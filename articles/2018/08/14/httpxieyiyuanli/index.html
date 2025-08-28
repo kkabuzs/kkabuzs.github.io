@@ -1,0 +1,587 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>http协议原理 | kkabuzs博客屋</title><meta name="author" content="Kkabuzs"><meta name="copyright" content="Kkabuzs"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="无论你跑多少距离，放弃很容易，停下来，肉体得到暂时的舒服，但你最终会一无所得。坚持或许很难，但你最后一定会有所收获，跑过的路，永远不会欺骗自己。  http协议原理一，Web服务基础1.1http服务重要基础1.1.1 用户访问网站基本流程  第一步：用户在浏览器里输入网址  第二步：域名解析出ip地址（DNS）  第三步：浏览器发起一个http协议的请求  第四步：web服务器响应用户的请求（">
+<meta property="og:type" content="article">
+<meta property="og:title" content="http协议原理">
+<meta property="og:url" content="https://kkabuzs.github.io/articles/2018/08/14/httpxieyiyuanli/index.html">
+<meta property="og:site_name" content="kkabuzs博客屋">
+<meta property="og:description" content="无论你跑多少距离，放弃很容易，停下来，肉体得到暂时的舒服，但你最终会一无所得。坚持或许很难，但你最后一定会有所收获，跑过的路，永远不会欺骗自己。  http协议原理一，Web服务基础1.1http服务重要基础1.1.1 用户访问网站基本流程  第一步：用户在浏览器里输入网址  第二步：域名解析出ip地址（DNS）  第三步：浏览器发起一个http协议的请求  第四步：web服务器响应用户的请求（">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://kkabuzs.github.io/themes-img/touxiang.jpg">
+<meta property="article:published_time" content="2018-08-14T02:46:43.000Z">
+<meta property="article:modified_time" content="2025-08-28T02:27:03.844Z">
+<meta property="article:author" content="Kkabuzs">
+<meta property="article:tag" content="HTTP">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://kkabuzs.github.io/themes-img/touxiang.jpg"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "http协议原理",
+  "url": "https://kkabuzs.github.io/articles/2018/08/14/httpxieyiyuanli/",
+  "image": "https://kkabuzs.github.io/themes-img/touxiang.jpg",
+  "datePublished": "2018-08-14T02:46:43.000Z",
+  "dateModified": "2025-08-28T02:27:03.844Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "Kkabuzs",
+      "url": "https://kkabuzs.github.io/"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/themes-img/touxiang.jpg"><link rel="canonical" href="https://kkabuzs.github.io/articles/2018/08/14/httpxieyiyuanli/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'http协议原理',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 7.3.0"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/themes-img/touxiang.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">50</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">14</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">6</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(/themes-img/yinhe.jpg);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><img class="site-icon" src="/themes-img/touxiang.jpg" alt="Logo"><span class="site-name">kkabuzs博客屋</span></a><a class="nav-page-title" href="/"><span class="site-name">http协议原理</span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">http协议原理</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2018-08-14T02:46:43.000Z" title="发表于 2018-08-14 10:46:43">2018-08-14</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2025-08-28T02:27:03.844Z" title="更新于 2025-08-28 10:27:03">2025-08-28</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E6%9E%B6%E6%9E%84%E5%9F%BA%E7%A1%80/">架构基础</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><blockquote>
+<p><em>无论你跑多少距离，放弃很容易，停下来，肉体得到暂时的舒服，但你最终会一无所得。</em><br><em>坚持或许很难，但你最后一定会有所收获，跑过的路，永远不会欺骗自己。</em></p>
+</blockquote>
+<h1 id="http协议原理"><a href="#http协议原理" class="headerlink" title="http协议原理"></a>http协议原理</h1><h2 id="一，Web服务基础"><a href="#一，Web服务基础" class="headerlink" title="一，Web服务基础"></a>一，Web服务基础</h2><h3 id="1-1http服务重要基础"><a href="#1-1http服务重要基础" class="headerlink" title="1.1http服务重要基础"></a>1.1http服务重要基础</h3><h4 id="1-1-1-用户访问网站基本流程"><a href="#1-1-1-用户访问网站基本流程" class="headerlink" title="1.1.1 用户访问网站基本流程"></a>1.1.1 用户访问网站基本流程</h4><ul>
+<li><input checked="" disabled="" type="checkbox"> 第一步：用户在浏览器里输入网址</li>
+<li><input checked="" disabled="" type="checkbox"> 第二步：域名解析出ip地址（DNS）</li>
+<li><input checked="" disabled="" type="checkbox"> 第三步：浏览器发起一个http协议的请求</li>
+<li><input checked="" disabled="" type="checkbox"> 第四步：web服务器响应用户的请求（域名看的是首页）</li>
+<li><input checked="" disabled="" type="checkbox"> 第五步：用户的浏览器解析web服务器相应的数据包</li>
+<li><input checked="" disabled="" type="checkbox"> 第六步：用户就从浏览器里看到了内容</li>
+</ul>
+<h4 id="1-1-2DNS解析原理"><a href="#1-1-2DNS解析原理" class="headerlink" title="1.1.2DNS解析原理"></a>1.1.2DNS解析原理</h4><blockquote>
+<p>DNS就是区域域名服务。</p>
+</blockquote>
+<p><strong>DNS的递归查询过程（前6步）</strong></p>
+<ul>
+<li><input checked="" disabled="" type="checkbox"> 第一步：当我们输入了一个域名，先去内存里看有没有映射（映射的格式就是IP+域名）</li>
+<li><input checked="" disabled="" type="checkbox"> 第二步：如果内存里没有，就会找本地映射文件hosts</li>
+<li><input checked="" disabled="" type="checkbox"> 第三步：如果hosts文件里没有，就会找本地DNS去要（LDNS，L是local的意思）</li>
+<li><input checked="" disabled="" type="checkbox"> 第四步：DNS也在内存里找，如果找到，就会记录在内存里</li>
+<li><input checked="" disabled="" type="checkbox"> 第五步：如果内存里找不到，DNS就会找映射文件</li>
+<li><input checked="" disabled="" type="checkbox"> 第六步：映射文件里没有，DNS就会去域名记录本文件里查找（域名记录本文件就是文件里记录了哪个域名对应哪个IP）</li>
+<li><input checked="" disabled="" type="checkbox"> 第七步：还找不到，就要请外援。（这步开始就叫迭代查询）</li>
+</ul>
+<p><strong>DNS迭代查询过程</strong></p>
+<blockquote>
+<p>全世界公开的最大的DNS服务器有13个，这种服务器叫做“点”服务器。DNS解析域名的顺序是从右往左，先辨别.com&#x2F;.cn&#x2F;.xxx之类的后缀。</p>
+</blockquote>
+<ul>
+<li><input checked="" disabled="" type="checkbox"> 第一步：LDNS会从DNS系统的（.）根开始请求<a target="_blank" rel="noopener" href="http://www.baidu.com域名的解析,根服务器下面是没有www.baidu.com域名解析记录的,但是根下面有www.baidu.com对应的顶级域.org的解析记录,因此,根会把.org对应的dns服务器地址返回给ldns./">www.baidu.com域名的解析，根服务器下面是没有www.baidu.com域名解析记录的，但是根下面有www.baidu.com对应的顶级域.org的解析记录，因此，根会把.org对应的DNS服务器地址返回给LDNS。</a></li>
+<li><input checked="" disabled="" type="checkbox"> 第二步：LDNS获取到.org对应的DNS服务器地址后，就会去.org服务器请求<a target="_blank" rel="noopener" href="http://www.baidu.com域名的解析,而.org服务器下面也没有www.baidu.com域名对应的解析记录,但是有baidu.com域名的解析记录,因此,.org服务器会把baidu.com对应的dns服务器地址返回给ldns/">www.baidu.com域名的解析，而.org服务器下面也没有www.baidu.com域名对应的解析记录,但是有baidu.com域名的解析记录，因此，.org服务器会把baidu.com对应的DNS服务器地址返回给LDNS</a></li>
+<li><input checked="" disabled="" type="checkbox"> 第三步：同理，LDNS获取到baidu.com对应的DNS服务器地址后，就会去baidu.org服务器请求<a target="_blank" rel="noopener" href="http://www.baidu.com域名的解析,baidu.com域名对应的dns服务器是该域名的授权dns服务器,这个dns服务器正是企业购买域名时管理解析所在的服务器(也可能是自建的授权dns服务器),这个服务器会有www.baidu.com对应的ip解析记录,如果此时没有,就表示企业的域名人员没有为www.baidu.com域名做解析,即网站还没架设好./">www.baidu.com域名的解析，baidu.com域名对应的DNS服务器是该域名的授权DNS服务器，这个DNS服务器正是企业购买域名时管理解析所在的服务器（也可能是自建的授权DNS服务器），这个服务器会有www.baidu.com对应的IP解析记录，如果此时没有，就表示企业的域名人员没有为www.baidu.com域名做解析，即网站还没架设好。</a></li>
+<li><input checked="" disabled="" type="checkbox"> 第四步：baidu.com域名DNS服务器会把<a target="_blank" rel="noopener" href="http://www.baidu.com对应的ip解析记录发给ldns/">www.baidu.com对应的IP解析记录发给LDNS</a></li>
+<li><input checked="" disabled="" type="checkbox"> 第五步：用户就访问到了<a target="_blank" rel="noopener" href="http://www.baidu.com网站./">www.baidu.com网站。</a></li>
+</ul>
+<h3 id="1-2http协议"><a href="#1-2http协议" class="headerlink" title="1.2http协议"></a>1.2http协议</h3><ul>
+<li>HTTP协议，为超文本传输协议，是互联网中最常用的一种网络协议。HTTP的重要应用之一是WWW服务。</li>
+<li>HTTP协议是互联网上常用的通信协议之一。</li>
+<li>WWW，全称World Wide Web，常称为Web，中文译为“万维网”。它是目前互联网上最受用户欢迎的信息服务形式。HTTP协议的WWW服务应用的默认端口为80（端口的概念），另外的一个加密的WWW服务应用https的默认端口为443，主要用于网银，支付等和钱相关的业务。</li>
+</ul>
+<h4 id="1-2-2-常见的HTTP请求方法"><a href="#1-2-2-常见的HTTP请求方法" class="headerlink" title="1.2.2 常见的HTTP请求方法"></a>1.2.2 常见的HTTP请求方法</h4><table>
+<thead>
+<tr>
+<th>HTTP方法</th>
+<th>作用描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>GET（读）</td>
+<td>客户端请求指定资源信息，服务器返回指定资源</td>
+</tr>
+<tr>
+<td>HEAD</td>
+<td>只请求响应报文中的HTTP首部（单纯的看http数据包的头部）</td>
+</tr>
+<tr>
+<td>POST（写）</td>
+<td>将客户端的数据提交到服务器，例：注册表单（提交请求）</td>
+</tr>
+<tr>
+<td>PUT</td>
+<td>从客户端向服务器传送的数据取代指定的文档内容</td>
+</tr>
+<tr>
+<td>DELETE</td>
+<td>请求服务器删除Request-URI所标识的资源</td>
+</tr>
+<tr>
+<td>MOVE</td>
+<td>请求服务器将制定的页面移至另一个网络地址</td>
+</tr>
+</tbody></table>
+<p><strong>http数据包由头部和主体构成，头部用来装http状态码，主体就是网页。</strong></p>
+<h4 id="1-2-3-HTTP状态码"><a href="#1-2-3-HTTP状态码" class="headerlink" title="1.2.3 HTTP状态码"></a>1.2.3 HTTP状态码</h4><ul>
+<li>HTTP状态码是用来表示Web服务器响应http请求状态的数字代码。每当Web客户端向Web服务器发送一个HTTP请求时，Web服务器都会返回一个状态响应代码。这个状态码是一个三位数字代码，作用是告知Web客户端此次的请求是否成功，或者是否要采取其他的动作方式。</li>
+</ul>
+<p>HTTP协议1.1版本中的状态吗可以分为五大类，如下表：</p>
+<table>
+<thead>
+<tr>
+<th>状态码范围</th>
+<th>作用描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>100-199</td>
+<td>用于指定客户端相应的某些动作</td>
+</tr>
+<tr>
+<td>200-299</td>
+<td>用于表示请求成功</td>
+</tr>
+<tr>
+<td>300-399</td>
+<td>用于已经移动的文件并且常被包含在定位头信息中指定新的地址信息</td>
+</tr>
+<tr>
+<td>400-499</td>
+<td>用于指出客户端的错误</td>
+</tr>
+<tr>
+<td>500-599</td>
+<td>用于指出服务器端的错误</td>
+</tr>
+</tbody></table>
+<p><strong>生产场景常见的状态吗及其对应的作用</strong></p>
+<table>
+<thead>
+<tr>
+<th>状态代码</th>
+<th>详细描述说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>200～OK</td>
+<td>服务器成功返回网页，这是成功的http请求，返回的标准状态码</td>
+</tr>
+<tr>
+<td>301-Moved Permanently</td>
+<td>永久跳转，所有请求的网页将永久跳转到被设定的新的位置，例如：从baidu.com跳转到<a target="_blank" rel="noopener" href="http://www.baidu.com/">www.baidu.com</a></td>
+</tr>
+<tr>
+<td>403-Forbidden</td>
+<td>禁止访问，这个请求是合法的，但是服务器端因为匹配了预先设置的规则而拒绝响应客户端的请求，此类问题一般为服务器或服务权限配置不当所致。</td>
+</tr>
+<tr>
+<td>404-Not Found</td>
+<td>服务器找不到客户端请求的指定页面，可能是客户端请求了服务器上不存在的资源导致</td>
+</tr>
+<tr>
+<td>500-Internal Server Error</td>
+<td>内部服务器错误，服务器遇到了意料不到的情况，不能完成客户的请求。这是一个较为笼统地报错，一般为服务器的设置或者内部程序问题导致。例如SElinux开启，而又没有为http设置规则许可，客户端访问就是500</td>
+</tr>
+<tr>
+<td>502-Bad Gateway</td>
+<td>坏的网关，一般是代理服务器请求后端服务时，后端服务不可用或没有完成响应网关服务器。一般为反向代理服务器下面的节点出问题导致。</td>
+</tr>
+<tr>
+<td>503-Service Unavailable</td>
+<td>服务当前不可用，可能因为服务器超载或停机维护导致，或者是反向代理服务器后面没有可以提供服务的节点</td>
+</tr>
+<tr>
+<td>504-Gateway Timeout</td>
+<td>网关超时，一般是网关代理服务器请求后端服务时，后端服务没有在特定的时间内完成处理请求，一般是服务器过载导致没有在指定的时间内返回数据给前端代理服务器。</td>
+</tr>
+</tbody></table>
+<h4 id="1-2-4-HTTP响应报文介绍"><a href="#1-2-4-HTTP响应报文介绍" class="headerlink" title="1.2.4 HTTP响应报文介绍"></a>1.2.4 HTTP响应报文介绍</h4><p>HTTP响应报文由起始行，响应头部，空行和响应报文主体几个部分组成，和HTTP请求报文格式类似。报文如下表：</p>
+<table>
+<thead>
+<tr>
+<th>报文格式</th>
+<th>报文信息</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>起始行</td>
+<td>协议及版本号 数字状态码 状态信息</td>
+</tr>
+<tr>
+<td>响应头部</td>
+<td>字段1:值1 字段2：值2</td>
+</tr>
+<tr>
+<td>空行</td>
+<td>空白内容</td>
+</tr>
+<tr>
+<td>响应报文主体</td>
+<td>就是html的网页</td>
+</tr>
+</tbody></table>
+<p><strong>下面对响应报文的每个部分逐一阐述：</strong></p>
+<p><strong>（1）起始行</strong></p>
+<blockquote>
+<p>响应报文的起始行，也叫状态行，用来说明服务器响应客户端请求的状况。一般为协议及版本号，数字状态码，状态情况。例如：HTTP&#x2F;1.1 200 OK</p>
+</blockquote>
+<p><strong>（2）响应头部</strong></p>
+<blockquote>
+<p>和请求报文类似，起始行的后面一般有若干个头部字段。每个头部字段都包含一个名字和一个值，两者之间用冒号分隔。头部结尾也是以一个空行结束。</p>
+</blockquote>
+<p><strong>（3）空行</strong></p>
+<blockquote>
+<p>最后一个响应头部信息之后是一个空行，发送回车符和换行符，通知客户端空行下文无头部信息。</p>
+</blockquote>
+<p><strong>（4）响应报文主体</strong></p>
+<blockquote>
+<p>响应报文主体中装载了要返回给客户端的数据。这些数据可以是文本，也可以是二进制的（图片，视频）。</p>
+</blockquote>
+<h4 id="1-2-5-HTTP协议原理及重点分析"><a href="#1-2-5-HTTP协议原理及重点分析" class="headerlink" title="1.2.5 HTTP协议原理及重点分析"></a>1.2.5 HTTP协议原理及重点分析</h4><blockquote>
+<p>HTTP协议属于OSI模型中的第七层应用层协议，HTTP协议的重要应用就是WWW服务应用，下面就以WWW服务应用为例介绍HTTP协议的通信原理了，HTTP协议进行通信时，需要有客户端（即终端用户）和服务端（即Web服务器），在Web客户端向Web服务器发送请求报文之前，先要通过TCP&#x2F;IP协议在Web客户端和服务器之间建立一个TCP&#x2F;IP连接。</p>
+</blockquote>
+<p><strong>过程：</strong></p>
+<ul>
+<li><input checked="" disabled="" type="checkbox"> 用户访问网站的流程</li>
+<li><input checked="" disabled="" type="checkbox"> DNS解析流程细节</li>
+<li><input checked="" disabled="" type="checkbox"> 建立TCP连接过程（TCP&#x2F;IP三次握手原理知识）（11种状态）</li>
+<li><input checked="" disabled="" type="checkbox"> 发送HTTP报文及HTTP请求报文内容细节。</li>
+<li><input checked="" disabled="" type="checkbox"> Web服务器响应客户端请求处理细节（网站集群架构细节）</li>
+<li><input checked="" disabled="" type="checkbox"> 响应HTTP报文及HTTP响应报文的细节</li>
+<li><input checked="" disabled="" type="checkbox"> 关闭TCP连接，涉及TCP&#x2F;IP协议四次挥手原理</li>
+</ul>
+<p><strong>重要知识点汇总</strong></p>
+<ul>
+<li><input checked="" disabled="" type="checkbox"> http协议位于OSI模型中第7层应用层</li>
+<li><input checked="" disabled="" type="checkbox"> http协议的重要应用是www服务。</li>
+<li><input checked="" disabled="" type="checkbox"> 用户上网流程，DNS解析原理流程</li>
+<li><input checked="" disabled="" type="checkbox"> DNS解析获取的IP后，建立TCP连接，然后发送http请求细节和服务器响应细节。</li>
+<li><input checked="" disabled="" type="checkbox"> HTTP请求报文与HTTP响应报文知识</li>
+<li><input checked="" disabled="" type="checkbox"> 到达HTTP服务后请求后端集群节点流程为Nginix–&gt;fastcgi–&gt;PHP–&gt;(数据库，存储等)</li>
+<li><input checked="" disabled="" type="checkbox"> TCP&#x2F;IP协议三次握手和四次挥手原理。</li>
+</ul>
+<h3 id="1-3-http资源"><a href="#1-3-http资源" class="headerlink" title="1.3 http资源"></a>1.3 http资源</h3><h4 id="1-3-1-媒体类型"><a href="#1-3-1-媒体类型" class="headerlink" title="1.3.1 媒体类型"></a>1.3.1 媒体类型</h4><blockquote>
+</blockquote>
+<ul>
+<li>互联网上的数据有很多不同的数据类型，Web服务器会把通过Web传输的每个对象都打上名为MIME类型（MIME Type）的数据格式标签。</li>
+<li>当Web服务器响应HTTP请求时，会为每一个HTTP对象数据加一个MIME类型，当Web浏览器获取到服务器返回的对象时，会去查看相关的MIME类型，进行相应处理。</li>
+<li>MIME类型存在于HTTP响应报文的响应头部信息里，它是一种文本标记，表示一种主要的对象类型和一个特定的子类型，中间由一条斜杠来分隔。</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>MIME类型</th>
+<th>文件类型</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>text&#x2F;html</td>
+<td>html htm shtml文本类型</td>
+</tr>
+<tr>
+<td>text&#x2F;css</td>
+<td>css文本类型</td>
+</tr>
+<tr>
+<td>text&#x2F;xml</td>
+<td>xml文本类型</td>
+</tr>
+<tr>
+<td>image&#x2F;gif</td>
+<td>gif图像类型</td>
+</tr>
+<tr>
+<td>image&#x2F;jpeg</td>
+<td>jpeg jpg图像类型</td>
+</tr>
+<tr>
+<td>application&#x2F;javascript</td>
+<td>js文本类型</td>
+</tr>
+<tr>
+<td>text&#x2F;plain</td>
+<td>txt文本类型</td>
+</tr>
+<tr>
+<td>application&#x2F;json</td>
+<td>json文本类型</td>
+</tr>
+<tr>
+<td>text.plain</td>
+<td>txt文本类型</td>
+</tr>
+<tr>
+<td>application&#x2F;json</td>
+<td>json文本类型</td>
+</tr>
+<tr>
+<td>video&#x2F;mp4</td>
+<td>mp4视频类型</td>
+</tr>
+<tr>
+<td>video&#x2F;quicktime</td>
+<td>mov视频类型</td>
+</tr>
+<tr>
+<td>video&#x2F;x-flv</td>
+<td>flv视频类型</td>
+</tr>
+<tr>
+<td>video&#x2F;x-ms-wmv</td>
+<td>wmv视频类型</td>
+</tr>
+<tr>
+<td>video&#x2F;x-msvideo</td>
+<td>avi视频类型</td>
+</tr>
+</tbody></table>
+<blockquote>
+<p><strong>说明</strong><br>PC电脑浏览器上显示的网站，是web前端做的。用户直接接触的客户端就是前端。<br>1，前端包括：web开发，安卓开发，ios开发，VR开发。</p>
+</blockquote>
+<blockquote>
+<p>web开发用到了什么？(1和2写的网页是静态网页，3写的是动态网页)<br>（1），html语言：决定了你的浏览器上显示的具体内容<br>（2），CSS语言：决定了内容的显示格式，例如图片是方的还是圆的。<br>（3），JavaScript语言：不是java。<br>2，后端语言包括：PHP，java，python（前后端都有），c++，c#（前后端都有），Golang</p>
+</blockquote>
+<p><img src="/articles/2018/08/14/httpxieyiyuanli/1.png"></p>
+<h4 id="1-3-2-URL介绍"><a href="#1-3-2-URL介绍" class="headerlink" title="1.3.2 URL介绍"></a>1.3.2 URL介绍</h4><blockquote>
+<p>URL，全称Uniform Resource Location，中文翻译为统一资源定位符，就叫（用户的）请求，也被称为网页地址（网址）。如同在网络上的门牌，它是因特网上标准的资源唯一地址。</p>
+</blockquote>
+<p><strong>URL的组成</strong></p>
+<blockquote>
+<p>URL是由域名+后边的部分(页面的存储路径，这个部分成为URi）<br>（URL&#x3D;域名+URi）</p>
+</blockquote>
+<h4 id="1-3-4-静态网页资源"><a href="#1-3-4-静态网页资源" class="headerlink" title="1.3.4 静态网页资源"></a>1.3.4 静态网页资源</h4><p><strong>静态网页资源介绍</strong></p>
+<blockquote>
+<p>在网站设计中，纯粹HTML格式的网页（可以包含图片，视频，JS（前端功能实现），CSS（样式）等）通常被称为“静态网页”，早期的网站大多都是静态的。静态网页是相对于动态网页而言的，是指没有后台数据库，不含程序（如php，jsp，asp(C#)）和可交互的网页。</p>
+</blockquote>
+<p><strong>静态网页资源特点</strong></p>
+<blockquote>
+</blockquote>
+<ul>
+<li>静态网页资源的特点是，开发者编写的是什么，它显示的就是什么，一旦编写完成，就不会有任何改变。静态网页的维护和更新相对比较麻烦，每个不同的网页都需要单独编集更新，静态网页一般适用于更新较少的宣传展示型网站（例如：酒，家具，猪饲料等的宣传网站），是早期很多中小网站展示的形式。</li>
+<li>静态网页资源的对应程序及资源文件的常见扩展名为：<br>纯文本类程序或文件，如htm，html，xml，shtml，js，css等<br>图片类文件或数据文档，如jpg，gif，png，bmp，txt，doc，ppt等<br>视频类流媒体文件，如mp4，swf，avi，wmv，flv等</li>
+</ul>
+<p><strong>静态网页资源有几个重要的特征：</strong></p>
+<ul>
+<li><input checked="" disabled="" type="checkbox"> 每个网页都有一个固定的URL地址，且URL一般以.html,.html,shtml等常见形式为后缀，而且地址中不含邮问号“？”或“&amp;”等特殊符号。</li>
+<li><input checked="" disabled="" type="checkbox"> 网页内容一经发布到网站服务器上，无论是否有用户访问，每个网页的内容都是保存在网站服务器文件系统上的，也就是说，静态网页是实实在在保存在服务器上的文件实体，每个网页都是一个独立的文件。</li>
+<li><input checked="" disabled="" type="checkbox"> 网页内容是固定不变的，因此，容易被搜索引擎收录（容易被用户找到）（优点）</li>
+<li><input checked="" disabled="" type="checkbox"> 网页没有数据库支持，在网站制作和维护方面工作量较大，因此当网站信息量很大时完全依靠静态网页制作的方式比较困难（缺点）</li>
+<li><input checked="" disabled="" type="checkbox"> 网页的交互性较差，在程序功能实现方面有较大的限制（缺点）</li>
+<li><input checked="" disabled="" type="checkbox"> 网页程序在用户浏览器端解析，如IE浏览器，程序解析效率很高，由于服务端不进行解析，并且不需要读取数据库，因此服务器端可以接受更多的并发访问。当客户端向服务器请求数据时，服务器直接把数据从磁盘文件系统上返回（不做任何解析），待客户端拿到数据后，在浏览器端解析展现出来（优点)</li>
+</ul>
+<blockquote>
+<p><strong>静态网页的核心特点，如下：</strong><br>1）程序在客户浏览器端解析，不读取后端数据库，因此性能和效率很高。<br>2）因为后端没有数据库支持，所以和用户的交互性较差，功能实现也很少。</p>
+</blockquote>
+<p><strong>有关静态网页的架构思想</strong></p>
+<pre><code>    在高并发，高访问量的场景下做架构优化，涉及的关键环节就是把动态网页转成静态网页，而不直接请求数据库和动态服务器，并且可以把静态内容推送到前端缓存（或CDN）中提供服务，这样就可以提升用户体验，节约服务器和维护成本。
+</code></pre>
+<h4 id="1-3-5-动态网页资源"><a href="#1-3-5-动态网页资源" class="headerlink" title="1.3.5 动态网页资源"></a>1.3.5 动态网页资源</h4><p><strong>动态网页资源介绍</strong></p>
+<p>所谓的动态网页是与静态网页相对而言的，也就是说，动态网页的URL后缀不是.htm,.html,.shtml,.xml,.js,.css等静态网页的常见后缀扩展名形式，而是以.asp,.aspx,.php,.js,.do,.cgi等形式作为后缀的，并且一般在动态网页网址中会有标志性的符号–“？，&amp;”，此外，在大多数情况下后端都需要有数据库支持等。</p>
+<p><strong>动态网页资源特点</strong></p>
+<p>1）网页扩展名后缀常见为：.asp,.aspx,.php,.jsp,.do,cgi等<br>2）网页一般以数据库技术为基础，大大降低了网站维护的工作量<br>3）采用动态网页技术的网站可以实现更多的功能，如用户注册，用户登录，在线调查，投票，用户管理，订单管理，发博文等等<br>4）动态网页并不是独立存在于服务器上的网页文件，当用户请求服务器上的动态程序时，服务器解析这些程序并可能读取数据库返回一个完整的网页内容。<br>5）动态网页中的“？”在搜索引擎的收录方面存在一定问题，搜索引擎一般不会从一个网站的数据库中访问全部网页，或者出于技术等方面的考虑，搜索蜘蛛一般不会去抓去网址中“？”后面的内容，因此在企业通过搜索引擎进行推广时，需要针对采用动态网页的网站做一定的技术处理（伪静态技术），以便适应搜索引擎的抓取要求。<br>6）程序在服务器端解析，这相当于顾客点餐，饭店厨师做饭做菜，耗时长，效率低。由于程序在服务端解析，因此，会消耗大量的CPU和内存，I&#x2F;O等资源，并且多数还要读取数据库等服务，因此，其访问效率远不如静态网页，在服务端解析动态程序的服务常见的有PHP引擎，Java容器（tomcat,resin,jboss,weblogic）</p>
+<p><strong>有关动态网页的架构思想</strong></p>
+<ul>
+<li>一般来说，静态网页的性能效率是动态网页的10～30倍。且动态网站效率很差，并发能力也很低，在高并发场景中，应尽可能转换成静态网页提供服务。动态转静态几乎是所有高并发网站必备的架构方案思路，也是高级架构师的职责所在。</li>
+<li>此外，动态转静态也要根据业务需求设计，例如，对于更新频繁的网站如果设计不好就可能会产生数据不一致的情况，即用户看到的数据不是网站最新的内容，而是静态的内容。</li>
+</ul>
+<h4 id="1-3-6-生产Web架构优化实战方案"><a href="#1-3-6-生产Web架构优化实战方案" class="headerlink" title="1.3.6 生产Web架构优化实战方案"></a>1.3.6 生产Web架构优化实战方案</h4><p>由于静态网页程序在客户端解析，大大降低了服务器端的访问压力，因此解析效率更高，在实际高并发网站架构中，可以考虑把用户请求的数据解析后存成静态文件放于磁盘中或放于内存中，来降低动态服务器的压力，节约企业成本，提升用户体验。</p>
+<p><strong>（1）门户新闻业务</strong></p>
+<p>新闻网站的特点是一旦发布完成，几乎不会再改动网页内容。因此，对于新闻业务内容的静态化相对比较简单。</p>
+<p>程序&#x3D;&#x3D;&#x3D;&gt;生成静态页面</p>
+<ul>
+<li><input checked="" disabled="" type="checkbox"> 第一步：程序要支持发布动态内容转成静态功能</li>
+<li><input checked="" disabled="" type="checkbox"> 第二步：运营编辑人员发布新闻网页后，后台程序立刻将动态网页生成静态文件。</li>
+<li><input checked="" disabled="" type="checkbox"> 第三步：运维人员通过发布或事件触发把运营编辑生成的静态网页发布到事先搭建好的公司缓存集群服务器上，或者把静态内容同步到购买的全国所有CDN服务器节点上，然后，再提供给用户访问浏览。</li>
+</ul>
+<p><strong>（2）视频网站业务</strong></p>
+<ul>
+<li>视频网站和新闻网站类似，特点都是一旦发布完成，几乎不会再改动网页内容。因此，实现视频业务网站高效访问也很简单。</li>
+<li>以优酷视频网为例，用户在上传视频时，需要经历转码–&gt;审核的过程（大概1小时），然后一些热点视频也可能会被提前推送同步到CDN的核心节点或全国所有CDN服务器节点，用户访问时才会更快。</li>
+</ul>
+<p><strong>（3）Blog&#x2F;BBS&#x2F;SNS&#x2F;微博社区业务&#x2F;电商（如淘宝，京东）</strong></p>
+<ul>
+<li>这几类业务的动态转静态是比较困难的，因为，用户发布完成内容，可能会随时更新并查看，这种情况一般会通过异步方式，例如消息中间件技术加上NoSQL集群技术实现转换，当然也会改进产品细节，例如：在访问的环节设置延时，异步加载等手段。</li>
+</ul>
+<h3 id="1-4-网站流量度量术语"><a href="#1-4-网站流量度量术语" class="headerlink" title="1.4 网站流量度量术语"></a>1.4 网站流量度量术语</h3><h4 id="1-4-1-IP（internet-Protocol）"><a href="#1-4-1-IP（internet-Protocol）" class="headerlink" title="1.4.1 IP（internet Protocol）"></a>1.4.1 IP（internet Protocol）</h4><blockquote>
+<p>IP(独立IP)即Internet Protocol，这里指独立IP数，独立IP数是指不同IP地址的计算机访问网站时被计算的总次数。独立IP数是衡量网站流量的一个重要指标。一般一天内（00:00- 24:00）相同IP地址的客户端访问网站页面只被计算为一次，记录独立IP的时间可为一天或一个月，目前通用的标准为“一天”。</p>
+</blockquote>
+<h4 id="1-4-2-PV（Page-View）"><a href="#1-4-2-PV（Page-View）" class="headerlink" title="1.4.2 PV（Page View）"></a>1.4.2 PV（Page View）</h4><ul>
+<li>PV（访问量）即Page View，中文翻译为页面浏览，即页面浏览器或点击量，不管客户端是不是相同，也不管IP是不是相同，用户每次访问一个网站页面都会被计算一个PV。</li>
+<li>PV的具体度量方法就是从客户浏览器发出一个对Web服务器的请求（Request），Web服务器接到这个请求后，将该请求对应的一个网页（Page）发送给浏览器，就产生一个PV。这里有一个问题，就是只要这个请求发送给了浏览器，无论这个页面是否完全打开（或下载完成），那么都是会被计数为1个PV（服务器日志），一般为了防止用户快速刷PV，很多网站把PV的统计程序放在页面的最下面。</li>
+<li>用PV衡量网站时，PV数反映的是浏览某网站的页面数量，每刷新一次页面也算一次。因此，可以说PV数与来访用户的数量成正比，但PV数并不是真正的页面来访者数量，而是网站被访问的页面数量，因为一个来访者可能产生多个PV。</li>
+</ul>
+<blockquote>
+<p><strong>说明</strong><br>PV（Page View）是网站被访问的页面数量的一个指标，但不能直接知道有多少人访问了这个网站。<br>一个来访者访问网站，可能产生若干PV数，但是独立IP数就只有1个，因此，如果对比一个网站的独立IP数和PV数，不难看出，PV数一定会大于等于独立IP数的</p>
+</blockquote>
+<h4 id="1-4-3-UV-Unique-Visitor"><a href="#1-4-3-UV-Unique-Visitor" class="headerlink" title="1.4.3 UV(Unique Visitor)"></a>1.4.3 UV(Unique Visitor)</h4><ul>
+<li>UV(独立访客)即Unique Visitor，同一台客户端（PC或移动端）访问网站被计算为一个访客。一天（00:00-24:00）内相同的客户端访问同一个网站只计算一次UV。UV一般是以客户端Cookie等技术作为统计依据的，实际统计会有误差。</li>
+<li>考虑到一台客户端电脑可能会有多人使用的情况，因此，UV（独立访客）实际上并不一定是独立的自然人访问。<br>1.http请求报文：浏览器版本，OS<br>2.http响应报文：cookie（id）</li>
+</ul>
+<h4 id="1-4-4-企业网站对IP，PV，UV的度量"><a href="#1-4-4-企业网站对IP，PV，UV的度量" class="headerlink" title="1.4.4 企业网站对IP，PV，UV的度量"></a>1.4.4 企业网站对IP，PV，UV的度量</h4><ul>
+<li><input checked="" disabled="" type="checkbox"> 先来看对IP的度量： <ul>
+<li>分析所有Web服务器的访问日志信息，对IP地址段去重后计数，这是IT人员的基本计算手段</li>
+<li>在网站的每一个（所有）页面结尾，嵌入JS等统计程序代码，待用户加载网页后，IP即传给统计IP的服务器，这种方法一般被第三方统计公司或企业内部开发日志分析程序时使用</li>
+<li>用第三方大家比较信任的统计工具例如：谷歌的统计（GA）。</li>
+</ul>
+</li>
+</ul>
+<p>IP的统计方法简单，易用，因此，成为了多数网站衡量网站流量的重要指标之一。</p>
+<ul>
+<li><input checked="" disabled="" type="checkbox"> 对PV的度量如下： <ul>
+<li>分析Web服务的访问日志（需要排除js，css及各种图片的日志信息），只计算HTML，PHP等页面数量。</li>
+<li>在网站的每一个页面结尾，嵌入JS等统计程序代码，待用户加载网页后，访问数量即传给统计PV的服务器，这种方法一般被第三方统计公司或在企业内部开发日志分析程序时使用。</li>
+<li>用第三方大家比较信任的统计工具例如：谷歌的统计（GA）</li>
+</ul>
+</li>
+</ul>
+<p>PV的统计方法也很简单，易用，因此，也是多数网站衡量网站流量的重要指标之一。</p>
+<ul>
+<li><input checked="" disabled="" type="checkbox"> 对于UV的度量如下： <ul>
+<li>通过客户端HTTP请求报文分析<br>  一个客户端会多次请求网站服务器，每次HTTP请求都会携带客户端自身的大量信息，比如：IP地址，请求发出时间，浏览器版本，操作系统版本等等。网站服务器对这些请求进行分析，如果这些请求满足一些共同特征，比如来自同一个IP地址，且浏览器版本和操作系统版本相同，请求时间又相近等，那么就可以认为这些是来自于同一个客户端，那么多个页面访问也只算一个UV。共同特征的定义是由服务器方决定的。通常，用IP地址+其他特征共同来定义的情况较多。但此种度量方法无法解决以下问题，例如：多个人的电脑软硬件经常雷同，并且是一个公司或者学校的人；多个人共用一个电脑的情况。</li>
+<li>通过cookie鉴别<br>  当客户端第一次访问某个网站服务器的时候，网站服务器会给这个客户端的电脑发出一个cookie，通常放在这个客户端电脑的C盘当中。在这个cookie中会分配一个独一无二的编号，这其中会记录一些访问服务器的信息，如访问时间，访问了哪些页面，等等。当你下次再访问这个服务器的时候，服务器就可以直接从你的电脑中找到上一次放进去的Cookie文件，并且对其进行一些更新，但那个独一无二的编号是不会变的。如果在一定时间内，服务器发现2个来访者对应的是一个编号，那么自然可以认为它来源于同一个来访者了，于是就计算1个UV。</li>
+<li>使用Cookie的方法要比分析客户端HTTP请求头部信息分析更精确些。但也存在一些问题，比如：有的客户端为保证更高级别的安全，关闭了Cookie的功能；或者是有些客户端设置了在退出页面时自动删除Cookie，亦或你经常自己去手动删除Cookie，那么这个方法就不那么精确了。</li>
+</ul>
+</li>
+</ul>
+<h4 id="1-4-5-IP-PV-UV的区别"><a href="#1-4-5-IP-PV-UV的区别" class="headerlink" title="1.4.5 IP,PV,UV的区别"></a>1.4.5 IP,PV,UV的区别</h4><ul>
+<li>一个网站的独立IP数量要比网站实际访问的PV数量小的多。通常情况下（国内互联网环境），网站的UV数也会大于独立IP数。</li>
+<li>PV数高说明访问的页面数多，但是不一定就代表来访者多：但PV数一定与来访者的数量成正比，不过，PV并不直接决定页面的真实来访者数量。比如在访问某网站时，一个人也可通过不断的刷新页面，制造出非常高的PV数。PV数多，用户访问网站页面的总数量多，通常服务器的压力会大一些。</li>
+</ul>
+<h4 id="1-4-6-并发连接"><a href="#1-4-6-并发连接" class="headerlink" title="1.4.6 并发连接"></a>1.4.6 并发连接</h4><p><code>统计并发连接方法(ss命令等于netstat命令)：ss -an | grep ESTAB | wc -l</code></p>
+<p><strong>网站并发连接</strong></p>
+<p>那么到底什么事并发？怎么理解并发呢？<br>A种理解：网站服务器每秒能够接收的最大用户请求数<br>B种理解：网站服务器每秒能够响应的最大用户请求数。<br>C种理解：网站服务器在单位时间内能够处理的最大连接数。<br>虽然A，B的理解占IT人员中的大多数，但是，C理解更为准确一些。</p>
+<p><strong>如何测试磁盘的存储性能？</strong></p>
+<p>1.连续的读写向磁盘中写入大的文件<br>dd if&#x3D;&#x2F;dev&#x2F;zero of&#x3D;&#x2F;tmp&#x2F;test01.bin bs&#x3D;1K count&#x3D;10000</p>
+<h3 id="1-5-www服务软件介绍"><a href="#1-5-www服务软件介绍" class="headerlink" title="1.5 www服务软件介绍"></a>1.5 www服务软件介绍</h3><h4 id="1-5-1-当前互联网主流Web服务说明"><a href="#1-5-1-当前互联网主流Web服务说明" class="headerlink" title="1.5.1 当前互联网主流Web服务说明"></a>1.5.1 当前互联网主流Web服务说明</h4><p><strong>常用来提供静态Web服务的软件：</strong></p>
+<ul>
+<li>Apache：这是中小型Web服务的主流，Web服务器中的老大哥。</li>
+<li>Nginx：大型网站Web服务主流，曾经Web服务器中的初生牛犊，现已长大。Nginx的分支tengine（<a target="_blank" rel="noopener" href="http://tengine.taobao.org/%EF%BC%89%E7%9B%AE%E5%89%8D%E4%B9%9F%E5%9C%A8%E9%A3%9E%E9%80%9F%E5%8F%91%E5%B1%95%E3%80%82">http://tengine.taobao.org/）目前也在飞速发展。</a></li>
+</ul>
+<p><strong>常用来提供动态服务的软件</strong></p>
+<ul>
+<li>PHP（fastcgi）：大中小型网站都会使用，动态网页语言PHP程序的解析容器。它可配合Apache解析动态程序，不过，这里的PHP不是Fastcgi守护进程模式，而是mod_php5.so(module).也可配合Nginx解析动态程序，此时的PHP常用Fastcgi守护进程模式提供服务。</li>
+<li>tomcat:中小企业动态Web服务主流，互联网Java容器主流（如jsp，do）</li>
+<li>resin：大型动态Web服务主流，互联网Java容器主流（如jsp，do）</li>
+<li>IIS（internet information services）：微软Windows下的Web服务软件（asp，.aspx）</li>
+</ul>
+<h3 id="1-6重点"><a href="#1-6重点" class="headerlink" title="1.6重点"></a>1.6重点</h3><ul>
+<li>用户访问网站基本流程</li>
+<li>DNS系统解析原理</li>
+<li>HTTP协议通信原理，包括HTTP协议，请求报文，响应报文，状态码等相关知识</li>
+<li>动态，静态概念特点以及伪静态技术；</li>
+<li>动态转静态Web优化方案</li>
+<li>IP，PV，UV的概念和区别</li>
+<li>并发的概念理解</li>
+<li>了解常用www服务软件特点，如Apache，Nginx，PHP（Fastcgi），tomcat，Resin等</li>
+</ul>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://kkabuzs.github.io">Kkabuzs</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://kkabuzs.github.io/articles/2018/08/14/httpxieyiyuanli/">https://kkabuzs.github.io/articles/2018/08/14/httpxieyiyuanli/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://kkabuzs.github.io" target="_blank">kkabuzs博客屋</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/HTTP/">HTTP</a></div><div class="post-share"><div class="social-share" data-image="/themes-img/touxiang.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/articles/2018/07/25/rsync/" title="Rsync数据同步工具"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">Rsync数据同步工具</div></div><div class="info-2"><div class="info-item-1"> 无论你跑多少距离，放弃很容易，停下来，肉体得到暂时的舒服，但你最终会一无所得。坚持或许很难，但你最后一定会有所收获，跑过的路，永远不会欺骗自己。  一，Rsync介绍1.1什么是Rsync？    Rsync是一款开源的，快速的，多功能的，可实现全量及变量的本地或远程数据同步备份的优秀工具。       1.2Rsync简介    Rsync具有可是本地和远程两台主机之间的数据快速复制同步镜像，远程备份的功能。这个功能类似ssh带的scp命令，但又优于scp命令的功能。scp每次都是全量拷贝，而Rsync可以增量拷贝。当然，Rsync还可以在本地主机的不同分区的不同目录之间全量及增量的复制数据。这有类似cp命令，但同样也优于cp命令，cp每次都是全量拷贝，而Rsync可以增量拷贝。        ...</div></div></div></a><a class="pagination-related" href="/articles/2018/08/16/nginxxiangxijiangjie/" title="Nginx详细讲解"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">Nginx详细讲解</div></div><div class="info-2"><div class="info-item-1"> 无论你跑多少距离，放弃很容易，停下来，肉体得到暂时的舒服，但你最终会一无所得。坚持或许很难，但你最后一定会有所收获，跑过的路，永远不会欺骗自己。  Nginx详细讲解一，Nginx是什么？   nginx是一个开源的，支持高性能，高并发的www服务和代理服务软件。 nginx因具有高并发（特别是静态资源），占用系统资源少等特性，且功能丰富而逐渐流行起来。 nginx不但是一个优秀Web服务软件，还具有反向代理负载均衡功能和缓存服务功能，与lvs负载均衡及Haproxy等专业代理软件相比，Nginx部署起来更为简单，方便；在缓存功能方面，它又类似于Squid等专业的缓存服务软件。 nginx还有一个分支，由淘宝开发，叫 Tengine  1.1...</div></div></div></a></nav></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/themes-img/touxiang.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">Kkabuzs</div><div class="author-info-description">学习记录和整理</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">50</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">14</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">6</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/xxxxxx"><i class="fab fa-github"></i><span>Follow Me</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">三人行，必有我师！</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#http%E5%8D%8F%E8%AE%AE%E5%8E%9F%E7%90%86"><span class="toc-number">1.</span> <span class="toc-text">http协议原理</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%EF%BC%8CWeb%E6%9C%8D%E5%8A%A1%E5%9F%BA%E7%A1%80"><span class="toc-number">1.1.</span> <span class="toc-text">一，Web服务基础</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-1http%E6%9C%8D%E5%8A%A1%E9%87%8D%E8%A6%81%E5%9F%BA%E7%A1%80"><span class="toc-number">1.1.1.</span> <span class="toc-text">1.1http服务重要基础</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-1-1-%E7%94%A8%E6%88%B7%E8%AE%BF%E9%97%AE%E7%BD%91%E7%AB%99%E5%9F%BA%E6%9C%AC%E6%B5%81%E7%A8%8B"><span class="toc-number">1.1.1.1.</span> <span class="toc-text">1.1.1 用户访问网站基本流程</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#1-1-2DNS%E8%A7%A3%E6%9E%90%E5%8E%9F%E7%90%86"><span class="toc-number">1.1.1.2.</span> <span class="toc-text">1.1.2DNS解析原理</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-2http%E5%8D%8F%E8%AE%AE"><span class="toc-number">1.1.2.</span> <span class="toc-text">1.2http协议</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-2-2-%E5%B8%B8%E8%A7%81%E7%9A%84HTTP%E8%AF%B7%E6%B1%82%E6%96%B9%E6%B3%95"><span class="toc-number">1.1.2.1.</span> <span class="toc-text">1.2.2 常见的HTTP请求方法</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#1-2-3-HTTP%E7%8A%B6%E6%80%81%E7%A0%81"><span class="toc-number">1.1.2.2.</span> <span class="toc-text">1.2.3 HTTP状态码</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#1-2-4-HTTP%E5%93%8D%E5%BA%94%E6%8A%A5%E6%96%87%E4%BB%8B%E7%BB%8D"><span class="toc-number">1.1.2.3.</span> <span class="toc-text">1.2.4 HTTP响应报文介绍</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#1-2-5-HTTP%E5%8D%8F%E8%AE%AE%E5%8E%9F%E7%90%86%E5%8F%8A%E9%87%8D%E7%82%B9%E5%88%86%E6%9E%90"><span class="toc-number">1.1.2.4.</span> <span class="toc-text">1.2.5 HTTP协议原理及重点分析</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-3-http%E8%B5%84%E6%BA%90"><span class="toc-number">1.1.3.</span> <span class="toc-text">1.3 http资源</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-3-1-%E5%AA%92%E4%BD%93%E7%B1%BB%E5%9E%8B"><span class="toc-number">1.1.3.1.</span> <span class="toc-text">1.3.1 媒体类型</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#1-3-2-URL%E4%BB%8B%E7%BB%8D"><span class="toc-number">1.1.3.2.</span> <span class="toc-text">1.3.2 URL介绍</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#1-3-4-%E9%9D%99%E6%80%81%E7%BD%91%E9%A1%B5%E8%B5%84%E6%BA%90"><span class="toc-number">1.1.3.3.</span> <span class="toc-text">1.3.4 静态网页资源</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#1-3-5-%E5%8A%A8%E6%80%81%E7%BD%91%E9%A1%B5%E8%B5%84%E6%BA%90"><span class="toc-number">1.1.3.4.</span> <span class="toc-text">1.3.5 动态网页资源</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#1-3-6-%E7%94%9F%E4%BA%A7Web%E6%9E%B6%E6%9E%84%E4%BC%98%E5%8C%96%E5%AE%9E%E6%88%98%E6%96%B9%E6%A1%88"><span class="toc-number">1.1.3.5.</span> <span class="toc-text">1.3.6 生产Web架构优化实战方案</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-4-%E7%BD%91%E7%AB%99%E6%B5%81%E9%87%8F%E5%BA%A6%E9%87%8F%E6%9C%AF%E8%AF%AD"><span class="toc-number">1.1.4.</span> <span class="toc-text">1.4 网站流量度量术语</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-4-1-IP%EF%BC%88internet-Protocol%EF%BC%89"><span class="toc-number">1.1.4.1.</span> <span class="toc-text">1.4.1 IP（internet Protocol）</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#1-4-2-PV%EF%BC%88Page-View%EF%BC%89"><span class="toc-number">1.1.4.2.</span> <span class="toc-text">1.4.2 PV（Page View）</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#1-4-3-UV-Unique-Visitor"><span class="toc-number">1.1.4.3.</span> <span class="toc-text">1.4.3 UV(Unique Visitor)</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#1-4-4-%E4%BC%81%E4%B8%9A%E7%BD%91%E7%AB%99%E5%AF%B9IP%EF%BC%8CPV%EF%BC%8CUV%E7%9A%84%E5%BA%A6%E9%87%8F"><span class="toc-number">1.1.4.4.</span> <span class="toc-text">1.4.4 企业网站对IP，PV，UV的度量</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#1-4-5-IP-PV-UV%E7%9A%84%E5%8C%BA%E5%88%AB"><span class="toc-number">1.1.4.5.</span> <span class="toc-text">1.4.5 IP,PV,UV的区别</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#1-4-6-%E5%B9%B6%E5%8F%91%E8%BF%9E%E6%8E%A5"><span class="toc-number">1.1.4.6.</span> <span class="toc-text">1.4.6 并发连接</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-5-www%E6%9C%8D%E5%8A%A1%E8%BD%AF%E4%BB%B6%E4%BB%8B%E7%BB%8D"><span class="toc-number">1.1.5.</span> <span class="toc-text">1.5 www服务软件介绍</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-5-1-%E5%BD%93%E5%89%8D%E4%BA%92%E8%81%94%E7%BD%91%E4%B8%BB%E6%B5%81Web%E6%9C%8D%E5%8A%A1%E8%AF%B4%E6%98%8E"><span class="toc-number">1.1.5.1.</span> <span class="toc-text">1.5.1 当前互联网主流Web服务说明</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-6%E9%87%8D%E7%82%B9"><span class="toc-number">1.1.6.</span> <span class="toc-text">1.6重点</span></a></li></ol></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/articles/2025/04/22/mongodb-6-0-21-lixian-fenpianjiqun/" title="MongoDB-6.0.21离线分片集群部署">MongoDB-6.0.21离线分片集群部署</a><time datetime="2025-04-21T17:53:44.000Z" title="发表于 2025-04-22 01:53:44">2025-04-22</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/articles/2025/04/22/mongodb-6-0-21-lixian-fubenjibushu/" title="MongoDB-6.0.21副本集离线部署手册-（Replica Set）副本集模式">MongoDB-6.0.21副本集离线部署手册-（Replica Set）副本集模式</a><time datetime="2025-04-21T17:51:21.000Z" title="发表于 2025-04-22 01:51:21">2025-04-22</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/articles/2025/04/21/mongodb-6-0-21-lixian-danjiedianbushu/" title="MongoDB-6.0.21离线单节点部署">MongoDB-6.0.21离线单节点部署</a><time datetime="2025-04-21T15:55:06.000Z" title="发表于 2025-04-21 23:55:06">2025-04-21</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/articles/2023/05/10/jichengyupaisheng/" title="继承与派生">继承与派生</a><time datetime="2023-05-10T05:52:52.000Z" title="发表于 2023-05-10 13:52:52">2023-05-10</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/articles/2023/05/09/fengzhuang/" title="封装">封装</a><time datetime="2023-05-09T01:37:55.000Z" title="发表于 2023-05-09 09:37:55">2023-05-09</time></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2019 - 2025 By Kkabuzs</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 7.3.0</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.3.5</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

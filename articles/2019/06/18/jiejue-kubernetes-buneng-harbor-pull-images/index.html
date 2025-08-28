@@ -1,0 +1,184 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>解决kubernetes不能从harbor pull image | kkabuzs博客屋</title><meta name="author" content="Kkabuzs"><meta name="copyright" content="Kkabuzs"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="无论你跑多少距离，放弃很容易，停下来，肉体得到暂时的舒服，但你最终会一无所得。坚持或许很难，但你最后一定会有所收获，跑过的路，永远不会欺骗自己。   在实现kubernetes ci的时候发现node节点不能从harbor的私有仓库将image直接pull下来。但是直接从node节点直接pull的话又是没有问题的，后来发现如果想要kubernetes直接pull的话需要一个secret。  一，">
+<meta property="og:type" content="article">
+<meta property="og:title" content="解决kubernetes不能从harbor pull image">
+<meta property="og:url" content="https://kkabuzs.github.io/articles/2019/06/18/jiejue-kubernetes-buneng-harbor-pull-images/index.html">
+<meta property="og:site_name" content="kkabuzs博客屋">
+<meta property="og:description" content="无论你跑多少距离，放弃很容易，停下来，肉体得到暂时的舒服，但你最终会一无所得。坚持或许很难，但你最后一定会有所收获，跑过的路，永远不会欺骗自己。   在实现kubernetes ci的时候发现node节点不能从harbor的私有仓库将image直接pull下来。但是直接从node节点直接pull的话又是没有问题的，后来发现如果想要kubernetes直接pull的话需要一个secret。  一，">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://kkabuzs.github.io/themes-img/touxiang.jpg">
+<meta property="article:published_time" content="2019-06-18T08:52:55.000Z">
+<meta property="article:modified_time" content="2025-08-28T02:37:36.281Z">
+<meta property="article:author" content="Kkabuzs">
+<meta property="article:tag" content="Kubernetes">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://kkabuzs.github.io/themes-img/touxiang.jpg"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "解决kubernetes不能从harbor pull image",
+  "url": "https://kkabuzs.github.io/articles/2019/06/18/jiejue-kubernetes-buneng-harbor-pull-images/",
+  "image": "https://kkabuzs.github.io/themes-img/touxiang.jpg",
+  "datePublished": "2019-06-18T08:52:55.000Z",
+  "dateModified": "2025-08-28T02:37:36.281Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "Kkabuzs",
+      "url": "https://kkabuzs.github.io/"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/themes-img/touxiang.jpg"><link rel="canonical" href="https://kkabuzs.github.io/articles/2019/06/18/jiejue-kubernetes-buneng-harbor-pull-images/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '解决kubernetes不能从harbor pull image',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 7.3.0"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/themes-img/touxiang.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">50</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">14</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">6</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(/themes-img/yinhe.jpg);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><img class="site-icon" src="/themes-img/touxiang.jpg" alt="Logo"><span class="site-name">kkabuzs博客屋</span></a><a class="nav-page-title" href="/"><span class="site-name">解决kubernetes不能从harbor pull image</span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">解决kubernetes不能从harbor pull image</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2019-06-18T08:52:55.000Z" title="发表于 2019-06-18 16:52:55">2019-06-18</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2025-08-28T02:37:36.281Z" title="更新于 2025-08-28 10:37:36">2025-08-28</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%B7%A5%E4%BD%9C%E9%9A%8F%E7%AC%94%EF%BC%8C%E9%97%AE%E9%A2%98%E6%8E%92%E6%9F%A5/">工作随笔，问题排查</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><blockquote>
+<p><em>无论你跑多少距离，放弃很容易，停下来，肉体得到暂时的舒服，但你最终会一无所得。</em><br><em>坚持或许很难，但你最后一定会有所收获，跑过的路，永远不会欺骗自己。</em></p>
+</blockquote>
+<blockquote>
+<p><strong>在实现kubernetes ci的时候发现node节点不能从harbor的私有仓库将image直接pull下来。但是直接从node节点直接pull的话又是没有问题的，后来发现如果想要kubernetes直接pull的话需要一个secret。</strong></p>
+</blockquote>
+<h2 id="一，以下面的为例介绍"><a href="#一，以下面的为例介绍" class="headerlink" title="一，以下面的为例介绍"></a>一，以下面的为例介绍</h2><blockquote>
+<p>下面的是创建service以及deployment的例子</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br></pre></td><td class="code"><pre><span class="line">apiVersion: v1</span><br><span class="line">kind: Namespace</span><br><span class="line">metadata:</span><br><span class="line">  name: <span class="built_in">test</span></span><br><span class="line">---</span><br><span class="line">apiVersion: v1</span><br><span class="line">kind: Service</span><br><span class="line">metadata:</span><br><span class="line">  name: webapp</span><br><span class="line">  namespace: <span class="built_in">test</span></span><br><span class="line">  labels:</span><br><span class="line">    app: nginx</span><br><span class="line">spec:</span><br><span class="line">  ports:</span><br><span class="line">  - port: 80</span><br><span class="line">    name: webapp</span><br><span class="line">  selector:</span><br><span class="line">    app: nginx</span><br><span class="line">---</span><br><span class="line">apiVersion: extensions/v1beta1</span><br><span class="line">kind: Deployment</span><br><span class="line">metadata:</span><br><span class="line">  name: nginx</span><br><span class="line">  namespace: <span class="built_in">test</span></span><br><span class="line">  annotations:</span><br><span class="line">    kubernetes.io/change-cause: <span class="string">&quot;true&quot;</span></span><br><span class="line">  labels:</span><br><span class="line">    app: nginx</span><br><span class="line">spec:</span><br><span class="line">  strategy:</span><br><span class="line">    rollingUpdate:</span><br><span class="line">      maxUnavailable: 1</span><br><span class="line">      maxSurge: 2</span><br><span class="line">  replicas: 1</span><br><span class="line">  template:</span><br><span class="line">    metadata:</span><br><span class="line">      labels:</span><br><span class="line">        app: nginx</span><br><span class="line">        namespace: <span class="built_in">test</span></span><br><span class="line">    spec:</span><br><span class="line">      containers:</span><br><span class="line">      - name: nginx</span><br><span class="line">        image: harbor.gagogroup.cn/api-dev/nginx:1.1.9</span><br><span class="line">        imagePullPolicy: IfNotPresent </span><br><span class="line">        ports:</span><br><span class="line">        - containerPort: 80</span><br><span class="line">      imagePullSecrets:</span><br><span class="line">        - name: harbor-secret</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p><strong>如果我们想要保证kubernetes能够正常的pull image的话，就需要加上imagePullSecrets这个字段。下面是创建secret的方法。</strong></p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">kubectl create secret docker-registry SECRET_NAME -–namespace=NAME_SPACE \</span><br><span class="line">-–docker-server=DOCKER_REGISTRY_SERVER -–docker-username=DOCKER_USER \</span><br><span class="line">-–docker-password=DOCKER_PASSWORD -–docker-email=DOCKER_EMAIL</span><br><span class="line"></span><br><span class="line"><span class="comment">#其中：</span></span><br><span class="line">-–namespace 为命名空间</span><br><span class="line">--docker-server 为通过docker login登陆时输入的地址</span><br><span class="line">--docker-username 为登陆时的账号</span><br><span class="line">--docker-password 为登陆时的密码</span><br><span class="line">--docker-email 为注册的账号时的邮箱地址</span><br></pre></td></tr></table></figure>
+
+<p><strong>真实命令示例</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">[root@gago-k8s-master api]# kubectl create secret docker-registry harbor-secret  --docker-server=xxx.xxxx.cn --docker-username=yunwei --docker-password=xxxxxx --docker-email=xxx@qq.com -n api             </span><br><span class="line">secret/harbor-secret created</span><br><span class="line"></span><br><span class="line">[root@gago-k8s-master api]# kubectl get secret -n api   <span class="comment">#查看secret</span></span><br><span class="line">NAME                  TYPE                                  DATA   AGE</span><br><span class="line">default-token-4qgfl   kubernetes.io/service-account-token   3      47m</span><br><span class="line">harbor-secret         kubernetes.io/dockerconfigjson        1      3m52s</span><br><span class="line">harbor-yunwei         kubernetes.io/dockerconfigjson        1      47m</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>同时不要忘记的是此用户需要读拉取的image的project有权限。</p>
+</blockquote>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://kkabuzs.github.io">Kkabuzs</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://kkabuzs.github.io/articles/2019/06/18/jiejue-kubernetes-buneng-harbor-pull-images/">https://kkabuzs.github.io/articles/2019/06/18/jiejue-kubernetes-buneng-harbor-pull-images/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://kkabuzs.github.io" target="_blank">kkabuzs博客屋</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Kubernetes/">Kubernetes</a></div><div class="post-share"><div class="social-share" data-image="/themes-img/touxiang.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/articles/2019/06/11/git-qianduan-ci-example/" title="git前端ci文件写法示例"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">git前端ci文件写法示例</div></div><div class="info-2"><div class="info-item-1"> 无论你跑多少距离，放弃很容易，停下来，肉体得到暂时的舒服，但你最终会一无所得。坚持或许很难，但你最后一定会有所收获，跑过的路，永远不会欺骗自己。  12345678910111213#前端ci示例：stages: #有哪些步骤  - picc_ts_testpicc_ts_test:  #可以理解为项目名，只是定义一个名字  stage: picc_ts_test  #步骤1，跟上面的要对应  tags:  # runner名字，决定用哪个runnre来执行    - zhaoshuo_172.16.0.26  only:  # 分支名，定义部署分支    - develop  script: # 动作    - scp -P 12224 -r dist gago_zhaoshuo@172.17.108.101:/data/home/gago_hetao/web_ci/picc_ts_test/    - ssh -p 12224 gago_zhaoshuo@172.17.108.101 &quot;sudo sh ~/picc_web_ts_ci.sh&quot; </div></div></div></a><a class="pagination-related" href="/articles/2019/06/24/system-initialization-jiludenglurizhi/" title="系统初始化之记录登录日志"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">系统初始化之记录登录日志</div></div><div class="info-2"><div class="info-item-1"> 无论你跑多少距离，放弃很容易，停下来，肉体得到暂时的舒服，但你最终会一无所得。坚持或许很难，但你最后一定会有所收获，跑过的路，永远不会欺骗自己。   在系统初始化的过程中，需要将登录日志记录到一个隐藏的文件中,下面简单的记录下流程:  123456#配置如下：vim /etc/profileexport HISTTIMEFORMAT=&quot;&#123;\&quot;TIME\&quot;:\&quot;%F %T\&quot;,\&quot;HOST\&quot;:\&quot;$HOSTNAME\&quot;,\&quot;LI\&quot;:\&quot;$(who -u am i 2&gt;/dev/null| awk &#x27;&#123;print $NF&#125;&#x27;|sed -e &#x27;s/[()]//g&#x27;)\&quot;,\&quot;LU\&quot;:\&quot;$(who am i|awk &#x27;&#123;print...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/articles/2018/12/28/kubernetesyamlbushujixiefadingyi/" title="kubernetes yaml部署及各种yaml写法和含义"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2018-12-28</div><div class="info-item-2">kubernetes yaml部署及各种yaml写法和含义</div></div><div class="info-2"><div class="info-item-1"> 无论你跑多少距离，放弃很容易，停下来，肉体得到暂时的舒服，但你最终会一无所得。坚持或许很难，但你最后一定会有所收获，跑过的路，永远不会欺骗自己。  kubernetes yaml部署及各种yaml写法和含义一，环境介绍   主机名 IP地址 CPU 内存 描述    k8s-master01 192.168.101.61 2核 4GB k8s master   k8s-node01 192.168.101.62 2核 4GB k8s node节点   k8s-node02 192.168.101.125 2核 4GB k8s node节点   二，RC的写法及SVC(service)的写法及用法2.1 创建一个mysql的RC123456789101112131415161718192021222324252627[root@k8s-master01 kubernetes-yaml]# pwd/root/kubernetes-yaml[root@k8s-master01 kubernetes-yaml]# vim msyql-rc.yamlapiVersion:...</div></div></div></a><a class="pagination-related" href="/articles/2018/11/21/kuberneteszhivolumeguazai/" title="Kubernetes之Volume挂载"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2018-11-21</div><div class="info-item-2">Kubernetes之Volume挂载</div></div><div class="info-2"><div class="info-item-1"> 无论你跑多少距离，放弃很容易，停下来，肉体得到暂时的舒服，但你最终会一无所得。坚持或许很难，但你最后一定会有所收获，跑过的路，永远不会欺骗自己。  Kubernetes之Volume挂载一，Volume Container中的磁盘文件是短暂的，这在容器中运行时会给非平凡的应用程序带来一些问题。首先，当容器崩溃时，kubelet将重新启动它，但文件将丢失，Container以干净状态启动。其次，当在一起运行Container时，Pod通常需要在这些容器之间共享文件。Kubernetes Volume抽象解决了这两个问题。  1.1...</div></div></div></a><a class="pagination-related" href="/articles/2019/07/04/k8s-apiserver-zhengshulunhuangengxin-kubeadm/" title="k8s apiserver证书轮换更新（kubeadm）"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2019-07-04</div><div class="info-item-2">k8s apiserver证书轮换更新（kubeadm）</div></div><div class="info-2"><div class="info-item-1">一，确认kubeadm版本 无论你跑多少距离，放弃很容易，停下来，肉体得到暂时的舒服，但你最终会一无所得。坚持或许很难，但你最后一定会有所收获，跑过的路，永远不会欺骗自己。   如果使用的事kubeadm 1.8之前的版本，那么需要手动更新证书。或者重建集群。或者升级为1.8版本之后，即可使用命令轮换更新。  12345#kubeadm更新方法示例：$ sudo curl -sSL https://dl.k8s.io/release/v1.8.15/bin/linux/amd64/kubeadm &gt; ./kubeadm.1.8.15$ chmod a+rx kubeadm.1.8.15$ sudo mv /usr/bin/kubeadm /usr/bin/kubeadm.1.7$ sudo mv kubeadm.1.8.15 /usr/bin/kubeadm  二，更新证书流程 因我的kubeadm版本为1.9，故不需要更新。  2.1 备份旧的apiserver，apiserver-kubelet-client和前端代理客户端证书和密钥。123456$ sudo mv...</div></div></div></a><a class="pagination-related" href="/articles/2019/04/09/centos7erjinzhibushukubernetes1-13jiqun/" title="CentOS 7 使用二进制部署 Kubernetes 1.13集群"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2019-04-09</div><div class="info-item-2">CentOS 7 使用二进制部署 Kubernetes 1.13集群</div></div><div class="info-2"><div class="info-item-1"> 无论你跑多少距离，放弃很容易，停下来，肉体得到暂时的舒服，但你最终会一无所得。坚持或许很难，但你最后一定会有所收获，跑过的路，永远不会欺骗自己。  CentOS 7 使用二进制部署 Kubernetes 1.13集群一，概述 Kubernetes是一个开源的，用于管理云平台中多个主机上的容器化的应用，Kubernetes的目标是让部署容器化的应用简单并且高效（powerful）,Kubernetes提供了应用部署，规划，更新，维护的一种机制。  1.1...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/themes-img/touxiang.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">Kkabuzs</div><div class="author-info-description">学习记录和整理</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">50</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">14</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">6</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/xxxxxx"><i class="fab fa-github"></i><span>Follow Me</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">三人行，必有我师！</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%EF%BC%8C%E4%BB%A5%E4%B8%8B%E9%9D%A2%E7%9A%84%E4%B8%BA%E4%BE%8B%E4%BB%8B%E7%BB%8D"><span class="toc-number">1.</span> <span class="toc-text">一，以下面的为例介绍</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/articles/2025/04/22/mongodb-6-0-21-lixian-fenpianjiqun/" title="MongoDB-6.0.21离线分片集群部署">MongoDB-6.0.21离线分片集群部署</a><time datetime="2025-04-21T17:53:44.000Z" title="发表于 2025-04-22 01:53:44">2025-04-22</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/articles/2025/04/22/mongodb-6-0-21-lixian-fubenjibushu/" title="MongoDB-6.0.21副本集离线部署手册-（Replica Set）副本集模式">MongoDB-6.0.21副本集离线部署手册-（Replica Set）副本集模式</a><time datetime="2025-04-21T17:51:21.000Z" title="发表于 2025-04-22 01:51:21">2025-04-22</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/articles/2025/04/21/mongodb-6-0-21-lixian-danjiedianbushu/" title="MongoDB-6.0.21离线单节点部署">MongoDB-6.0.21离线单节点部署</a><time datetime="2025-04-21T15:55:06.000Z" title="发表于 2025-04-21 23:55:06">2025-04-21</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/articles/2023/05/10/jichengyupaisheng/" title="继承与派生">继承与派生</a><time datetime="2023-05-10T05:52:52.000Z" title="发表于 2023-05-10 13:52:52">2023-05-10</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/articles/2023/05/09/fengzhuang/" title="封装">封装</a><time datetime="2023-05-09T01:37:55.000Z" title="发表于 2023-05-09 09:37:55">2023-05-09</time></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2019 - 2025 By Kkabuzs</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 7.3.0</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.3.5</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

@@ -1,0 +1,282 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>kkabuzs博客屋</title><meta name="author" content="Kkabuzs"><meta name="copyright" content="Kkabuzs"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="学习记录和整理">
+<meta property="og:type" content="website">
+<meta property="og:title" content="kkabuzs博客屋">
+<meta property="og:url" content="https://kkabuzs.github.io/index.html">
+<meta property="og:site_name" content="kkabuzs博客屋">
+<meta property="og:description" content="学习记录和整理">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://kkabuzs.github.io/themes-img/touxiang.jpg">
+<meta property="article:author" content="Kkabuzs">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://kkabuzs.github.io/themes-img/touxiang.jpg"><link rel="shortcut icon" href="/themes-img/touxiang.jpg"><link rel="canonical" href="https://kkabuzs.github.io/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'kkabuzs博客屋',
+  isHighlightShrink: false,
+  isToc: false,
+  pageType: 'home'
+}</script><meta name="generator" content="Hexo 7.3.0"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/themes-img/touxiang.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">50</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">14</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">6</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div></div></div></div><div class="page" id="body-wrap"><header class="full_page" id="page-header" style="background-image: url(/themes-img/yinhe.jpg);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><img class="site-icon" src="/themes-img/touxiang.jpg" alt="Logo"><span class="site-name">kkabuzs博客屋</span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="site-info"><h1 id="site-title">kkabuzs博客屋</h1><div id="site-subtitle"><span id="subtitle"></span></div></div><div id="scroll-down"><i class="fas fa-angle-down scroll-down-effects"></i></div></header><main class="layout" id="content-inner"><div class="recent-posts nc" id="recent-posts"><div class="recent-post-items"><div class="recent-post-item"><div class="recent-post-info no-cover"><a class="article-title" href="/articles/2025/04/22/mongodb-6-0-21-lixian-fenpianjiqun/" title="MongoDB-6.0.21离线分片集群部署">MongoDB-6.0.21离线分片集群部署</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2025-04-21T17:53:44.000Z" title="发表于 2025-04-22 01:53:44">2025-04-22</time></span><span class="article-meta"><span class="article-meta-separator">|</span><i class="fas fa-inbox"></i><a class="article-meta__categories" href="/categories/%E6%9E%B6%E6%9E%84%E5%9F%BA%E7%A1%80/">架构基础</a></span></div><div class="content"> 无论你跑多少距离，放弃很容易，停下来，肉体得到暂时的舒服，但你最终会一无所得。坚持或许很难，但你最后一定会有所收获，跑过的路，永远不会欺骗自己。  一 介绍 MongoDB 分片集群通过将数据分散存储在多个节点（分片）上，以支持处理大规模数据和高并发读写操作。它由多个组件组成，包括分片（Shard）、配置服务器（Config Server）和查询路由器（Query Router，也称为 mongos）。分片负责存储实际的数据，配置服务器存储集群的元数据，查询路由器则负责接收客户端的请求，并将其路由到正确的分片上进行处理。  1.1 核心组件分片（Shard）  功能： 分片是存储实际数据的服务器，一个分片集群可包含多个分片。每个分片能够是单个服务器，也可以是一个复制集，复制集的运用提升了数据的可用性与持久性。数据依据分片键被划分并存储于不同的分片上。 示例场景： 在一个电商数据库中，可按商品 ID 进行分片，不同范围的商品 ID 数据会存于不同的分片，如此能将数据均匀分散，减轻单个服务器的负载。  配置服务器（Config Server）  功能：...</div></div></div><div class="recent-post-item"><div class="recent-post-info no-cover"><a class="article-title" href="/articles/2025/04/22/mongodb-6-0-21-lixian-fubenjibushu/" title="MongoDB-6.0.21副本集离线部署手册-（Replica Set）副本集模式">MongoDB-6.0.21副本集离线部署手册-（Replica Set）副本集模式</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2025-04-21T17:51:21.000Z" title="发表于 2025-04-22 01:51:21">2025-04-22</time></span><span class="article-meta"><span class="article-meta-separator">|</span><i class="fas fa-inbox"></i><a class="article-meta__categories" href="/categories/%E6%9E%B6%E6%9E%84%E5%9F%BA%E7%A1%80/">架构基础</a></span></div><div class="content"> 无论你跑多少距离，放弃很容易，停下来，肉体得到暂时的舒服，但你最终会一无所得。坚持或许很难，但你最后一定会有所收获，跑过的路，永远不会欺骗自己。  一 介绍 MongoDB 副本集是一组维护相同数据集的 MongoDB 实例，由一个主节点（Primary）和多个从节点（Secondary）组成。客户端的写操作只能在主节点上执行，而读操作可以在主节点或从节点上执行。副本集通过心跳机制来监控成员状态，当主节点出现故障时，会自动进行选举，从从节点中选出一个新的主节点，以保证系统的高可用性。  1.1 架构组成 主节点（Primary）：  唯一可以处理写操作的节点。当客户端发起写请求时，主节点会将写操作应用到自己的数据集上，并将这些操作记录到操作日志（oplog）中。 负责将 oplog 中的操作同步到从节点。   从节点（Secondary）：  从主节点复制...</div></div></div><div class="recent-post-item"><div class="recent-post-info no-cover"><a class="article-title" href="/articles/2025/04/21/mongodb-6-0-21-lixian-danjiedianbushu/" title="MongoDB-6.0.21离线单节点部署">MongoDB-6.0.21离线单节点部署</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2025-04-21T15:55:06.000Z" title="发表于 2025-04-21 23:55:06">2025-04-21</time></span><span class="article-meta"><span class="article-meta-separator">|</span><i class="fas fa-inbox"></i><a class="article-meta__categories" href="/categories/%E6%9E%B6%E6%9E%84%E5%9F%BA%E7%A1%80/">架构基础</a></span></div><div class="content"> 无论你跑多少距离，放弃很容易，停下来，肉体得到暂时的舒服，但你最终会一无所得。坚持或许很难，但你最后一定会有所收获，跑过的路，永远不会欺骗自己。  一 准备工作 下载离线环境包mongodb-linux-x86_64-rhel70-6.0.21.tgz  主体文件包下载地址：https://www.mongodb.com/try/download/community   mongosh-1.10.6-linux-x64.tgz            启动命令包（因为mongodb6.0要用mongosh命令连接，故此需要额外下载工具包）下载地址：https://www.mongodb.com/try/download/shell  1.1 环境初始化1234567891011121314151617181920212223[root@localhost ~]# cat /etc/redhat-release CentOS Linux release 7.6.1810 (Core) [root@localhost ~]# uname...</div></div></div><div class="recent-post-item"><div class="recent-post-info no-cover"><a class="article-title" href="/articles/2023/05/10/jichengyupaisheng/" title="继承与派生">继承与派生</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2023-05-10T05:52:52.000Z" title="发表于 2023-05-10 13:52:52">2023-05-10</time></span><span class="article-meta"><span class="article-meta-separator">|</span><i class="fas fa-inbox"></i><a class="article-meta__categories" href="/categories/Python/">Python</a></span></div><div class="content"> 无论你跑多少距离，放弃很容易，停下来，肉体得到暂时的舒服，但你最终会一无所得。坚持或许很难，但你最后一定会有所收获，跑过的路，永远不会欺骗自己。  26、继承与派生特别鸣谢：        — b站老男孩agen老师 一，什么是继承12345&#x27;&#x27;&#x27;继承是一种创建新类的方式，在Python中，新建的类可以继承一个或多个父类，新建的类可称为子类或派生类，父类又可称为基类或超类，子类会遗传父类的属性需要注意的是：    在python中，新建的类可以继承一个或多个父类&#x27;&#x27;&#x27;  12345678910111213141516171819202122232425class Parent1: #定义父类    passclass Parent2: #定义父类    passclass Sub1(Parent1): #单继承    passclass Sub2(Parent1,Parent2): #多继承    pass# 通过类的内置属性__bases__可以查看类继承的所有父类print(Sub1.__bases__)    ...</div></div></div><div class="recent-post-item"><div class="recent-post-info no-cover"><a class="article-title" href="/articles/2023/05/09/fengzhuang/" title="封装">封装</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2023-05-09T01:37:55.000Z" title="发表于 2023-05-09 09:37:55">2023-05-09</time></span><span class="article-meta"><span class="article-meta-separator">|</span><i class="fas fa-inbox"></i><a class="article-meta__categories" href="/categories/Python/">Python</a></span></div><div class="content"> 无论你跑多少距离，放弃很容易，停下来，肉体得到暂时的舒服，但你最终会一无所得。坚持或许很难，但你最后一定会有所收获，跑过的路，永远不会欺骗自己。  25、封装特别鸣谢：        — b站老男孩agen老师 一，引入 面向对象编程有三大特性：封装、继承、多态，其中最重要的一个特性就是封装。封装指的就是把数据与功能都整合到一起，听起来是不是很熟悉，没错，我们之前所说的”整合“二字其实就是封装的通俗说法。除此之外，针对封装到对象或者类中的属性，我们还可以严格控制对它们的访问，分两步实现：隐藏与开放接口  二，隐藏属性12345678910111213141516171819202122# 如何隐藏：在属性名面前加__前缀，就会实现一个对外隐藏属性的效果# 说明：# I、在类外部无法直接访问双下滑线开头的属性，但知道了类名和属性名就可以拼出名字：_类名__属性，然后就可以访问了，如Foo._Foo__x，所以说这种操作并没有严格意义上地限制外部访问，仅仅只是一种语法意义上的变形。#...</div></div></div><div class="recent-post-item"><div class="recent-post-info no-cover"><a class="article-title" href="/articles/2023/05/05/mianxiangduixiangbiancheng/" title="面向对象编程">面向对象编程</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2023-05-05T02:00:09.000Z" title="发表于 2023-05-05 10:00:09">2023-05-05</time></span><span class="article-meta"><span class="article-meta-separator">|</span><i class="fas fa-inbox"></i><a class="article-meta__categories" href="/categories/Python/">Python</a></span></div><div class="content"> 无论你跑多少距离，放弃很容易，停下来，肉体得到暂时的舒服，但你最终会一无所得。坚持或许很难，但你最后一定会有所收获，跑过的路，永远不会欺骗自己。  24、面向对象编程特别鸣谢：        — b站老男孩agen老师 一，对象的概念12345678910111213&#x27;&#x27;&#x27;面向过程：    核心是&quot;过程&quot;二字    过程的终极奥义是：将程序流程化    过程是&quot;流水线&quot;，用来分步骤解决问题面向对象：    核心是&quot;对象&quot;二字    对象的终极奥义就是：将程序&quot;整合&quot;    对象是&quot;容器&quot;，用来盛放数据与功能的&#x27;&#x27;&#x27;  所有的程序都是由”数据”与“功能“组成，因而编写程序的本质就是定义出一系列的数据，然后定义出一系列的功能来对数据进行操作。在学习”对象“之前，程序中的数据与功能是分离开的，如下:  12345678910# 程序 = 数据 + 功能# 学生的数据name = &#x27;zhangsan&#x27;age...</div></div></div><div class="recent-post-item"><div class="recent-post-info no-cover"><a class="article-title" href="/articles/2023/04/23/changyongmokuai/" title="常用模块">常用模块</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2023-04-23T06:22:29.000Z" title="发表于 2023-04-23 14:22:29">2023-04-23</time></span><span class="article-meta"><span class="article-meta-separator">|</span><i class="fas fa-inbox"></i><a class="article-meta__categories" href="/categories/Python/">Python</a></span></div><div class="content"> 无论你跑多少距离，放弃很容易，停下来，肉体得到暂时的舒服，但你最终会一无所得。坚持或许很难，但你最后一定会有所收获，跑过的路，永远不会欺骗自己。  23、常用模块特别鸣谢：        — b站老男孩agen老师 一，时间模块time123456789101112131415161718192021# 一：timeimport time# 时间分为三种格式：# 1、时间戳：从1970年到现在经过的秒数# 作用：用于时间间隔的计算print(time.time())# 2、按照某种格式显示的时间：2023-04-19 17:36:33# 作用：用于展示时间#                    年 月 日  时 分 秒 上下午print(time.strftime(&#x27;%Y-%m-%d %H:%M:%S %p&#x27;))print(time.strftime(&#x27;%Y-%m-%d %X&#x27;))     # X：直接表示分时秒的时间# 3、结构化时间(struct_time)# 作用：用于单独获取时间的某一部分res =...</div></div></div><div class="recent-post-item"><div class="recent-post-info no-cover"><a class="article-title" href="/articles/2023/04/19/ruanjiankaifamuluguifan/" title="软件开发的目录规范">软件开发的目录规范</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2023-04-19T06:44:43.000Z" title="发表于 2023-04-19 14:44:43">2023-04-19</time></span><span class="article-meta"><span class="article-meta-separator">|</span><i class="fas fa-inbox"></i><a class="article-meta__categories" href="/categories/Python/">Python</a></span></div><div class="content"> 无论你跑多少距离，放弃很容易，停下来，肉体得到暂时的舒服，但你最终会一无所得。坚持或许很难，但你最后一定会有所收获，跑过的路，永远不会欺骗自己。  22、软件开发的目录规范特别鸣谢：        — b站老男孩agen老师 一，软件开发目录规范 为了提高程序的可读性与可维护性，我们应该为软件设计良好的目录结构，这与规范的编码风格同等重要。软件的目录规范并无硬性标准，只要清晰可读即可，假设你的软件名为ATM，推荐目录结构如下  1234567891011121314151617181920212223ATM/|-- src/|   |-- src.py||-- api/|   |-- api.py||-- db/|   |-- db_handle.py||-- lib/|   |-- common.py||-- bin/|   |-- start.py||-- conf/|   |-- settings.py||-- run.py|-- setup.py|-- requirements.txt|--...</div></div></div><div class="recent-post-item"><div class="recent-post-info no-cover"><a class="article-title" href="/articles/2023/04/18/bao/" title="包">包</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2023-04-18T06:15:39.000Z" title="发表于 2023-04-18 14:15:39">2023-04-18</time></span><span class="article-meta"><span class="article-meta-separator">|</span><i class="fas fa-inbox"></i><a class="article-meta__categories" href="/categories/Python/">Python</a></span></div><div class="content"> 无论你跑多少距离，放弃很容易，停下来，肉体得到暂时的舒服，但你最终会一无所得。坚持或许很难，但你最后一定会有所收获，跑过的路，永远不会欺骗自己。  21、包特别鸣谢：        — b站老男孩agen老师 一，包介绍 随着模块数目的增多，把所有模块不加区分地放到一起也是极不合理的，于是Python为我们提供了一种把模块组织到一起的方法，即创建一个包。包就是一个含有_init_.py文件的文件夹，文件夹内可以组织子模块或子包  包就是一个包含有__init__.py文件的文件夹,包的本质是模块的一种形式，包用来被当作模块导入  123456# 示例：mmm/├── __init__.py     ├── mm1.py├── mm2.py└── mm3.py      #子模块   需要强调的是  123#1. 在python3中，即使包下没有__init__.py文件，import 包仍然不会报错，而在python2中，包下一定要有该文件，否则import 包报错#2....</div></div></div><div class="recent-post-item"><div class="recent-post-info no-cover"><a class="article-title" href="/articles/2023/04/07/mokuai/" title="模块">模块</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2023-04-07T08:01:28.000Z" title="发表于 2023-04-07 16:01:28">2023-04-07</time></span><span class="article-meta"><span class="article-meta-separator">|</span><i class="fas fa-inbox"></i><a class="article-meta__categories" href="/categories/Python/">Python</a></span></div><div class="content"> 无论你跑多少距离，放弃很容易，停下来，肉体得到暂时的舒服，但你最终会一无所得。坚持或许很难，但你最后一定会有所收获，跑过的路，永远不会欺骗自己。  20、模块特别鸣谢：        — b站老男孩agen老师 一，模块介绍1.1 什么是模块12345678910模块就是一系列功能的集合体，分为三大类    I：内置模块    II：第三方的模块    III：自定义的模块         一个python文件本身就是一个模块，例如：文件名m.py，模块名m    ps：模块分为四种形式        1、使用python编写的.py文件        2、已被编译为共享库或DLL的C或C++扩展        3、把一系列模块组知道一起的文件夹（注：文件夹下有一个__init__.py文件，该文件夹称之为包）        4、使用C编写并链接到python解释器的内置模块  1.2 为什么要有模块1234I：内置与第三方的模块拿来就用，无需定义，这种拿来主义，可以极大的提升自己的开发效率II：自定义的模块    可以将程序的各部分功能提取出来放到一个模块中共享使用   ...</div></div></div></div><nav id="pagination"><div class="pagination"><span class="page-number current">1</span><a class="page-number" href="/page/2/#content-inner">2</a><span class="space">&hellip;</span><a class="page-number" href="/page/5/#content-inner">5</a><a class="extend next" rel="next" href="/page/2/#content-inner"><i class="fas fa-chevron-right fa-fw"></i></a></div></nav></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/themes-img/touxiang.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">Kkabuzs</div><div class="author-info-description">学习记录和整理</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">50</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">14</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">6</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/xxxxxx"><i class="fab fa-github"></i><span>Follow Me</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">三人行，必有我师！</div></div><div class="sticky_layout"><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/articles/2025/04/22/mongodb-6-0-21-lixian-fenpianjiqun/" title="MongoDB-6.0.21离线分片集群部署">MongoDB-6.0.21离线分片集群部署</a><time datetime="2025-04-21T17:53:44.000Z" title="发表于 2025-04-22 01:53:44">2025-04-22</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/articles/2025/04/22/mongodb-6-0-21-lixian-fubenjibushu/" title="MongoDB-6.0.21副本集离线部署手册-（Replica Set）副本集模式">MongoDB-6.0.21副本集离线部署手册-（Replica Set）副本集模式</a><time datetime="2025-04-21T17:51:21.000Z" title="发表于 2025-04-22 01:51:21">2025-04-22</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/articles/2025/04/21/mongodb-6-0-21-lixian-danjiedianbushu/" title="MongoDB-6.0.21离线单节点部署">MongoDB-6.0.21离线单节点部署</a><time datetime="2025-04-21T15:55:06.000Z" title="发表于 2025-04-21 23:55:06">2025-04-21</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/articles/2023/05/10/jichengyupaisheng/" title="继承与派生">继承与派生</a><time datetime="2023-05-10T05:52:52.000Z" title="发表于 2023-05-10 13:52:52">2023-05-10</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/articles/2023/05/09/fengzhuang/" title="封装">封装</a><time datetime="2023-05-09T01:37:55.000Z" title="发表于 2023-05-09 09:37:55">2023-05-09</time></div></div></div></div><div class="card-widget card-categories"><div class="item-headline">
+            <i class="fas fa-folder-open"></i>
+            <span>分类</span>
+            
+          </div>
+          <ul class="card-category-list" id="aside-cat-list">
+            <li class="card-category-list-item "><a class="card-category-list-link" href="/categories/Python/"><span class="card-category-list-name">Python</span><span class="card-category-list-count">26</span></a></li><li class="card-category-list-item "><a class="card-category-list-link" href="/categories/%E5%A4%A7%E6%95%B0%E6%8D%AE/"><span class="card-category-list-name">大数据</span><span class="card-category-list-count">1</span></a></li><li class="card-category-list-item "><a class="card-category-list-link" href="/categories/%E5%AE%B9%E5%99%A8%E8%87%AA%E5%8A%A8%E5%8C%96/"><span class="card-category-list-name">容器自动化</span><span class="card-category-list-count">6</span></a></li><li class="card-category-list-item "><a class="card-category-list-link" href="/categories/%E5%B7%A5%E4%BD%9C%E9%9A%8F%E7%AC%94%EF%BC%8C%E9%97%AE%E9%A2%98%E6%8E%92%E6%9F%A5/"><span class="card-category-list-name">工作随笔，问题排查</span><span class="card-category-list-count">6</span></a></li><li class="card-category-list-item "><a class="card-category-list-link" href="/categories/%E6%9C%8D%E5%8A%A1%E5%9F%BA%E7%A1%80/"><span class="card-category-list-name">服务基础</span><span class="card-category-list-count">2</span></a></li><li class="card-category-list-item "><a class="card-category-list-link" href="/categories/%E6%9E%B6%E6%9E%84%E5%9F%BA%E7%A1%80/"><span class="card-category-list-name">架构基础</span><span class="card-category-list-count">9</span></a></li>
+          </ul></div><div class="card-widget card-tags"><div class="item-headline"><i class="fas fa-tags"></i><span>标签</span></div><div class="card-tag-cloud"><a href="/tags/Linux/" style="font-size: 1.1em; color: #999">Linux</a> <a href="/tags/Docker/" style="font-size: 1.4em; color: #99a5b6">Docker</a> <a href="/tags/Kubernetes/" style="font-size: 1.4em; color: #99a5b6">Kubernetes</a> <a href="/tags/Devops/" style="font-size: 1.1em; color: #999">Devops</a> <a href="/tags/HTTP/" style="font-size: 1.1em; color: #999">HTTP</a> <a href="/tags/Python/" style="font-size: 1.5em; color: #99a9bf">Python</a> <a href="/tags/Tomcat/" style="font-size: 1.1em; color: #999">Tomcat</a> <a href="/tags/Hadoop/" style="font-size: 1.1em; color: #999">Hadoop</a> <a href="/tags/Ansible/" style="font-size: 1.1em; color: #999">Ansible</a> <a href="/tags/Nginx/" style="font-size: 1.2em; color: #999da3">Nginx</a> <a href="/tags/Rsync/" style="font-size: 1.1em; color: #999">Rsync</a> <a href="/tags/MongoDB/" style="font-size: 1.3em; color: #99a1ac">MongoDB</a> <a href="/tags/Keepalived/" style="font-size: 1.1em; color: #999">Keepalived</a> <a href="/tags/Ftp/" style="font-size: 1.1em; color: #999">Ftp</a></div></div><div class="card-widget card-archives">
+    <div class="item-headline">
+      <i class="fas fa-archive"></i>
+      <span>归档</span>
+      <a class="card-more-btn" href="/archives/"
+            title="查看更多">
+            <i class="fas fa-angle-right"></i>
+          </a>
+    </div>
+  
+    <ul class="card-archive-list">
+      
+        <li class="card-archive-list-item">
+          <a class="card-archive-list-link" href="/archives/2025/04/">
+            <span class="card-archive-list-date">
+              四月 2025
+            </span>
+            <span class="card-archive-list-count">3</span>
+          </a>
+        </li>
+      
+        <li class="card-archive-list-item">
+          <a class="card-archive-list-link" href="/archives/2023/05/">
+            <span class="card-archive-list-date">
+              五月 2023
+            </span>
+            <span class="card-archive-list-count">3</span>
+          </a>
+        </li>
+      
+        <li class="card-archive-list-item">
+          <a class="card-archive-list-link" href="/archives/2023/04/">
+            <span class="card-archive-list-date">
+              四月 2023
+            </span>
+            <span class="card-archive-list-count">9</span>
+          </a>
+        </li>
+      
+        <li class="card-archive-list-item">
+          <a class="card-archive-list-link" href="/archives/2023/03/">
+            <span class="card-archive-list-date">
+              三月 2023
+            </span>
+            <span class="card-archive-list-count">14</span>
+          </a>
+        </li>
+      
+        <li class="card-archive-list-item">
+          <a class="card-archive-list-link" href="/archives/2019/07/">
+            <span class="card-archive-list-date">
+              七月 2019
+            </span>
+            <span class="card-archive-list-count">2</span>
+          </a>
+        </li>
+      
+        <li class="card-archive-list-item">
+          <a class="card-archive-list-link" href="/archives/2019/06/">
+            <span class="card-archive-list-date">
+              六月 2019
+            </span>
+            <span class="card-archive-list-count">3</span>
+          </a>
+        </li>
+      
+        <li class="card-archive-list-item">
+          <a class="card-archive-list-link" href="/archives/2019/04/">
+            <span class="card-archive-list-date">
+              四月 2019
+            </span>
+            <span class="card-archive-list-count">3</span>
+          </a>
+        </li>
+      
+        <li class="card-archive-list-item">
+          <a class="card-archive-list-link" href="/archives/2018/12/">
+            <span class="card-archive-list-date">
+              十二月 2018
+            </span>
+            <span class="card-archive-list-count">2</span>
+          </a>
+        </li>
+      
+    </ul>
+  </div><div class="card-widget card-webinfo"><div class="item-headline"><i class="fas fa-chart-line"></i><span>网站信息</span></div><div class="webinfo"><div class="webinfo-item"><div class="item-name">文章数目 :</div><div class="item-count">50</div></div><div class="webinfo-item"><div class="item-name">本站访客数 :</div><div class="item-count" id="busuanzi_value_site_uv"><i class="fa-solid fa-spinner fa-spin"></i></div></div><div class="webinfo-item"><div class="item-name">本站总浏览量 :</div><div class="item-count" id="busuanzi_value_site_pv"><i class="fa-solid fa-spinner fa-spin"></i></div></div><div class="webinfo-item"><div class="item-name">最后更新时间 :</div><div class="item-count" id="last-push-date" data-lastPushDate="2025-08-28T09:05:06.216Z"><i class="fa-solid fa-spinner fa-spin"></i></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2019 - 2025 By Kkabuzs</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 7.3.0</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.3.5</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><div class="js-pjax"><script>window.typedJSFn = {
+  init: str => {
+    window.typed = new Typed('#subtitle', Object.assign({
+      strings: str,
+      startDelay: 300,
+      typeSpeed: 150,
+      loop: true,
+      backSpeed: 50,
+    }, null))
+  },
+  run: subtitleType => {
+    if (true) {
+      if (typeof Typed === 'function') {
+        subtitleType()
+      } else {
+        btf.getScript('https://cdn.jsdelivr.net/npm/typed.js/dist/typed.umd.min.js').then(subtitleType)
+      }
+    } else {
+      subtitleType()
+    }
+  },
+  processSubtitle: (content, extraContents = []) => {
+    if (true) {
+      const sub = ["尘劳迥脱事非常 &#44; 紧把绳头做一场","不经一番寒彻骨 &#44; 怎得梅花扑鼻香"].slice()
+
+      if (extraContents.length > 0) {
+        sub.unshift(...extraContents)
+      }
+
+      if (typeof content === 'string') {
+        sub.unshift(content)
+      } else if (Array.isArray(content)) {
+        sub.unshift(...content)
+      }
+
+      sub.length > 0 && typedJSFn.init(sub)
+    } else {
+      document.getElementById('subtitle').textContent = typeof content === 'string' ? content :
+        (Array.isArray(content) && content.length > 0 ? content[0] : '')
+    }
+  }
+}
+btf.addGlobalFn('pjaxSendOnce', () => { typed.destroy() }, 'typedDestroy')
+</script><script>function subtitleType () {
+  typedJSFn.processSubtitle(["尘劳迥脱事非常 &#44; 紧把绳头做一场","不经一番寒彻骨 &#44; 怎得梅花扑鼻香"])
+}
+typedJSFn.run(subtitleType)</script></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

@@ -1,0 +1,282 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>kkabuzs博客屋</title><meta name="author" content="Kkabuzs"><meta name="copyright" content="Kkabuzs"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="学习记录和整理">
+<meta property="og:type" content="website">
+<meta property="og:title" content="kkabuzs博客屋">
+<meta property="og:url" content="https://kkabuzs.github.io/page/5/index.html">
+<meta property="og:site_name" content="kkabuzs博客屋">
+<meta property="og:description" content="学习记录和整理">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://kkabuzs.github.io/themes-img/touxiang.jpg">
+<meta property="article:author" content="Kkabuzs">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://kkabuzs.github.io/themes-img/touxiang.jpg"><link rel="shortcut icon" href="/themes-img/touxiang.jpg"><link rel="canonical" href="https://kkabuzs.github.io/page/5/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'kkabuzs博客屋',
+  isHighlightShrink: false,
+  isToc: false,
+  pageType: 'home'
+}</script><meta name="generator" content="Hexo 7.3.0"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/themes-img/touxiang.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">50</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">14</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">6</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div></div></div></div><div class="page" id="body-wrap"><header class="full_page" id="page-header" style="background-image: url(/themes-img/yinhe.jpg);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><img class="site-icon" src="/themes-img/touxiang.jpg" alt="Logo"><span class="site-name">kkabuzs博客屋</span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="site-info"><h1 id="site-title">kkabuzs博客屋</h1><div id="site-subtitle"><span id="subtitle"></span></div></div><div id="scroll-down"><i class="fas fa-angle-down scroll-down-effects"></i></div></header><main class="layout" id="content-inner"><div class="recent-posts nc" id="recent-posts"><div class="recent-post-items"><div class="recent-post-item"><div class="recent-post-info no-cover"><a class="article-title" href="/articles/2018/11/15/harborsiyoujingxiangcangku/" title="Harbor私有镜像仓库">Harbor私有镜像仓库</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2018-11-15T08:26:48.000Z" title="发表于 2018-11-15 16:26:48">2018-11-15</time></span><span class="article-meta"><span class="article-meta-separator">|</span><i class="fas fa-inbox"></i><a class="article-meta__categories" href="/categories/%E5%AE%B9%E5%99%A8%E8%87%AA%E5%8A%A8%E5%8C%96/">容器自动化</a></span></div><div class="content"> 无论你跑多少距离，放弃很容易，停下来，肉体得到暂时的舒服，但你最终会一无所得。坚持或许很难，但你最后一定会有所收获，跑过的路，永远不会欺骗自己。  Harbor私有镜像仓库一，Harbor简介  Harbor可帮助用户迅速搭建企业级注册服务。它提供了管理图形界面，基于角色的访问控制（Role Based Access Control），镜像远程复制（同步），AD&#x2F;LDAP集成，以及审计日志等企业用户需求的功能，同时还原生支持中文。  该项目自推出以来，在Github获得了超过3300多个star和900多个forks。  1.1 基于角色的访问控制 用户与Docker镜像仓库通过“项目”进行组织管理，一个用户可以对多个镜像仓库在同一命名空间（project）里有不同的权限。  1.2 图形化用户界面 用户可以通过浏览器来浏览，检索当前Docker镜像仓库，管理项目和命名空间  1.3 审计管理 所有针对镜像仓库的操作都可以被记录追溯，用于审计管理。  1.4 国际化 基于英文与中文语言进行了本地化。可以增加更多的语言支持。  1.5 RESTful...</div></div></div><div class="recent-post-item"><div class="recent-post-info no-cover"><a class="article-title" href="/articles/2018/10/14/dockerjichu-xia/" title="Docker基础（下）">Docker基础（下）</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2018-10-14T09:05:54.000Z" title="发表于 2018-10-14 17:05:54">2018-10-14</time></span><span class="article-meta"><span class="article-meta-separator">|</span><i class="fas fa-inbox"></i><a class="article-meta__categories" href="/categories/%E5%AE%B9%E5%99%A8%E8%87%AA%E5%8A%A8%E5%8C%96/">容器自动化</a></span></div><div class="content"> 无论你跑多少距离，放弃很容易，停下来，肉体得到暂时的舒服，但你最终会一无所得。坚持或许很难，但你最后一定会有所收获，跑过的路，永远不会欺骗自己。  Docker基础（下）五，网络管理5.1 容器网络模式  Docker支持5种网络模式  bridge  默认网络，Docker启动后默认创建一个docker0网桥，默认创建的容器也是添加到这个网桥中   host  容器不会获得一个独立的network namespace，而是与宿主机共用一个   none  获取独立的network namespace，但不为容器进行任何网络配置   container  与指定的容器使用同一个network namespace，网卡配置也都是相同的   自定义  自定义网桥，默认与bridge网络一样      5.1.1 bridge网络类型123456789101112131415161718192021222324252627282930313233343536373839404142#安装bridge管理工具[root@localhost ~]# yum -y install...</div></div></div><div class="recent-post-item"><div class="recent-post-info no-cover"><a class="article-title" href="/articles/2018/10/02/dockerjichu-shang/" title="Docker基础（上）">Docker基础（上）</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2018-10-02T13:18:35.000Z" title="发表于 2018-10-02 21:18:35">2018-10-02</time></span><span class="article-meta"><span class="article-meta-separator">|</span><i class="fas fa-inbox"></i><a class="article-meta__categories" href="/categories/%E5%AE%B9%E5%99%A8%E8%87%AA%E5%8A%A8%E5%8C%96/">容器自动化</a></span></div><div class="content"> 无论你跑多少距离，放弃很容易，停下来，肉体得到暂时的舒服，但你最终会一无所得。坚持或许很难，但你最后一定会有所收获，跑过的路，永远不会欺骗自己。  Docker基础（上）一，Docker简介，功能特性与应用场景1.1 Docker简介  Docker是一个开源的应用容器引擎，让开发者可以打包他们的应用以及依赖包到一个可移植的容器中，然后发布到任何流行的Linux机器上，也可以实现虚拟化，容器是完全使用沙箱机制，相互之间不会有任何接口。  一个完整的Docker有以下几个部分组成：  Docker Client 客户端 Docker Daemon 守护进程 Docker Image 镜像 Docker Container 容器    1.2 Docker功能特性  隔离环境（系统，网络，文件系统）与应用  解决依赖与版本问题  易于分发，开箱即用  节点与容器快速扩容  镜像制作简单便捷，管理方便  （1）隔离    通过cgroup（隔离和跟踪资源的使用）&amp;...</div></div></div><div class="recent-post-item"><div class="recent-post-info no-cover"><a class="article-title" href="/articles/2018/08/31/tomcatxiangjie/" title="Tomcat详解">Tomcat详解</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2018-08-31T10:20:44.000Z" title="发表于 2018-08-31 18:20:44">2018-08-31</time></span><span class="article-meta"><span class="article-meta-separator">|</span><i class="fas fa-inbox"></i><a class="article-meta__categories" href="/categories/%E6%9E%B6%E6%9E%84%E5%9F%BA%E7%A1%80/">架构基础</a></span></div><div class="content"> 无论你跑多少距离，放弃很容易，停下来，肉体得到暂时的舒服，但你最终会一无所得。坚持或许很难，但你最后一定会有所收获，跑过的路，永远不会欺骗自己。  Tomcat详解一，Tomcat简介   Tomcat是Apache软件基金会（Apache Software Foundation）的Jakarta项目中的一个核心项目，由Apache，Sun和其他一些公司及个人共同开发而成。 Tomcat服务器是一个免费的开放源代码的Web应用服务器，属于轻量级应用服务器，在中小型系统和并发访问用户不是很多的场合下被普遍使用，是开发和调试JSP程序的首选。 Tomcat和Nginx，APache（httpd），lighttpd等Web服务器一样，具有处理HTML页面的功能，另外它还是一个Servlet和JSP容器，独立的Servlet容器是Tomcat的默认模式。不过，Tomcat处理静态HTML的能力不如Nginx／Apache服务器。  二，Tomcat安装2.1...</div></div></div><div class="recent-post-item"><div class="recent-post-info no-cover"><a class="article-title" href="/articles/2018/08/31/keepalivedgaokeyongjiqun/" title="Keepalived高可用集群">Keepalived高可用集群</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2018-08-31T07:45:40.000Z" title="发表于 2018-08-31 15:45:40">2018-08-31</time></span><span class="article-meta"><span class="article-meta-separator">|</span><i class="fas fa-inbox"></i><a class="article-meta__categories" href="/categories/%E6%9E%B6%E6%9E%84%E5%9F%BA%E7%A1%80/">架构基础</a></span></div><div class="content"> 无论你跑多少距离，放弃很容易，停下来，肉体得到暂时的舒服，但你最终会一无所得。坚持或许很难，但你最后一定会有所收获，跑过的路，永远不会欺骗自己。  Keepalived高可用集群一，Keepalived高可用软件1.1 Keepalived介绍   Keepalived软件起初是专门为LVS负载均衡软件设计的，用来管理并监控LVS集群系统中各个服务节点的状态，后来又加入了可以实现高可用的VRRP功能。因此，Keepalived除了能够管理LVS软件外，还可以作为其他服务（例如：Nginx，Haproxy，MySQL等）的高可用解决方案软件。 Keepalived软件主要是通过VRRP协议实现高可用功能的。VRRP是Virtual Router Redundancy Protocol（虚拟路由器冗余协议）的缩写，VRRP出现的目的就是为了解决静态路由单点故障问题的，他能够保证当个别节点宕机时，整个网络可以不间断地运行。所以，Keepalived一方面具有配置管理LVS的功能，同时还具有对LVS下面节点进行健康检查的功能，另一方面也可实现系统网络服务的高可用功能。  1.2...</div></div></div><div class="recent-post-item"><div class="recent-post-info no-cover"><a class="article-title" href="/articles/2018/08/28/ansiblepiliangzidonghuaguanligongju/" title="Ansible批量自动化管理工具">Ansible批量自动化管理工具</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2018-08-28T04:28:54.000Z" title="发表于 2018-08-28 12:28:54">2018-08-28</time></span><span class="article-meta"><span class="article-meta-separator">|</span><i class="fas fa-inbox"></i><a class="article-meta__categories" href="/categories/%E6%9E%B6%E6%9E%84%E5%9F%BA%E7%A1%80/">架构基础</a></span></div><div class="content"> 无论你跑多少距离，放弃很容易，停下来，肉体得到暂时的舒服，但你最终会一无所得。坚持或许很难，但你最后一定会有所收获，跑过的路，永远不会欺骗自己。  Ansible批量自动化管理工具一， ansible简介 批量管理服务器的工具，无需部署agent，通过ssh进行管理   jenkins简介  可视化运维（主要用在可视化部署）持续构建，可以和git，svn结合可结合ssh实现可视化运维可结合ansible实现可视化运维  二，Python3与ansible的安装2.1 使用源码安装Python3.51234567891011[root@localhost ~]# yum -y install lrzsz vim net-tools gcc gcc-c++ ncurses ncurses-devel unzip zlib-devel zlib openssl-devel openssl           #安装支持包[root@localhost ~]# tar xf Python-3.5.2.tgz -C /usr/src/[root@localhost...</div></div></div><div class="recent-post-item"><div class="recent-post-info no-cover"><a class="article-title" href="/articles/2018/08/22/nginxfanxiangdaili/" title="Nginx反向代理">Nginx反向代理</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2018-08-22T02:25:53.000Z" title="发表于 2018-08-22 10:25:53">2018-08-22</time></span><span class="article-meta"><span class="article-meta-separator">|</span><i class="fas fa-inbox"></i><a class="article-meta__categories" href="/categories/%E6%9E%B6%E6%9E%84%E5%9F%BA%E7%A1%80/">架构基础</a></span></div><div class="content"> 无论你跑多少距离，放弃很容易，停下来，肉体得到暂时的舒服，但你最终会一无所得。坚持或许很难，但你最后一定会有所收获，跑过的路，永远不会欺骗自己。  Nginx反向代理1.1 集群简介   简单地说，集群就是指一组（若干个）相互独立的计算机，利用高速通信网络组成的一个较大的计算机服务系统，每个集群节点（即集群中的每台计算机）都是运行各自服务的独立服务器。这些服务器之间可以彼此通信，协同向用户提供应用程序，系统资源和数据，并以单一系统的模式加以管理。当用户客户机请求集群系统时，集群给用户的感觉就是一个单一独立的服务器，而实际上用户请求的是一组集群服务器。 若要用一句话描述集群，即一堆服务器合作做同一件事，这些机器可能需要整个技术团队架构，设计和统一协调管理，这些机器可以分布在一个机房，也可以分布在全国全球各个地区的多个机房。  1.2 集群的好处 高性能,价格有效性,可伸缩性,高可用性,透明性,可管理性,可编程性  1.3 集群的常见分类1.3.1...</div></div></div><div class="recent-post-item"><div class="recent-post-info no-cover"><a class="article-title" href="/articles/2018/08/16/nginxxiangxijiangjie/" title="Nginx详细讲解">Nginx详细讲解</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2018-08-16T10:52:14.000Z" title="发表于 2018-08-16 18:52:14">2018-08-16</time></span><span class="article-meta"><span class="article-meta-separator">|</span><i class="fas fa-inbox"></i><a class="article-meta__categories" href="/categories/%E6%9E%B6%E6%9E%84%E5%9F%BA%E7%A1%80/">架构基础</a></span></div><div class="content"> 无论你跑多少距离，放弃很容易，停下来，肉体得到暂时的舒服，但你最终会一无所得。坚持或许很难，但你最后一定会有所收获，跑过的路，永远不会欺骗自己。  Nginx详细讲解一，Nginx是什么？   nginx是一个开源的，支持高性能，高并发的www服务和代理服务软件。 nginx因具有高并发（特别是静态资源），占用系统资源少等特性，且功能丰富而逐渐流行起来。 nginx不但是一个优秀Web服务软件，还具有反向代理负载均衡功能和缓存服务功能，与lvs负载均衡及Haproxy等专业代理软件相比，Nginx部署起来更为简单，方便；在缓存功能方面，它又类似于Squid等专业的缓存服务软件。 nginx还有一个分支，由淘宝开发，叫 Tengine  1.1...</div></div></div><div class="recent-post-item"><div class="recent-post-info no-cover"><a class="article-title" href="/articles/2018/08/14/httpxieyiyuanli/" title="http协议原理">http协议原理</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2018-08-14T02:46:43.000Z" title="发表于 2018-08-14 10:46:43">2018-08-14</time></span><span class="article-meta"><span class="article-meta-separator">|</span><i class="fas fa-inbox"></i><a class="article-meta__categories" href="/categories/%E6%9E%B6%E6%9E%84%E5%9F%BA%E7%A1%80/">架构基础</a></span></div><div class="content"> 无论你跑多少距离，放弃很容易，停下来，肉体得到暂时的舒服，但你最终会一无所得。坚持或许很难，但你最后一定会有所收获，跑过的路，永远不会欺骗自己。  http协议原理一，Web服务基础1.1http服务重要基础1.1.1 用户访问网站基本流程  第一步：用户在浏览器里输入网址  第二步：域名解析出ip地址（DNS）  第三步：浏览器发起一个http协议的请求  第四步：web服务器响应用户的请求（域名看的是首页）  第五步：用户的浏览器解析web服务器相应的数据包  第六步：用户就从浏览器里看到了内容  1.1.2DNS解析原理 DNS就是区域域名服务。  DNS的递归查询过程（前6步）   第一步：当我们输入了一个域名，先去内存里看有没有映射（映射的格式就是IP+域名）  第二步：如果内存里没有，就会找本地映射文件hosts  第三步：如果hosts文件里没有，就会找本地DNS去要（LDNS，L是local的意思）  第四步：DNS也在内存里找，如果找到，就会记录在内存里  第五步：如果内存里找不到，DNS就会找映射文件 ...</div></div></div><div class="recent-post-item"><div class="recent-post-info no-cover"><a class="article-title" href="/articles/2018/07/25/rsync/" title="Rsync数据同步工具">Rsync数据同步工具</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2018-07-25T08:33:44.000Z" title="发表于 2018-07-25 16:33:44">2018-07-25</time></span><span class="article-meta"><span class="article-meta-separator">|</span><i class="fas fa-inbox"></i><a class="article-meta__categories" href="/categories/%E6%9C%8D%E5%8A%A1%E5%9F%BA%E7%A1%80/">服务基础</a></span></div><div class="content"> 无论你跑多少距离，放弃很容易，停下来，肉体得到暂时的舒服，但你最终会一无所得。坚持或许很难，但你最后一定会有所收获，跑过的路，永远不会欺骗自己。  一，Rsync介绍1.1什么是Rsync？    Rsync是一款开源的，快速的，多功能的，可实现全量及变量的本地或远程数据同步备份的优秀工具。       1.2Rsync简介    Rsync具有可是本地和远程两台主机之间的数据快速复制同步镜像，远程备份的功能。这个功能类似ssh带的scp命令，但又优于scp命令的功能。scp每次都是全量拷贝，而Rsync可以增量拷贝。当然，Rsync还可以在本地主机的不同分区的不同目录之间全量及增量的复制数据。这有类似cp命令，但同样也优于cp命令，cp每次都是全量拷贝，而Rsync可以增量拷贝。        ...</div></div></div></div><nav id="pagination"><div class="pagination"><a class="extend prev" rel="prev" href="/page/4/#content-inner"><i class="fas fa-chevron-left fa-fw"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/4/#content-inner">4</a><span class="page-number current">5</span></div></nav></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/themes-img/touxiang.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">Kkabuzs</div><div class="author-info-description">学习记录和整理</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">50</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">14</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">6</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/xxxxxx"><i class="fab fa-github"></i><span>Follow Me</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">三人行，必有我师！</div></div><div class="sticky_layout"><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/articles/2025/04/22/mongodb-6-0-21-lixian-fenpianjiqun/" title="MongoDB-6.0.21离线分片集群部署">MongoDB-6.0.21离线分片集群部署</a><time datetime="2025-04-21T17:53:44.000Z" title="发表于 2025-04-22 01:53:44">2025-04-22</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/articles/2025/04/22/mongodb-6-0-21-lixian-fubenjibushu/" title="MongoDB-6.0.21副本集离线部署手册-（Replica Set）副本集模式">MongoDB-6.0.21副本集离线部署手册-（Replica Set）副本集模式</a><time datetime="2025-04-21T17:51:21.000Z" title="发表于 2025-04-22 01:51:21">2025-04-22</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/articles/2025/04/21/mongodb-6-0-21-lixian-danjiedianbushu/" title="MongoDB-6.0.21离线单节点部署">MongoDB-6.0.21离线单节点部署</a><time datetime="2025-04-21T15:55:06.000Z" title="发表于 2025-04-21 23:55:06">2025-04-21</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/articles/2023/05/10/jichengyupaisheng/" title="继承与派生">继承与派生</a><time datetime="2023-05-10T05:52:52.000Z" title="发表于 2023-05-10 13:52:52">2023-05-10</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/articles/2023/05/09/fengzhuang/" title="封装">封装</a><time datetime="2023-05-09T01:37:55.000Z" title="发表于 2023-05-09 09:37:55">2023-05-09</time></div></div></div></div><div class="card-widget card-categories"><div class="item-headline">
+            <i class="fas fa-folder-open"></i>
+            <span>分类</span>
+            
+          </div>
+          <ul class="card-category-list" id="aside-cat-list">
+            <li class="card-category-list-item "><a class="card-category-list-link" href="/categories/Python/"><span class="card-category-list-name">Python</span><span class="card-category-list-count">26</span></a></li><li class="card-category-list-item "><a class="card-category-list-link" href="/categories/%E5%A4%A7%E6%95%B0%E6%8D%AE/"><span class="card-category-list-name">大数据</span><span class="card-category-list-count">1</span></a></li><li class="card-category-list-item "><a class="card-category-list-link" href="/categories/%E5%AE%B9%E5%99%A8%E8%87%AA%E5%8A%A8%E5%8C%96/"><span class="card-category-list-name">容器自动化</span><span class="card-category-list-count">6</span></a></li><li class="card-category-list-item "><a class="card-category-list-link" href="/categories/%E5%B7%A5%E4%BD%9C%E9%9A%8F%E7%AC%94%EF%BC%8C%E9%97%AE%E9%A2%98%E6%8E%92%E6%9F%A5/"><span class="card-category-list-name">工作随笔，问题排查</span><span class="card-category-list-count">6</span></a></li><li class="card-category-list-item "><a class="card-category-list-link" href="/categories/%E6%9C%8D%E5%8A%A1%E5%9F%BA%E7%A1%80/"><span class="card-category-list-name">服务基础</span><span class="card-category-list-count">2</span></a></li><li class="card-category-list-item "><a class="card-category-list-link" href="/categories/%E6%9E%B6%E6%9E%84%E5%9F%BA%E7%A1%80/"><span class="card-category-list-name">架构基础</span><span class="card-category-list-count">9</span></a></li>
+          </ul></div><div class="card-widget card-tags"><div class="item-headline"><i class="fas fa-tags"></i><span>标签</span></div><div class="card-tag-cloud"><a href="/tags/Linux/" style="font-size: 1.1em; color: #999">Linux</a> <a href="/tags/Docker/" style="font-size: 1.4em; color: #99a5b6">Docker</a> <a href="/tags/Kubernetes/" style="font-size: 1.4em; color: #99a5b6">Kubernetes</a> <a href="/tags/Devops/" style="font-size: 1.1em; color: #999">Devops</a> <a href="/tags/HTTP/" style="font-size: 1.1em; color: #999">HTTP</a> <a href="/tags/Python/" style="font-size: 1.5em; color: #99a9bf">Python</a> <a href="/tags/Tomcat/" style="font-size: 1.1em; color: #999">Tomcat</a> <a href="/tags/Hadoop/" style="font-size: 1.1em; color: #999">Hadoop</a> <a href="/tags/Ansible/" style="font-size: 1.1em; color: #999">Ansible</a> <a href="/tags/Nginx/" style="font-size: 1.2em; color: #999da3">Nginx</a> <a href="/tags/Rsync/" style="font-size: 1.1em; color: #999">Rsync</a> <a href="/tags/MongoDB/" style="font-size: 1.3em; color: #99a1ac">MongoDB</a> <a href="/tags/Keepalived/" style="font-size: 1.1em; color: #999">Keepalived</a> <a href="/tags/Ftp/" style="font-size: 1.1em; color: #999">Ftp</a></div></div><div class="card-widget card-archives">
+    <div class="item-headline">
+      <i class="fas fa-archive"></i>
+      <span>归档</span>
+      <a class="card-more-btn" href="/archives/"
+            title="查看更多">
+            <i class="fas fa-angle-right"></i>
+          </a>
+    </div>
+  
+    <ul class="card-archive-list">
+      
+        <li class="card-archive-list-item">
+          <a class="card-archive-list-link" href="/archives/2025/04/">
+            <span class="card-archive-list-date">
+              四月 2025
+            </span>
+            <span class="card-archive-list-count">3</span>
+          </a>
+        </li>
+      
+        <li class="card-archive-list-item">
+          <a class="card-archive-list-link" href="/archives/2023/05/">
+            <span class="card-archive-list-date">
+              五月 2023
+            </span>
+            <span class="card-archive-list-count">3</span>
+          </a>
+        </li>
+      
+        <li class="card-archive-list-item">
+          <a class="card-archive-list-link" href="/archives/2023/04/">
+            <span class="card-archive-list-date">
+              四月 2023
+            </span>
+            <span class="card-archive-list-count">9</span>
+          </a>
+        </li>
+      
+        <li class="card-archive-list-item">
+          <a class="card-archive-list-link" href="/archives/2023/03/">
+            <span class="card-archive-list-date">
+              三月 2023
+            </span>
+            <span class="card-archive-list-count">14</span>
+          </a>
+        </li>
+      
+        <li class="card-archive-list-item">
+          <a class="card-archive-list-link" href="/archives/2019/07/">
+            <span class="card-archive-list-date">
+              七月 2019
+            </span>
+            <span class="card-archive-list-count">2</span>
+          </a>
+        </li>
+      
+        <li class="card-archive-list-item">
+          <a class="card-archive-list-link" href="/archives/2019/06/">
+            <span class="card-archive-list-date">
+              六月 2019
+            </span>
+            <span class="card-archive-list-count">3</span>
+          </a>
+        </li>
+      
+        <li class="card-archive-list-item">
+          <a class="card-archive-list-link" href="/archives/2019/04/">
+            <span class="card-archive-list-date">
+              四月 2019
+            </span>
+            <span class="card-archive-list-count">3</span>
+          </a>
+        </li>
+      
+        <li class="card-archive-list-item">
+          <a class="card-archive-list-link" href="/archives/2018/12/">
+            <span class="card-archive-list-date">
+              十二月 2018
+            </span>
+            <span class="card-archive-list-count">2</span>
+          </a>
+        </li>
+      
+    </ul>
+  </div><div class="card-widget card-webinfo"><div class="item-headline"><i class="fas fa-chart-line"></i><span>网站信息</span></div><div class="webinfo"><div class="webinfo-item"><div class="item-name">文章数目 :</div><div class="item-count">50</div></div><div class="webinfo-item"><div class="item-name">本站访客数 :</div><div class="item-count" id="busuanzi_value_site_uv"><i class="fa-solid fa-spinner fa-spin"></i></div></div><div class="webinfo-item"><div class="item-name">本站总浏览量 :</div><div class="item-count" id="busuanzi_value_site_pv"><i class="fa-solid fa-spinner fa-spin"></i></div></div><div class="webinfo-item"><div class="item-name">最后更新时间 :</div><div class="item-count" id="last-push-date" data-lastPushDate="2025-08-28T09:05:06.216Z"><i class="fa-solid fa-spinner fa-spin"></i></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2019 - 2025 By Kkabuzs</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 7.3.0</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.3.5</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><div class="js-pjax"><script>window.typedJSFn = {
+  init: str => {
+    window.typed = new Typed('#subtitle', Object.assign({
+      strings: str,
+      startDelay: 300,
+      typeSpeed: 150,
+      loop: true,
+      backSpeed: 50,
+    }, null))
+  },
+  run: subtitleType => {
+    if (true) {
+      if (typeof Typed === 'function') {
+        subtitleType()
+      } else {
+        btf.getScript('https://cdn.jsdelivr.net/npm/typed.js/dist/typed.umd.min.js').then(subtitleType)
+      }
+    } else {
+      subtitleType()
+    }
+  },
+  processSubtitle: (content, extraContents = []) => {
+    if (true) {
+      const sub = ["尘劳迥脱事非常 &#44; 紧把绳头做一场","不经一番寒彻骨 &#44; 怎得梅花扑鼻香"].slice()
+
+      if (extraContents.length > 0) {
+        sub.unshift(...extraContents)
+      }
+
+      if (typeof content === 'string') {
+        sub.unshift(content)
+      } else if (Array.isArray(content)) {
+        sub.unshift(...content)
+      }
+
+      sub.length > 0 && typedJSFn.init(sub)
+    } else {
+      document.getElementById('subtitle').textContent = typeof content === 'string' ? content :
+        (Array.isArray(content) && content.length > 0 ? content[0] : '')
+    }
+  }
+}
+btf.addGlobalFn('pjaxSendOnce', () => { typed.destroy() }, 'typedDestroy')
+</script><script>function subtitleType () {
+  typedJSFn.processSubtitle(["尘劳迥脱事非常 &#44; 紧把绳头做一场","不经一番寒彻骨 &#44; 怎得梅花扑鼻香"])
+}
+typedJSFn.run(subtitleType)</script></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
