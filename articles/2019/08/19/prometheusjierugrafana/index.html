@@ -1,0 +1,312 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>Prometheus 之接入Grafana | kkabuzs博客屋</title><meta name="author" content="Kkabuzs"><meta name="copyright" content="Kkabuzs"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="无论你跑多少距离，放弃很容易，停下来，肉体得到暂时的舒服，但你最终会一无所得。坚持或许很难，但你最后一定会有所收获，跑过的路，永远不会欺骗自己。  Prometheus 之接入Grafana一，Grafana介绍由于Prometheus自带的web Ui图标功能相对较弱，所以一般情况下我们会使用一个第三方的工具来展示这些数据    Grafana是一个跨平台的开源的度量分析和可视化工具，可以通过">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Prometheus 之接入Grafana">
+<meta property="og:url" content="https://kkabuzs.github.io/articles/2019/08/19/prometheusjierugrafana/index.html">
+<meta property="og:site_name" content="kkabuzs博客屋">
+<meta property="og:description" content="无论你跑多少距离，放弃很容易，停下来，肉体得到暂时的舒服，但你最终会一无所得。坚持或许很难，但你最后一定会有所收获，跑过的路，永远不会欺骗自己。  Prometheus 之接入Grafana一，Grafana介绍由于Prometheus自带的web Ui图标功能相对较弱，所以一般情况下我们会使用一个第三方的工具来展示这些数据    Grafana是一个跨平台的开源的度量分析和可视化工具，可以通过">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://kkabuzs.github.io/themes-img/touxiang.jpg">
+<meta property="article:published_time" content="2019-08-19T01:42:02.000Z">
+<meta property="article:author" content="Kkabuzs">
+<meta property="article:tag" content="Prometheus">
+<meta property="article:tag" content="Grafana">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://kkabuzs.github.io/themes-img/touxiang.jpg"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Prometheus 之接入Grafana",
+  "url": "https://kkabuzs.github.io/articles/2019/08/19/prometheusjierugrafana/",
+  "image": "https://kkabuzs.github.io/themes-img/touxiang.jpg",
+  "datePublished": "2019-08-19T01:42:02.000Z",
+  "dateModified": "2019-08-19T01:42:02.000Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "Kkabuzs",
+      "url": "https://kkabuzs.github.io/"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/themes-img/touxiang.jpg"><link rel="canonical" href="https://kkabuzs.github.io/articles/2019/08/19/prometheusjierugrafana/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'Prometheus 之接入Grafana',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 7.3.0"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/themes-img/touxiang.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">61</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">16</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">6</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(/themes-img/yinhe.jpg);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><img class="site-icon" src="/themes-img/touxiang.jpg" alt="Logo"><span class="site-name">kkabuzs博客屋</span></a><a class="nav-page-title" href="/"><span class="site-name">Prometheus 之接入Grafana</span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">Prometheus 之接入Grafana</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2019-08-19T01:42:02.000Z" title="发表于 2019-08-19 09:42:02">2019-08-19</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2025-09-01T09:26:10.191Z" title="更新于 2025-09-01 17:26:10">2025-09-01</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%AE%B9%E5%99%A8%E8%87%AA%E5%8A%A8%E5%8C%96/">容器自动化</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><blockquote>
+<p><em>无论你跑多少距离，放弃很容易，停下来，肉体得到暂时的舒服，但你最终会一无所得。</em><br><em>坚持或许很难，但你最后一定会有所收获，跑过的路，永远不会欺骗自己。</em></p>
+</blockquote>
+<h1 id="Prometheus-之接入Grafana"><a href="#Prometheus-之接入Grafana" class="headerlink" title="Prometheus 之接入Grafana"></a>Prometheus 之接入Grafana</h1><h2 id="一，Grafana介绍"><a href="#一，Grafana介绍" class="headerlink" title="一，Grafana介绍"></a>一，Grafana介绍</h2><pre><code>由于Prometheus自带的web Ui图标功能相对较弱，所以一般情况下我们会使用一个第三方的工具来展示这些数据
+</code></pre>
+<blockquote>
+<ul>
+<li>Grafana是一个跨平台的开源的度量分析和可视化工具，可以通过将采集的数据查询然后可视化的展示，并及时通知。</li>
+<li>grafana 是一个可视化面包，有着非常漂亮的图片和布局展示，功能齐全的度量仪表盘和图形化编辑器，支持Graphite、Zabbix、InfluxDB、Prometheus、OpenTSDB、Elasticasearch等作为数据源，比Prometheus自带的图标展示功能强大很多，更加灵活，有丰富的插件.</li>
+</ul>
+</blockquote>
+<h3 id="1-1-部署Grafana"><a href="#1-1-部署Grafana" class="headerlink" title="1.1 部署Grafana"></a>1.1 部署Grafana</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br></pre></td><td class="code"><pre><span class="line">[root@k8s-master01 grafana]# vim grafana_deployment.yaml</span><br><span class="line">apiVersion: extensions/v1beta1</span><br><span class="line">kind: Deployment</span><br><span class="line">metadata:</span><br><span class="line">  name: grafana</span><br><span class="line">  namespace: kube-system</span><br><span class="line">  labels:</span><br><span class="line">    app: grafana</span><br><span class="line">spec:</span><br><span class="line">  revisionHistoryLimit: 10</span><br><span class="line">  template:</span><br><span class="line">    metadata:</span><br><span class="line">      labels:</span><br><span class="line">        app: grafana</span><br><span class="line">    spec:</span><br><span class="line">      containers:</span><br><span class="line">      - name: grafana</span><br><span class="line">        image: grafana/grafana:5.3.4</span><br><span class="line">        imagePullPolicy: IfNotPresent</span><br><span class="line">        ports:</span><br><span class="line">        - containerPort: 3000</span><br><span class="line">          name: grafana</span><br><span class="line">        <span class="built_in">env</span>:</span><br><span class="line">        - name: GF_SECURITY_ADMIN_USER</span><br><span class="line">          value: admin</span><br><span class="line">        - name: GF_SECURITY_ADMIN_PASSWORD</span><br><span class="line">          value: admin</span><br><span class="line">        readinessProbe:</span><br><span class="line">          failureThreshold: 10</span><br><span class="line">          httpGet:</span><br><span class="line">            path: /api/health</span><br><span class="line">            port: 3000</span><br><span class="line">            scheme: HTTP</span><br><span class="line">          initialDelaySeconds: 60</span><br><span class="line">          periodSeconds: 10</span><br><span class="line">          successThreshold: 1</span><br><span class="line">          timeoutSeconds: 30</span><br><span class="line">        livenessProbe:</span><br><span class="line">          failureThreshold: 3</span><br><span class="line">          httpGet:</span><br><span class="line">            path: /api/health</span><br><span class="line">            port: 3000</span><br><span class="line">            scheme: HTTP</span><br><span class="line">          periodSeconds: 10</span><br><span class="line">          successThreshold: 1</span><br><span class="line">          timeoutSeconds: 1</span><br><span class="line">        resources:</span><br><span class="line">          limits:</span><br><span class="line">            cpu: 300m</span><br><span class="line">            memory: 1024Mi</span><br><span class="line">          requests:</span><br><span class="line">            cpu: 300m</span><br><span class="line">            memory: 1024Mi</span><br><span class="line">        volumeMounts:</span><br><span class="line">        - mountPath: /var/lib/grafana</span><br><span class="line">          subPath: grafana</span><br><span class="line">          name: storage</span><br><span class="line">      securityContext:</span><br><span class="line">        fsGroup: 472</span><br><span class="line">        runAsUser: 472</span><br><span class="line">      volumes:</span><br><span class="line">      - name: storage</span><br><span class="line">        persistentVolumeClaim:</span><br><span class="line">          claimName: grafana</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<ul>
+<li>这里使用了grafana 5.3.4的镜像，添加了监控检查、资源声明，比较重要的变量是GF_SECURITY_ADMIN_USER和GF_SECURITY_ADMIN_PASSWORD为grafana的账号和密码。</li>
+<li>由于grafana将dashboard、插件这些数据保留在&#x2F;var&#x2F;lib&#x2F;grafana目录下，所以我们这里需要做持久化，同时要针对这个目录做挂载声明，由于5.3.4版本用户的userid和groupid都有所变化，所以这里添加了一个securityContext设置用户ID</li>
+</ul>
+</blockquote>
+<p><img src="/articles/2019/08/19/prometheusjierugrafana/1.png"></p>
+<h3 id="1-2-添加pv-pvc"><a href="#1-2-添加pv-pvc" class="headerlink" title="1.2 添加pv pvc"></a>1.2 添加pv pvc</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">[root@k8s-master01 ~]# kubectl get pv</span><br><span class="line">NAME       CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS      CLAIM                    STORAGECLASS   REASON   AGE</span><br><span class="line">nfs-pv01   1Gi        RWX            Retain           Bound       default/www-web-0                                5d18h</span><br><span class="line">nfs-pv02   2Gi        RWX            Retain           Bound       default/www-web-1                                5d18h</span><br><span class="line">nfs-pv03   3Gi        RWO            Retain           Available                                                    5d18h</span><br><span class="line">nfs-pv04   4Gi        RWX            Retain           Bound       default/www-web-2                                5d18h</span><br><span class="line">nfs-pv05   5Gi        RWX            Retain           Bound       kube-system/prometheus                           5d18h</span><br><span class="line"></span><br><span class="line"><span class="comment">#说明：可以看到我们还有一个可以使用的pv，故此不用创建pv了，直接创建一个pvc，用于绑定Grafana。</span></span><br><span class="line"></span><br><span class="line">[root@k8s-master01 ~]# <span class="built_in">mkdir</span> grafana</span><br><span class="line">[root@k8s-master01 ~]# <span class="built_in">cd</span> grafana/</span><br><span class="line">[root@k8s-master01 grafana]# vim grafana_pvc.yaml</span><br><span class="line">apiVersion: v1</span><br><span class="line">kind: PersistentVolumeClaim</span><br><span class="line">metadata:</span><br><span class="line">  name: grafana</span><br><span class="line">  namespace: kube-system</span><br><span class="line">spec:</span><br><span class="line">  accessModes:</span><br><span class="line">  - ReadWriteOnce</span><br><span class="line">  resources:</span><br><span class="line">    requests:</span><br><span class="line">      storage: 3Gi</span><br></pre></td></tr></table></figure>
+
+<h3 id="1-3-创建service，使用NodePort"><a href="#1-3-创建service，使用NodePort" class="headerlink" title="1.3 创建service，使用NodePort"></a>1.3 创建service，使用NodePort</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">[root@k8s-master01 grafana]# vim grafana_svc.yaml</span><br><span class="line">apiVersion: v1</span><br><span class="line">kind: Service</span><br><span class="line">metadata:</span><br><span class="line">  name: grafana</span><br><span class="line">  namespace: kube-system</span><br><span class="line">  labels:</span><br><span class="line">    app: grafana</span><br><span class="line">spec:</span><br><span class="line">  <span class="built_in">type</span>: NodePort</span><br><span class="line">  ports:</span><br><span class="line">    - port: 3000</span><br><span class="line">  selector:</span><br><span class="line">    app: grafana</span><br></pre></td></tr></table></figure>
+
+<h3 id="1-4-创建一个job"><a href="#1-4-创建一个job" class="headerlink" title="1.4 创建一个job"></a>1.4 创建一个job</h3><blockquote>
+<p>由于5.1 (可以选择5.1之前的docker镜像，可以避免此类错误) 版本后groupid更改，同时我们将&#x2F;var&#x2F;lib&#x2F;grafana挂载到pvc后，目录拥有者可能不是grafana用户，所以我们还需要添加一个Job用于授权目录</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">[root@k8s-master01 grafana]# vim grafana_job.yaml</span><br><span class="line">apiVersion: batch/v1</span><br><span class="line">kind: Job</span><br><span class="line">metadata:</span><br><span class="line">  name: grafana-chown</span><br><span class="line">  namespace: kube-system</span><br><span class="line">spec:</span><br><span class="line">  template:</span><br><span class="line">    spec:</span><br><span class="line">      restartPolicy: Never</span><br><span class="line">      containers:</span><br><span class="line">      - name: grafana-chown</span><br><span class="line">        <span class="built_in">command</span>: [<span class="string">&quot;chown&quot;</span>, <span class="string">&quot;-R&quot;</span>, <span class="string">&quot;472:472&quot;</span>, <span class="string">&quot;/var/lib/grafana&quot;</span>]</span><br><span class="line">        image: busybox</span><br><span class="line">        imagePullPolicy: IfNotPresent</span><br><span class="line">        volumeMounts:</span><br><span class="line">        - name: storage</span><br><span class="line">          subPath: grafana</span><br><span class="line">          mountPath: /var/lib/grafana</span><br><span class="line">      volumes:</span><br><span class="line">      - name: storage</span><br><span class="line">        persistentVolumeClaim:</span><br><span class="line">          claimName: grafana</span><br><span class="line"></span><br><span class="line"><span class="comment"># 这里使用一个busybox镜像将/var/lib/grafana目录修改为权限472</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="1-5-创建所有资源（注意创建顺序）"><a href="#1-5-创建所有资源（注意创建顺序）" class="headerlink" title="1.5 创建所有资源（注意创建顺序）"></a>1.5 创建所有资源（注意创建顺序）</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#创建pvc</span></span><br><span class="line">[root@k8s-master01 grafana]# kubectl create -f grafana_pvc.yaml</span><br><span class="line">persistentvolumeclaim/grafana created</span><br><span class="line">[root@k8s-master01 grafana]# kubectl get pvc -n kube-system | grep grafana</span><br><span class="line">grafana      Bound    nfs-pv03   3Gi        RWO                           29s</span><br><span class="line"></span><br><span class="line"><span class="comment">#创建job</span></span><br><span class="line">[root@k8s-master01 grafana]# kubectl create -f grafana_job.yaml</span><br><span class="line">job.batch/grafana-chown created</span><br><span class="line">[root@k8s-master01 grafana]# kubectl get job -n kube-system</span><br><span class="line">NAME            COMPLETIONS   DURATION   AGE</span><br><span class="line">grafana-chown   1/1           10s        20s</span><br><span class="line"></span><br><span class="line"><span class="comment">#创建deployment</span></span><br><span class="line">[root@k8s-master01 grafana]# kubectl create -f grafana_deployment.yaml</span><br><span class="line">deployment.extensions/grafana created</span><br><span class="line">[root@k8s-master01 grafana]# kubectl get deploy -n kube-system</span><br><span class="line">NAME                 READY   UP-TO-DATE   AVAILABLE   AGE</span><br><span class="line">coredns              2/2     2            2           9d</span><br><span class="line">grafana              1/1     1            1           4m    <span class="comment">#启动成功</span></span><br><span class="line">kube-state-metrics   1/1     1            1           2d17h</span><br><span class="line">prometheus           1/1     1            1           3d23h</span><br><span class="line"></span><br><span class="line"><span class="comment">#创建service</span></span><br><span class="line">[root@k8s-master01 grafana]# kubectl create -f grafana_svc.yaml</span><br><span class="line">service/grafana created</span><br></pre></td></tr></table></figure>
+
+<h3 id="1-6-创建完成后我们打开grafana的dashboard界面"><a href="#1-6-创建完成后我们打开grafana的dashboard界面" class="headerlink" title="1.6 创建完成后我们打开grafana的dashboard界面"></a>1.6 创建完成后我们打开grafana的dashboard界面</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@k8s-master01 grafana]# kubectl get svc -n kube-system | grep gra</span><br><span class="line">grafana              NodePort    10.101.203.108   &lt;none&gt;        3000:30123/TCP           23s</span><br></pre></td></tr></table></figure>
+
+<p><strong>然后我们在任意集群中的节点访问端口为30123</strong></p>
+<blockquote>
+<p>这里的集群密码就是上面我们创建deployment里面设置的变量，我这里用户设置为admin密码admin</p>
+</blockquote>
+<p><img src="/articles/2019/08/19/prometheusjierugrafana/2.png"></p>
+<h2 id="二，Grafana-web-基本操作"><a href="#二，Grafana-web-基本操作" class="headerlink" title="二，Grafana web 基本操作"></a>二，Grafana web 基本操作</h2><h3 id="2-1-登陆grafana"><a href="#2-1-登陆grafana" class="headerlink" title="2.1 登陆grafana"></a>2.1 登陆grafana</h3><blockquote>
+<p>首次登陆提示修改密码，我们不做修改。</p>
+</blockquote>
+<p><img src="/articles/2019/08/19/prometheusjierugrafana/3.png"></p>
+<h3 id="2-2-登陆到grafana就显示到了引导界面"><a href="#2-2-登陆到grafana就显示到了引导界面" class="headerlink" title="2.2 登陆到grafana就显示到了引导界面"></a>2.2 登陆到grafana就显示到了引导界面</h3><p><img src="/articles/2019/08/19/prometheusjierugrafana/4.png"></p>
+<h3 id="2-3-第一次创建grafana需要添加数据源"><a href="#2-3-第一次创建grafana需要添加数据源" class="headerlink" title="2.3 第一次创建grafana需要添加数据源"></a>2.3 第一次创建grafana需要添加数据源</h3><p><img src="/articles/2019/08/19/prometheusjierugrafana/5.png"></p>
+<h3 id="2-4-类型选择prometheus"><a href="#2-4-类型选择prometheus" class="headerlink" title="2.4 类型选择prometheus"></a>2.4 类型选择prometheus</h3><blockquote>
+<p><strong>这里的地址我们填写下面的url</strong><br><code>http://prometheus.kube-system.svc.cluster.local:9090</code></p>
+<blockquote>
+<ul>
+<li>这里的prometheus代表service名称</li>
+<li>kube-system代表命名空间</li>
+</ul>
+</blockquote>
+</blockquote>
+<blockquote>
+<p><strong>这里的Access配置要说明一下:</strong></p>
+<blockquote>
+<ul>
+<li>服务器(Server)访问模式（默认）：所有请求都将从浏览器发送到 Grafana 后端的服务器，后者又将请求转发到数据源，通过这种方式可以避免一些跨域问题，其实就是在 Grafana 后端做了一次转发，需要从Grafana 后端服务器访问该 URL。</li>
+<li>浏览器(Browser)访问模式：所有请求都将从浏览器直接发送到数据源，但是有可能会有一些跨域的限制，使用此访问模式，需要从浏览器直接访问该 URL。</li>
+</ul>
+</blockquote>
+</blockquote>
+<p><img src="/articles/2019/08/19/prometheusjierugrafana/6.png"></p>
+<p><img src="/articles/2019/08/19/prometheusjierugrafana/7.png"></p>
+<p><strong>检查一下数据源是否配置成功</strong></p>
+<p><img src="/articles/2019/08/19/prometheusjierugrafana/8.png"></p>
+<h3 id="2-5-数据源添加完毕后，接下来添加New-dashboard"><a href="#2-5-数据源添加完毕后，接下来添加New-dashboard" class="headerlink" title="2.5 数据源添加完毕后，接下来添加New dashboard"></a>2.5 数据源添加完毕后，接下来添加New dashboard</h3><p><img src="/articles/2019/08/19/prometheusjierugrafana/9.png"></p>
+<blockquote>
+<p><strong>这里我们可以自定义模板，或者可以使用别人写好的模板 （写好的模板后面是需要我们自己修改的）</strong></p>
+</blockquote>
+<p><img src="/articles/2019/08/19/prometheusjierugrafana/10.png"></p>
+<blockquote>
+<p><strong>grafana提供了很多模板，类似和docker镜像仓库一下。导入模板也极其简单。点击上方的Dashboard</strong></p>
+</blockquote>
+<p><img src="/articles/2019/08/19/prometheusjierugrafana/11.png"></p>
+<p><img src="/articles/2019/08/19/prometheusjierugrafana/12.png"></p>
+<blockquote>
+<p><strong>这里面的模板都是公共的，可以免费使用</strong></p>
+</blockquote>
+<p><img src="/articles/2019/08/19/prometheusjierugrafana/13.png"></p>
+<blockquote>
+<ul>
+<li>点进去任意一个模板后，我们可以看到ID，复制ID然后在返回grafana</li>
+<li>我这里添加一个监控Kubernetes集群。显示整体群集CPU、内存、磁盘使用情况以及单个pod统计信息。</li>
+<li><a target="_blank" rel="noopener" href="https://grafana.com/grafana/dashboards/8588">https://grafana.com/grafana/dashboards/8588</a></li>
+</ul>
+</blockquote>
+<p><img src="/articles/2019/08/19/prometheusjierugrafana/14.png"></p>
+<h3 id="2-6-点击导入模板"><a href="#2-6-点击导入模板" class="headerlink" title="2.6 点击导入模板"></a>2.6 点击导入模板</h3><blockquote>
+<ul>
+<li>在这里我们输入<code>8588</code>或者<code>url</code>，会自动跳转到配置页面</li>
+<li><a target="_blank" rel="noopener" href="https://grafana.com/grafana/dashboards/8588">https://grafana.com/grafana/dashboards/8588</a></li>
+</ul>
+</blockquote>
+<p><img src="/articles/2019/08/19/prometheusjierugrafana/15.png"></p>
+<p><img src="/articles/2019/08/19/prometheusjierugrafana/16.png"></p>
+<p><strong>选择好数据源之后，我们在点击Import即可</strong></p>
+<p><img src="/articles/2019/08/19/prometheusjierugrafana/17.png"></p>
+<blockquote>
+<ul>
+<li>这里就会将模板8588给我们导入进行</li>
+<li>这里就会获取我们prometheus里面的数据了</li>
+</ul>
+</blockquote>
+<h3 id="2-7-现在的模板还没有进行保存，我们要点击保存一下"><a href="#2-7-现在的模板还没有进行保存，我们要点击保存一下" class="headerlink" title="2.7 现在的模板还没有进行保存，我们要点击保存一下"></a>2.7 现在的模板还没有进行保存，我们要点击保存一下</h3><p><img src="/articles/2019/08/19/prometheusjierugrafana/18.png"></p>
+<p><img src="/articles/2019/08/19/prometheusjierugrafana/19.png"></p>
+<blockquote>
+<p>至此，Grafana接入Prometheus完毕！！！</p>
+</blockquote>
+<h2 id="三，附录"><a href="#三，附录" class="headerlink" title="三，附录"></a>三，附录</h2><blockquote>
+<p><strong>以上模版为8588模版，首排监控的deployment的信息，哪我们想看集群的资源占用怎么办呢？可以在创建一个162模版。</strong></p>
+</blockquote>
+<h3 id="3-1-grafana模板修改"><a href="#3-1-grafana模板修改" class="headerlink" title="3.1 grafana模板修改"></a>3.1 grafana模板修改</h3><h4 id="3-1-1Cluster-memory-usage-集群内存使用率"><a href="#3-1-1Cluster-memory-usage-集群内存使用率" class="headerlink" title="3.1.1Cluster memory usage (集群内存使用率)"></a>3.1.1Cluster memory usage (集群内存使用率)</h4><p><img src="/articles/2019/08/19/prometheusjierugrafana/20.png"></p>
+<blockquote>
+<p><code>计算方式就是(整个集群的内存-(整个集群剩余的内存以及Buffer和Cached))/整</code></p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">(<span class="built_in">sum</span>(node_memory_MemTotal_bytes) - <span class="built_in">sum</span>(node_memory_MemFree_bytes + node_memory_Buffers_bytes+node_memory_Cached_bytes)) / <span class="built_in">sum</span>(node_memory_MemTotal_bytes) * 100</span><br></pre></td></tr></table></figure>
+
+<p><img src="/articles/2019/08/19/prometheusjierugrafana/21.png"></p>
+<p><strong>这里要说明一点，这里填写的是PromSQL，也就是说是可以在prometheus查询到的。 如果查询不到grafana也是会获取不到数据的</strong></p>
+<blockquote>
+<p>这里在prometheus是可以获取到的</p>
+</blockquote>
+<p><img src="/articles/2019/08/19/prometheusjierugrafana/22.png"></p>
+<h4 id="3-1-2-Cluster-memory-usage-配置如下-集群内存使用率"><a href="#3-1-2-Cluster-memory-usage-配置如下-集群内存使用率" class="headerlink" title="3.1.2 Cluster memory usage 配置如下 (集群内存使用率)"></a>3.1.2 Cluster memory usage 配置如下 (集群内存使用率)</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sum</span>(<span class="built_in">sum</span> by (container_name)( rate(container_cpu_usage_seconds_total&#123;image!=<span class="string">&quot;&quot;</span>&#125;[1m] ) )) / count(node_cpu_seconds_total&#123;mode=<span class="string">&quot;system&quot;</span>&#125;) * 100</span><br></pre></td></tr></table></figure>
+
+<p><img src="/articles/2019/08/19/prometheusjierugrafana/23.png"></p>
+<h4 id="3-1-3-Cluster-filesystem-usage-集群文件系统使用率"><a href="#3-1-3-Cluster-filesystem-usage-集群文件系统使用率" class="headerlink" title="3.1.3 Cluster filesystem usage 集群文件系统使用率"></a>3.1.3 Cluster filesystem usage 集群文件系统使用率</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">(<span class="built_in">sum</span>(node_filesystem_size_bytes&#123;device=<span class="string">&quot;tmpfs&quot;</span>&#125;) - <span class="built_in">sum</span>(node_filesystem_free_bytes&#123;device=<span class="string">&quot;tmpfs&quot;</span>&#125;) ) / <span class="built_in">sum</span>(node_filesystem_size_bytes&#123;device=<span class="string">&quot;tmpfs&quot;</span>&#125;) * 100</span><br></pre></td></tr></table></figure>
+
+<p><img src="/articles/2019/08/19/prometheusjierugrafana/24.png"></p>
+<h4 id="3-1-4-配置集群中Pod-cpu使用率"><a href="#3-1-4-配置集群中Pod-cpu使用率" class="headerlink" title="3.1.4 配置集群中Pod cpu使用率"></a>3.1.4 配置集群中Pod cpu使用率</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sum</span> by (pod_name)(rate(container_cpu_usage_seconds_total&#123;image!=<span class="string">&quot;&quot;</span>, pod_name!=<span class="string">&quot;&quot;</span>&#125;[1m]))</span><br></pre></td></tr></table></figure>
+
+<p><strong>下面显示的地方配置</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#123;&#123; pod_name &#125;&#125;</span><br></pre></td></tr></table></figure>
+
+<p><img src="/articles/2019/08/19/prometheusjierugrafana/25.png"></p>
+<h4 id="3-1-5-集群pod-内存使用率"><a href="#3-1-5-集群pod-内存使用率" class="headerlink" title="3.1.5 集群pod 内存使用率"></a>3.1.5 集群pod 内存使用率</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sort_desc(<span class="built_in">sum</span> (container_memory_usage_bytes&#123;image!=<span class="string">&quot;&quot;</span>, pod_name!=<span class="string">&quot;&quot;</span>&#125;) by(pod_name))</span><br></pre></td></tr></table></figure>
+
+<p><strong>下面显示的名称同样也是<code>&#123;&#123; pod_name &#125;&#125;</code></strong></p>
+<p><img src="/articles/2019/08/19/prometheusjierugrafana/26.png"></p>
+<h4 id="3-1-6-配置Pod-网络监控"><a href="#3-1-6-配置Pod-网络监控" class="headerlink" title="3.1.6 配置Pod 网络监控"></a>3.1.6 配置Pod 网络监控</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">1.入口流量</span><br><span class="line">sort_desc(<span class="built_in">sum</span> by (pod_name) (rate (container_network_receive_bytes_total&#123;name!=<span class="string">&quot;&quot;</span>&#125;[1m]) ))</span><br><span class="line"></span><br><span class="line">2.出口流量</span><br><span class="line">sort_desc(<span class="built_in">sum</span> by (pod_name) (rate (container_network_transmit_bytes_total&#123;name!=<span class="string">&quot;&quot;</span>&#125;[1m]) ))</span><br><span class="line"></span><br><span class="line"><span class="comment">#监控时间为1分钟</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="/articles/2019/08/19/prometheusjierugrafana/27.png"></p>
+<blockquote>
+<p><strong>说明：</strong></p>
+<ul>
+<li>如要配置，配置完毕记得保存！！！！</li>
+<li>所有的PromSQL都是可以在prometheus获取到数据的！</li>
+</ul>
+</blockquote>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://kkabuzs.github.io">Kkabuzs</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://kkabuzs.github.io/articles/2019/08/19/prometheusjierugrafana/">https://kkabuzs.github.io/articles/2019/08/19/prometheusjierugrafana/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://kkabuzs.github.io" target="_blank">kkabuzs博客屋</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Prometheus/">Prometheus</a><a class="post-meta__tags" href="/tags/Grafana/">Grafana</a></div><div class="post-share"><div class="social-share" data-image="/themes-img/touxiang.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/articles/2019/08/16/prometheusjiankongkubernetesjiqunjieidanjiyingyong/" title="Prometheus 监控 Kubernetes 集群节点及应用"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">Prometheus 监控 Kubernetes 集群节点及应用</div></div><div class="info-2"><div class="info-item-1"> 无论你跑多少距离，放弃很容易，停下来，肉体得到暂时的舒服，但你最终会一无所得。坚持或许很难，但你最后一定会有所收获，跑过的路，永远不会欺骗自己。  Prometheus 监控 Kubernetes 集群节点及应用一，Prometheus监控Kubernetes 集群节点及应用 对于Kubernetes的集群监控一般我们需要考虑一下几方面:   Kubernetes节点的监控；比如节点的cpu、load、fdisk、memory等指标     内部系统组件的状态；比如kube-scheduler、kube-controller-manager、kubedns&#x2F;coredns等组件的运行状态 编排级的metrics；比如Deployment的状态、资源请求、调度和API延迟等数据指标  1.1...</div></div></div></a><a class="pagination-related" href="/articles/2019/08/20/prometheuszhialertmanagerbaojingzujian-youjianbaojing/" title="Prometheus 之 AlertManager 报警组件+邮件报警"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">Prometheus 之 AlertManager 报警组件+邮件报警</div></div><div class="info-2"><div class="info-item-1"> 无论你跑多少距离，放弃很容易，停下来，肉体得到暂时的舒服，但你最终会一无所得。坚持或许很难，但你最后一定会有所收获，跑过的路，永远不会欺骗自己。  Prometheus 之 AlertManager 报警组件+邮件报警一，AlertManager 简介 prometheus的兄弟alertmanager就是一个专门负责报警的组建，它独立于prometheus项目，自行运行并接收来自prometheus的请求，然后使用多种方式进行报警，之所以不是直接集成到prometheus中。   Prometheus包含了一个报警模块，那就是AlertManager，主要用于接受Prometheus发送的告警信息，它支持丰富的告警通知渠道，而且很容易做到告警信息进行去重，降噪，分组等，是一个前卫的告警通知系统   二，安装 AlerManager prometheus配置文件官方文档https://prometheus.io/docs/alerting/configuration/  首先，我们需要先指定配置文件 ，这里我们还是创建一个ConfigMap资源对象   2.1...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/articles/2019/08/16/prometheusjiankongkubernetesjiqunjieidanjiyingyong/" title="Prometheus 监控 Kubernetes 集群节点及应用"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2019-08-16</div><div class="info-item-2">Prometheus 监控 Kubernetes 集群节点及应用</div></div><div class="info-2"><div class="info-item-1"> 无论你跑多少距离，放弃很容易，停下来，肉体得到暂时的舒服，但你最终会一无所得。坚持或许很难，但你最后一定会有所收获，跑过的路，永远不会欺骗自己。  Prometheus 监控 Kubernetes 集群节点及应用一，Prometheus监控Kubernetes 集群节点及应用 对于Kubernetes的集群监控一般我们需要考虑一下几方面:   Kubernetes节点的监控；比如节点的cpu、load、fdisk、memory等指标     内部系统组件的状态；比如kube-scheduler、kube-controller-manager、kubedns&#x2F;coredns等组件的运行状态 编排级的metrics；比如Deployment的状态、资源请求、调度和API延迟等数据指标  1.1...</div></div></div></a><a class="pagination-related" href="/articles/2019/08/15/prometheusjiankongredis/" title="Prometheus Exporter 监控 Redis"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2019-08-15</div><div class="info-item-2">Prometheus Exporter 监控 Redis</div></div><div class="info-2"><div class="info-item-1"> 无论你跑多少距离，放弃很容易，停下来，肉体得到暂时的舒服，但你最终会一无所得。坚持或许很难，但你最后一定会有所收获，跑过的路，永远不会欺骗自己。  Prometheus Exporter 监控 Redis一，Exporter简介   ...</div></div></div></a><a class="pagination-related" href="/articles/2019/08/20/prometheuszhialertmanagerbaojingzujian-youjianbaojing/" title="Prometheus 之 AlertManager 报警组件+邮件报警"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2019-08-20</div><div class="info-item-2">Prometheus 之 AlertManager 报警组件+邮件报警</div></div><div class="info-2"><div class="info-item-1"> 无论你跑多少距离，放弃很容易，停下来，肉体得到暂时的舒服，但你最终会一无所得。坚持或许很难，但你最后一定会有所收获，跑过的路，永远不会欺骗自己。  Prometheus 之 AlertManager 报警组件+邮件报警一，AlertManager 简介 prometheus的兄弟alertmanager就是一个专门负责报警的组建，它独立于prometheus项目，自行运行并接收来自prometheus的请求，然后使用多种方式进行报警，之所以不是直接集成到prometheus中。   Prometheus包含了一个报警模块，那就是AlertManager，主要用于接受Prometheus发送的告警信息，它支持丰富的告警通知渠道，而且很容易做到告警信息进行去重，降噪，分组等，是一个前卫的告警通知系统   二，安装 AlerManager prometheus配置文件官方文档https://prometheus.io/docs/alerting/configuration/  首先，我们需要先指定配置文件 ，这里我们还是创建一个ConfigMap资源对象   2.1...</div></div></div></a><a class="pagination-related" href="/articles/2019/08/21/prometheuszhialertmanagerjieruqiyeweixinbaojing/" title="Prometheus 之 AlertManager 接入企业微信报警"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2019-08-21</div><div class="info-item-2">Prometheus 之 AlertManager 接入企业微信报警</div></div><div class="info-2"><div class="info-item-1"> 无论你跑多少距离，放弃很容易，停下来，肉体得到暂时的舒服，但你最终会一无所得。坚持或许很难，但你最后一定会有所收获，跑过的路，永远不会欺骗自己。  Prometheus 之 AlertManager 接入企业微信报警一，通过企业微信接收告警 Alertmanger从v0.12开始已经默认支持企业微信了，下面我们就一起体验一下。  1.1 准备工作 第1步：访问网站注册企业微信账号（不需要企业认证）。  第2步：访问应用创建第三方应用，点击创建应用按钮- &gt;填写应用信息：    1.2 详细配置 一路和我配置下来的同学，那么此时只要修改AlertManager configmap文件即可！  12345678910111213141516171819202122232425262728293031323334353637[root@k8s-master01 prometheus]# cd alert/[root@k8s-master01 alert]# vim prometheus-alert-conf.yamlapiVersion: v1kind:...</div></div></div></a><a class="pagination-related" href="/articles/2019/08/14/prometheuszhichijiuhuaanzhuang/" title="Prometheus 之持久化安装"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2019-08-14</div><div class="info-item-2">Prometheus 之持久化安装</div></div><div class="info-2"><div class="info-item-1"> 无论你跑多少距离，放弃很容易，停下来，肉体得到暂时的舒服，但你最终会一无所得。坚持或许很难，但你最后一定会有所收获，跑过的路，永远不会欺骗自己。  Prometheus 之持久化安装一，简介 在早期的版本中 Kubernetes 提供了 heapster、influxDB、grafana 的组合来监控系统，所以我们可以在 Dashboard 中看到 heapster 提供的一些图表信息，在后续的版本中会陆续移除掉 heapster，现在更加流行的监控工具是 prometheus，prometheus 是 Google 内部监控报警系统的开源版本，是 Google SRE 思想在其内部不断完善的产物，它的存在是为了更快和高效的发现问题，快速的接入速度，简单灵活的配置都很好的解决了这一切，而且是已经毕业的 CNCF 项目。  二，集群部署Promethues prometheus的方式有很多，为了兼容k8s环境，我们将prometheus搭建在k8s里，除了使用docker镜像的方式安装，还可以使用二进制的方式进行安装，支持mac、Linux、windows  2.1...</div></div></div></a><a class="pagination-related" href="/articles/2019/08/13/prometheuszhiyuanlijieshao/" title="Prometheus 之原理介绍"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2019-08-13</div><div class="info-item-2">Prometheus 之原理介绍</div></div><div class="info-2"><div class="info-item-1"> 无论你跑多少距离，放弃很容易，停下来，肉体得到暂时的舒服，但你最终会一无所得。坚持或许很难，但你最后一定会有所收获，跑过的路，永远不会欺骗自己。  Prometheus 之原理介绍一，Prometheus简介Prometheus由Go语言编写而成，采用Pull方式获取监控信息，并提供了多维度的数据模型和灵活的查询接口。Prometheus不仅可以通过静态文件配置监控对象，还支持自动发现机制，能通过Kubernetes、Consl、DNS等多种方式动态获取监控对象。在数据采集方面，借助Go语音的高并发特性，单机Prometheus可以采取数百个节点的监控数据；在数据存储方面，随着本地时序数据库的不断优化，单机Prometheus每秒可以采集一千万个指标，如果需要存储大量的历史监控数据，则还支持远程存储。   Prometheus是由SoundCloud开发的开源监控系统的开源版本。2016年，由Google发起的Linux基金会(Cloud Native Computing...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/themes-img/touxiang.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">Kkabuzs</div><div class="author-info-description">学习记录和整理</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">61</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">16</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">6</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/xxxxxx"><i class="fab fa-github"></i><span>Follow Me</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">三人行，必有我师！</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Prometheus-%E4%B9%8B%E6%8E%A5%E5%85%A5Grafana"><span class="toc-number">1.</span> <span class="toc-text">Prometheus 之接入Grafana</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%EF%BC%8CGrafana%E4%BB%8B%E7%BB%8D"><span class="toc-number">1.1.</span> <span class="toc-text">一，Grafana介绍</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-1-%E9%83%A8%E7%BD%B2Grafana"><span class="toc-number">1.1.1.</span> <span class="toc-text">1.1 部署Grafana</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-2-%E6%B7%BB%E5%8A%A0pv-pvc"><span class="toc-number">1.1.2.</span> <span class="toc-text">1.2 添加pv pvc</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-3-%E5%88%9B%E5%BB%BAservice%EF%BC%8C%E4%BD%BF%E7%94%A8NodePort"><span class="toc-number">1.1.3.</span> <span class="toc-text">1.3 创建service，使用NodePort</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-4-%E5%88%9B%E5%BB%BA%E4%B8%80%E4%B8%AAjob"><span class="toc-number">1.1.4.</span> <span class="toc-text">1.4 创建一个job</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-5-%E5%88%9B%E5%BB%BA%E6%89%80%E6%9C%89%E8%B5%84%E6%BA%90%EF%BC%88%E6%B3%A8%E6%84%8F%E5%88%9B%E5%BB%BA%E9%A1%BA%E5%BA%8F%EF%BC%89"><span class="toc-number">1.1.5.</span> <span class="toc-text">1.5 创建所有资源（注意创建顺序）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-6-%E5%88%9B%E5%BB%BA%E5%AE%8C%E6%88%90%E5%90%8E%E6%88%91%E4%BB%AC%E6%89%93%E5%BC%80grafana%E7%9A%84dashboard%E7%95%8C%E9%9D%A2"><span class="toc-number">1.1.6.</span> <span class="toc-text">1.6 创建完成后我们打开grafana的dashboard界面</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%EF%BC%8CGrafana-web-%E5%9F%BA%E6%9C%AC%E6%93%8D%E4%BD%9C"><span class="toc-number">1.2.</span> <span class="toc-text">二，Grafana web 基本操作</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-%E7%99%BB%E9%99%86grafana"><span class="toc-number">1.2.1.</span> <span class="toc-text">2.1 登陆grafana</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-%E7%99%BB%E9%99%86%E5%88%B0grafana%E5%B0%B1%E6%98%BE%E7%A4%BA%E5%88%B0%E4%BA%86%E5%BC%95%E5%AF%BC%E7%95%8C%E9%9D%A2"><span class="toc-number">1.2.2.</span> <span class="toc-text">2.2 登陆到grafana就显示到了引导界面</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-3-%E7%AC%AC%E4%B8%80%E6%AC%A1%E5%88%9B%E5%BB%BAgrafana%E9%9C%80%E8%A6%81%E6%B7%BB%E5%8A%A0%E6%95%B0%E6%8D%AE%E6%BA%90"><span class="toc-number">1.2.3.</span> <span class="toc-text">2.3 第一次创建grafana需要添加数据源</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-4-%E7%B1%BB%E5%9E%8B%E9%80%89%E6%8B%A9prometheus"><span class="toc-number">1.2.4.</span> <span class="toc-text">2.4 类型选择prometheus</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-5-%E6%95%B0%E6%8D%AE%E6%BA%90%E6%B7%BB%E5%8A%A0%E5%AE%8C%E6%AF%95%E5%90%8E%EF%BC%8C%E6%8E%A5%E4%B8%8B%E6%9D%A5%E6%B7%BB%E5%8A%A0New-dashboard"><span class="toc-number">1.2.5.</span> <span class="toc-text">2.5 数据源添加完毕后，接下来添加New dashboard</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-6-%E7%82%B9%E5%87%BB%E5%AF%BC%E5%85%A5%E6%A8%A1%E6%9D%BF"><span class="toc-number">1.2.6.</span> <span class="toc-text">2.6 点击导入模板</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-7-%E7%8E%B0%E5%9C%A8%E7%9A%84%E6%A8%A1%E6%9D%BF%E8%BF%98%E6%B2%A1%E6%9C%89%E8%BF%9B%E8%A1%8C%E4%BF%9D%E5%AD%98%EF%BC%8C%E6%88%91%E4%BB%AC%E8%A6%81%E7%82%B9%E5%87%BB%E4%BF%9D%E5%AD%98%E4%B8%80%E4%B8%8B"><span class="toc-number">1.2.7.</span> <span class="toc-text">2.7 现在的模板还没有进行保存，我们要点击保存一下</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%89%EF%BC%8C%E9%99%84%E5%BD%95"><span class="toc-number">1.3.</span> <span class="toc-text">三，附录</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#3-1-grafana%E6%A8%A1%E6%9D%BF%E4%BF%AE%E6%94%B9"><span class="toc-number">1.3.1.</span> <span class="toc-text">3.1 grafana模板修改</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#3-1-1Cluster-memory-usage-%E9%9B%86%E7%BE%A4%E5%86%85%E5%AD%98%E4%BD%BF%E7%94%A8%E7%8E%87"><span class="toc-number">1.3.1.1.</span> <span class="toc-text">3.1.1Cluster memory usage (集群内存使用率)</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-1-2-Cluster-memory-usage-%E9%85%8D%E7%BD%AE%E5%A6%82%E4%B8%8B-%E9%9B%86%E7%BE%A4%E5%86%85%E5%AD%98%E4%BD%BF%E7%94%A8%E7%8E%87"><span class="toc-number">1.3.1.2.</span> <span class="toc-text">3.1.2 Cluster memory usage 配置如下 (集群内存使用率)</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-1-3-Cluster-filesystem-usage-%E9%9B%86%E7%BE%A4%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F%E4%BD%BF%E7%94%A8%E7%8E%87"><span class="toc-number">1.3.1.3.</span> <span class="toc-text">3.1.3 Cluster filesystem usage 集群文件系统使用率</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-1-4-%E9%85%8D%E7%BD%AE%E9%9B%86%E7%BE%A4%E4%B8%ADPod-cpu%E4%BD%BF%E7%94%A8%E7%8E%87"><span class="toc-number">1.3.1.4.</span> <span class="toc-text">3.1.4 配置集群中Pod cpu使用率</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-1-5-%E9%9B%86%E7%BE%A4pod-%E5%86%85%E5%AD%98%E4%BD%BF%E7%94%A8%E7%8E%87"><span class="toc-number">1.3.1.5.</span> <span class="toc-text">3.1.5 集群pod 内存使用率</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-1-6-%E9%85%8D%E7%BD%AEPod-%E7%BD%91%E7%BB%9C%E7%9B%91%E6%8E%A7"><span class="toc-number">1.3.1.6.</span> <span class="toc-text">3.1.6 配置Pod 网络监控</span></a></li></ol></li></ol></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/articles/2025/04/22/mongodb-6-0-21-lixian-fenpianjiqun/" title="MongoDB-6.0.21离线分片集群部署">MongoDB-6.0.21离线分片集群部署</a><time datetime="2025-04-21T17:53:44.000Z" title="发表于 2025-04-22 01:53:44">2025-04-22</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/articles/2025/04/22/mongodb-6-0-21-lixian-fubenjibushu/" title="MongoDB-6.0.21副本集离线部署手册-（Replica Set）副本集模式">MongoDB-6.0.21副本集离线部署手册-（Replica Set）副本集模式</a><time datetime="2025-04-21T17:51:21.000Z" title="发表于 2025-04-22 01:51:21">2025-04-22</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/articles/2025/04/21/mongodb-6-0-21-lixian-danjiedianbushu/" title="MongoDB-6.0.21离线单节点部署">MongoDB-6.0.21离线单节点部署</a><time datetime="2025-04-21T15:55:06.000Z" title="发表于 2025-04-21 23:55:06">2025-04-21</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/articles/2023/05/10/jichengyupaisheng/" title="继承与派生">继承与派生</a><time datetime="2023-05-10T05:52:52.000Z" title="发表于 2023-05-10 13:52:52">2023-05-10</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/articles/2023/05/09/fengzhuang/" title="封装">封装</a><time datetime="2023-05-09T01:37:55.000Z" title="发表于 2023-05-09 09:37:55">2023-05-09</time></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2019 - 2025 By Kkabuzs</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 7.3.0</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.3.5</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
