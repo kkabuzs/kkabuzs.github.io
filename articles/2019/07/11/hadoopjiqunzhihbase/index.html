@@ -1,0 +1,279 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>Hadoop集群之Hbase | kkabuzs博客屋</title><meta name="author" content="Kkabuzs"><meta name="copyright" content="Kkabuzs"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="无论你跑多少距离，放弃很容易，停下来，肉体得到暂时的舒服，但你最终会一无所得。坚持或许很难，但你最后一定会有所收获，跑过的路，永远不会欺骗自己。  Hadoop集群之Hbase一，概述  HBase是一个构建在HDFS上的分布式列存储系统； HBase是基于Google BigTable模型开发的，典型的key&#x2F;value系统； HBase是Apache Hadoop生态系统中的重要一">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Hadoop集群之Hbase">
+<meta property="og:url" content="https://kkabuzs.github.io/articles/2019/07/11/hadoopjiqunzhihbase/index.html">
+<meta property="og:site_name" content="kkabuzs博客屋">
+<meta property="og:description" content="无论你跑多少距离，放弃很容易，停下来，肉体得到暂时的舒服，但你最终会一无所得。坚持或许很难，但你最后一定会有所收获，跑过的路，永远不会欺骗自己。  Hadoop集群之Hbase一，概述  HBase是一个构建在HDFS上的分布式列存储系统； HBase是基于Google BigTable模型开发的，典型的key&#x2F;value系统； HBase是Apache Hadoop生态系统中的重要一">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://kkabuzs.github.io/themes-img/touxiang.jpg">
+<meta property="article:published_time" content="2019-07-11T08:11:25.000Z">
+<meta property="article:modified_time" content="2019-07-11T08:11:25.000Z">
+<meta property="article:author" content="Kkabuzs">
+<meta property="article:tag" content="Hadoop">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://kkabuzs.github.io/themes-img/touxiang.jpg"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Hadoop集群之Hbase",
+  "url": "https://kkabuzs.github.io/articles/2019/07/11/hadoopjiqunzhihbase/",
+  "image": "https://kkabuzs.github.io/themes-img/touxiang.jpg",
+  "datePublished": "2019-07-11T08:11:25.000Z",
+  "dateModified": "2019-07-11T08:11:25.000Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "Kkabuzs",
+      "url": "https://kkabuzs.github.io/"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/themes-img/touxiang.jpg"><link rel="canonical" href="https://kkabuzs.github.io/articles/2019/07/11/hadoopjiqunzhihbase/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'Hadoop集群之Hbase',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 7.3.0"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/themes-img/touxiang.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">67</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">18</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">6</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(/themes-img/yinhe.jpg);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><img class="site-icon" src="/themes-img/touxiang.jpg" alt="Logo"><span class="site-name">kkabuzs博客屋</span></a><a class="nav-page-title" href="/"><span class="site-name">Hadoop集群之Hbase</span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">Hadoop集群之Hbase</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2019-07-11T08:11:25.000Z" title="发表于 2019-07-11 16:11:25">2019-07-11</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2019-07-11T08:11:25.000Z" title="更新于 2019-07-11 16:11:25">2019-07-11</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%A4%A7%E6%95%B0%E6%8D%AE/">大数据</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><blockquote>
+<p><em>无论你跑多少距离，放弃很容易，停下来，肉体得到暂时的舒服，但你最终会一无所得。</em><br><em>坚持或许很难，但你最后一定会有所收获，跑过的路，永远不会欺骗自己。</em></p>
+</blockquote>
+<h1 id="Hadoop集群之Hbase"><a href="#Hadoop集群之Hbase" class="headerlink" title="Hadoop集群之Hbase"></a>Hadoop集群之Hbase</h1><h2 id="一，概述"><a href="#一，概述" class="headerlink" title="一，概述"></a>一，概述</h2><blockquote>
+<ul>
+<li>HBase是一个构建在HDFS上的分布式列存储系统；</li>
+<li>HBase是基于Google BigTable模型开发的，典型的key&#x2F;value系统；</li>
+<li>HBase是Apache Hadoop生态系统中的重要一员，主要用于海量结构化数据存储；</li>
+<li>从逻辑上讲，HBase将数据按照表、行和列进行存储。</li>
+<li>与hadoop一样，Hbase目标主要依靠横向扩展，通过不断增加廉价的商用服务器，来增加计算和存储能力。</li>
+</ul>
+</blockquote>
+<h3 id="1-1-Hbase表的特点"><a href="#1-1-Hbase表的特点" class="headerlink" title="1.1 Hbase表的特点"></a>1.1 Hbase表的特点</h3><ul>
+<li>**大：**一个表可以有数十亿行，上百万列；</li>
+<li>**无模式：**每行都有一个可排序的主键和任意多的列，列可以根据需要动态的增加，同一张表中不同的行可以有截然不同的列；</li>
+<li>**面向列：**面向列（族）的存储和权限控制，列（族）独立检索；</li>
+<li>**稀疏：**空（null）列并不占用存储空间，表可以设计的非常稀疏；</li>
+<li>**数据多版本：**每个单元中的数据可以有多个版本，默认情况下版本号自动分配，是单元格插入时的时间戳；</li>
+<li>**数据类型单一：**Hbase中的数据都是字符串，没有类型。</li>
+</ul>
+<h3 id="1-2-Hbase逻辑视图"><a href="#1-2-Hbase逻辑视图" class="headerlink" title="1.2 Hbase逻辑视图"></a>1.2 Hbase逻辑视图</h3><p><img src="/articles/2019/07/11/hadoopjiqunzhihbase/1.png"></p>
+<h3 id="1-3-Hbase基本概念"><a href="#1-3-Hbase基本概念" class="headerlink" title="1.3 Hbase基本概念"></a>1.3 Hbase基本概念</h3><blockquote>
+<ul>
+<li>RowKey：是Byte array，是表中每条记录的“主键”，方便快速查找，Rowkey的设计非常重要。</li>
+<li>Column Family：列族，拥有一个名称(string)，包含一个或者多个相关列</li>
+<li>Column：属于某一个columnfamily，familyName:columnName，每条记录可动态添加</li>
+<li>Version Number：类型为Long，默认值是系统时间戳，可由用户自定义</li>
+<li>Value(Cell)：Byte array</li>
+</ul>
+</blockquote>
+<p>###1.4 Hbase基本组件说明</p>
+<p><strong>Client</strong></p>
+<ul>
+<li><input checked="" disabled="" type="checkbox"> 包含访问Hbase的接口，并维护cache来加快对Hbase的访问，比如region的位置信息。</li>
+</ul>
+<p><strong>Master</strong></p>
+<ul>
+<li><input checked="" disabled="" type="checkbox"> 为Region server分配region</li>
+<li><input checked="" disabled="" type="checkbox"> 负责Region server的负载均衡</li>
+<li><input checked="" disabled="" type="checkbox"> 发现失效的Region server并重新分配其上的Region</li>
+<li><input checked="" disabled="" type="checkbox"> 管理用户对table的增删改查操作</li>
+</ul>
+<p><strong>Region server</strong></p>
+<ul>
+<li><input checked="" disabled="" type="checkbox"> Region server维护region，处理对这些region的IO请求。</li>
+<li><input checked="" disabled="" type="checkbox"> Region server负责切分在运行中变得过大的region。</li>
+</ul>
+<p><strong>Zookeeper的作用</strong></p>
+<ul>
+<li><input checked="" disabled="" type="checkbox"> 通过选举，保证任何时候，集群中只有一个master，master和Region server启动时会向zookeeper注册。</li>
+<li><input checked="" disabled="" type="checkbox"> 存贮所有Region的寻址入口</li>
+<li><input checked="" disabled="" type="checkbox"> 实时监控Region server的上线和下线信息。并实时通知给Master</li>
+<li><input checked="" disabled="" type="checkbox"> 存储HBase的schema和table元数据</li>
+<li><input checked="" disabled="" type="checkbox"> 默认情况下，HBase管理ZooKeeper实例，比如，启动或者停止ZooKeeper</li>
+<li><input checked="" disabled="" type="checkbox"> Zookeeper的引入使得Master不再是单点故障</li>
+</ul>
+<p><img src="/articles/2019/07/11/hadoopjiqunzhihbase/2.png"></p>
+<h2 id="二，Hbase部署搭建"><a href="#二，Hbase部署搭建" class="headerlink" title="二，Hbase部署搭建"></a>二，Hbase部署搭建</h2><h3 id="2-1-环境准备"><a href="#2-1-环境准备" class="headerlink" title="2.1 环境准备"></a>2.1 环境准备</h3><table>
+<thead>
+<tr>
+<th>主机名</th>
+<th>ip地址</th>
+<th>用户名</th>
+<th>运行组件</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>zhaohadoop1</td>
+<td>192.168.101.150</td>
+<td>hadoop</td>
+<td>DataNode、NodeManager、Hbase</td>
+</tr>
+<tr>
+<td>zhaohadoop2</td>
+<td>192.168.101.154</td>
+<td>hadoop</td>
+<td>DataNode、NodeManager、SecondaryNameNode、zookeeper、Hbase</td>
+</tr>
+<tr>
+<td>zhaohadoop3</td>
+<td>192.168.101.156</td>
+<td>hadoop</td>
+<td>NameNode、ResourceManager、zookeeper、Hbase</td>
+</tr>
+<tr>
+<td>zhaohadoop4</td>
+<td>192.168.101.157</td>
+<td>hadoop</td>
+<td>DataNode、NodeManager、zookeeper、Hbase</td>
+</tr>
+</tbody></table>
+<h3 id="2-2-安装Hbase"><a href="#2-2-安装Hbase" class="headerlink" title="2.2 安装Hbase"></a>2.2 安装Hbase</h3><blockquote>
+<p>下载地址：<a target="_blank" rel="noopener" href="https://mirrors.tuna.tsinghua.edu.cn/apache/hbase/">https://mirrors.tuna.tsinghua.edu.cn/apache/hbase/</a></p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#首先在hadoop-master安装配置好之后，在复制到从节点</span></span><br><span class="line">[root@zhaohadoop1 ~]# wget https://mirrors.tuna.tsinghua.edu.cn/apache/hbase/2.2.0/hbase-2.2.0-bin.tar.gz</span><br><span class="line">[root@zhaohadoop1 ~]# tar xf hbase-2.2.0-bin.tar.gz -C /usr/local/</span><br><span class="line">[root@zhaohadoop1 ~]# <span class="built_in">mv</span> /usr/local/hbase-2.2.0 /usr/local/hbase</span><br><span class="line"></span><br><span class="line">[root@zhaohadoop1 ~]# vim /etc/profile</span><br><span class="line"><span class="comment">#添加如下两行：</span></span><br><span class="line"><span class="built_in">export</span> HBASE_HOME=/usr/local/hbase</span><br><span class="line"><span class="built_in">export</span> PATH=<span class="variable">$HBASE_HOME</span>/bin:<span class="variable">$PATH</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#使立即生效</span></span><br><span class="line">[root@zhaohadoop1 ~]# <span class="built_in">source</span> /etc/profile</span><br><span class="line"></span><br><span class="line">[root@zhaohadoop1 ~]# <span class="built_in">cd</span> /usr/local/hbase/conf/</span><br><span class="line">[root@zhaohadoop1 conf]# <span class="built_in">ls</span></span><br><span class="line">hadoop-metrics2-hbase.properties  hbase-env.cmd  hbase-env.sh  hbase-policy.xml  hbase-site.xml  log4j.properties  regionservers</span><br><span class="line">[root@zhaohadoop1 conf]# <span class="built_in">cp</span> hbase-env.sh&#123;,.bak&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>修改hbase-env.sh文件</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@zhaohadoop1 conf]# vim hbase-env.sh</span><br><span class="line"><span class="comment">#修改如下内容：</span></span><br><span class="line"><span class="built_in">export</span> JAVA_HOME=/usr/local/jdk/</span><br><span class="line"><span class="built_in">export</span> HBASE_MANAGES_ZK=<span class="literal">false</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>修改hbase-site.xml文件</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line">[root@zhaohadoop1 conf]# <span class="built_in">cp</span> hbase-site.xml&#123;,.bak&#125;</span><br><span class="line">&lt;?xml version=<span class="string">&quot;1.0&quot;</span>?&gt;</span><br><span class="line">&lt;?xml-stylesheet <span class="built_in">type</span>=<span class="string">&quot;text/xsl&quot;</span> href=<span class="string">&quot;configuration.xsl&quot;</span>?&gt;</span><br><span class="line">&lt;!--</span><br><span class="line">/**</span><br><span class="line"> *</span><br><span class="line"> * Licensed to the Apache Software Foundation (ASF) under one</span><br><span class="line"> * or more contributor license agreements.  See the NOTICE file</span><br><span class="line"> * distributed with this work <span class="keyword">for</span> additional information</span><br><span class="line"> * regarding copyright ownership.  The ASF licenses this file</span><br><span class="line"> * to you under the Apache License, Version 2.0 (the</span><br><span class="line"> * <span class="string">&quot;License&quot;</span>); you may not use this file except <span class="keyword">in</span> compliance</span><br><span class="line"> * with the License.  You may obtain a copy of the License at</span><br><span class="line"> *</span><br><span class="line"> *     http://www.apache.org/licenses/LICENSE-2.0</span><br><span class="line"> *</span><br><span class="line"> * Unless required by applicable law or agreed to <span class="keyword">in</span> writing, software</span><br><span class="line"> * distributed under the License is distributed on an <span class="string">&quot;AS IS&quot;</span> BASIS,</span><br><span class="line"> * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span><br><span class="line"> * See the License <span class="keyword">for</span> the specific language governing permissions and</span><br><span class="line"> * limitations under the License.</span><br><span class="line"> */</span><br><span class="line">--&gt;</span><br><span class="line">&lt;configuration&gt;</span><br><span class="line"></span><br><span class="line">        &lt;property&gt;</span><br><span class="line">            &lt;name&gt;hbase.zookeeper.quorum&lt;/name&gt;</span><br><span class="line">            &lt;value&gt;zhaohadoop2:2181,zhaohadoop3:2181,zhaohadoop4:2181&lt;/value&gt;</span><br><span class="line">            &lt;description&gt;The directory shared by RegionServers.</span><br><span class="line">            &lt;/description&gt;</span><br><span class="line">        &lt;/property&gt;</span><br><span class="line">        &lt;property&gt;</span><br><span class="line">            &lt;name&gt;hbase.rootdir&lt;/name&gt;</span><br><span class="line">            &lt;value&gt;hdfs://zhaohadoop1:9000/hbase&lt;/value&gt;</span><br><span class="line">            &lt;description&gt;The directory shared by RegionServers.</span><br><span class="line">            &lt;/description&gt;</span><br><span class="line">        &lt;/property&gt;</span><br><span class="line">        &lt;property&gt;</span><br><span class="line">            &lt;name&gt;hbase.cluster.distributed&lt;/name&gt;</span><br><span class="line">            &lt;value&gt;<span class="literal">true</span>&lt;/value&gt;</span><br><span class="line">            &lt;description&gt;The mode the cluster will be <span class="keyword">in</span>. Possible values are</span><br><span class="line">            <span class="literal">false</span>: standalone and pseudo-distributed setups with managed ZooKeeper</span><br><span class="line">            <span class="literal">true</span>: fully-distributed with unmanaged ZooKeeper Quorum (see hbase-env.sh)</span><br><span class="line">            &lt;/description&gt;</span><br><span class="line">        &lt;/property&gt;</span><br><span class="line"></span><br><span class="line">&lt;/configuration&gt;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p><strong>hbase.zookeeper.quorum：</strong> 这个参数是用来设置zookeeper服务列表，每个服务器之间使用使用逗号分隔，2181是zookeeper默认端口号，你可以自行根据你的端口号添加，默认的端口号加不加都无所谓。<br><strong>hbase.rootdir:</strong> 这个参数是用来设置RegionServer 的共享目录，用来存放HBase数据。特别需要注意的是 hbase.rootdir 里面的 HDFS 地址是要跟 Hadoop 的 core-site.xml 里面的 fs.defaultFS 的 HDFS 的 IP 地址或者域名、端口必须一致。<br><strong>hbase.cluster.distributed：</strong> HBase 的运行模式。为 false 表示单机模式，为 true 表示分布式模式。</p>
+</blockquote>
+<p><strong>编辑regionservers文件，配置从服务器，去掉 localhost，添加 slaves 节点</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@zhaohadoop1 conf]# vim regionservers</span><br><span class="line">zhaohadoop2</span><br><span class="line">zhaohadoop3</span><br><span class="line">zhaohadoop4</span><br></pre></td></tr></table></figure>
+
+<p><strong>把 hadoop 的 hdfs-site.xml 复制一份到 hbase 的 conf 目录下</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[root@zhaohadoop1 conf]# <span class="built_in">cp</span> /usr/local/hadoop/etc/hadoop/hdfs-site.xml /usr/local/hbase/conf/</span><br><span class="line"></span><br><span class="line"><span class="comment">#将配置好的 habase 分发到其它节点对应的路径下</span></span><br><span class="line">[root@zhaohadoop1 conf]# scp -r /usr/local/hbase root@192.168.101.154:/usr/local/</span><br><span class="line">[root@zhaohadoop1 conf]# scp -r /usr/local/hbase root@192.168.101.156:/usr/local/</span><br><span class="line">[root@zhaohadoop1 conf]# scp -r /usr/local/hbase root@192.168.101.157:/usr/local/</span><br></pre></td></tr></table></figure>
+
+<p><strong>三台从节点配好环境变量</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#zhaohadoop2节点，zhaohadoop3节点，zhaohadoop4节点：</span></span><br><span class="line">[root@zhaohadoop2 ~]# vim /etc/profile</span><br><span class="line"><span class="comment">#追加如下内容</span></span><br><span class="line"><span class="built_in">export</span> HBASE_HOME=/usr/local/hbase</span><br><span class="line"><span class="built_in">export</span> PATH=<span class="variable">$HBASE_HOME</span>/bin:<span class="variable">$PATH</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#立即生效：</span></span><br><span class="line">[root@zhaohadoop2 ~]# <span class="built_in">source</span> /etc/profile</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-3-启动Hbase"><a href="#2-3-启动Hbase" class="headerlink" title="2.3 启动Hbase"></a>2.3 启动Hbase</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#做好ssh免密：</span></span><br><span class="line">[root@zhaohadoop1 hbase]# ssh-keygen</span><br><span class="line">Generating public/private rsa key pair.</span><br><span class="line">Enter file <span class="keyword">in</span> <span class="built_in">which</span> to save the key (/root/.ssh/id_rsa):</span><br><span class="line">Enter passphrase (empty <span class="keyword">for</span> no passphrase):</span><br><span class="line">Enter same passphrase again:</span><br><span class="line">Your identification has been saved <span class="keyword">in</span> /root/.ssh/id_rsa.</span><br><span class="line">Your public key has been saved <span class="keyword">in</span> /root/.ssh/id_rsa.pub.</span><br><span class="line">The key fingerprint is:</span><br><span class="line">SHA256:LU5bIl22f3fmLR7yQZT25KgEGSP563LRlSNVYBiEXzY root@zhaohadoop1</span><br><span class="line">The key<span class="string">&#x27;s randomart image is:</span></span><br><span class="line"><span class="string">+---[RSA 2048]----+</span></span><br><span class="line"><span class="string">|        ..oooooo.|</span></span><br><span class="line"><span class="string">|        ...+..E. |</span></span><br><span class="line"><span class="string">|         .=. ++o.|</span></span><br><span class="line"><span class="string">|       . +.ooo+= |</span></span><br><span class="line"><span class="string">|      . S +o.oo.o|</span></span><br><span class="line"><span class="string">|       + =oo.o   |</span></span><br><span class="line"><span class="string">|        o. .+ + +|</span></span><br><span class="line"><span class="string">|        . o  +.*o|</span></span><br><span class="line"><span class="string">|         o   .o.o|</span></span><br><span class="line"><span class="string">+----[SHA256]-----+</span></span><br><span class="line"><span class="string">[root@zhaohadoop1 hbase]# ssh-copy-id -i ~/.ssh/id_rsa.pub 192.168.101.154</span></span><br><span class="line"><span class="string">/usr/bin/ssh-copy-id: INFO: Source of key(s) to be installed: &quot;/root/.ssh/id_rsa.pub&quot;</span></span><br><span class="line"><span class="string">/usr/bin/ssh-copy-id: INFO: attempting to log in with the new key(s), to filter out any that are already installed</span></span><br><span class="line"><span class="string">/usr/bin/ssh-copy-id: INFO: 1 key(s) remain to be installed -- if you are prompted now it is to install the new keys</span></span><br><span class="line"><span class="string">root@192.168.101.154&#x27;</span>s password:</span><br><span class="line"></span><br><span class="line">Number of key(s) added: 1</span><br><span class="line"></span><br><span class="line">Now try logging into the machine, with:   <span class="string">&quot;ssh &#x27;192.168.101.154&#x27;&quot;</span></span><br><span class="line">and check to make sure that only the key(s) you wanted were added.</span><br><span class="line"></span><br><span class="line">[root@zhaohadoop1 hbase]# ssh-copy-id -i ~/.ssh/id_rsa.pub 192.168.101.156</span><br><span class="line">/usr/bin/ssh-copy-id: INFO: Source of key(s) to be installed: <span class="string">&quot;/root/.ssh/id_rsa.pub&quot;</span></span><br><span class="line">/usr/bin/ssh-copy-id: INFO: attempting to <span class="built_in">log</span> <span class="keyword">in</span> with the new key(s), to filter out any that are already installed</span><br><span class="line">/usr/bin/ssh-copy-id: INFO: 1 key(s) remain to be installed -- <span class="keyword">if</span> you are prompted now it is to install the new keys</span><br><span class="line">root@192.168.101.156<span class="string">&#x27;s password:</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">Number of key(s) added: 1</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">Now try logging into the machine, with:   &quot;ssh &#x27;</span>192.168.101.156<span class="string">&#x27;&quot;</span></span><br><span class="line"><span class="string">and check to make sure that only the key(s) you wanted were added.</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">[root@zhaohadoop1 hbase]# ssh-copy-id -i ~/.ssh/id_rsa.pub 192.168.101.157</span></span><br><span class="line"><span class="string">/usr/bin/ssh-copy-id: INFO: Source of key(s) to be installed: &quot;/root/.ssh/id_rsa.pub&quot;</span></span><br><span class="line"><span class="string">/usr/bin/ssh-copy-id: INFO: attempting to log in with the new key(s), to filter out any that are already installed</span></span><br><span class="line"><span class="string">/usr/bin/ssh-copy-id: INFO: 1 key(s) remain to be installed -- if you are prompted now it is to install the new keys</span></span><br><span class="line"><span class="string">root@192.168.101.157&#x27;</span>s password:</span><br><span class="line"></span><br><span class="line">Number of key(s) added: 1</span><br><span class="line"></span><br><span class="line">Now try logging into the machine, with:   <span class="string">&quot;ssh &#x27;192.168.101.157&#x27;&quot;</span></span><br><span class="line">and check to make sure that only the key(s) you wanted were added.</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#启动服务：</span></span><br><span class="line">[root@zhaohadoop1 hbase]# ./bin/start-hbase.sh</span><br><span class="line">SLF4J: Class path contains multiple SLF4J bindings.</span><br><span class="line">SLF4J: Found binding <span class="keyword">in</span> [jar:file:/usr/local/hadoop/share/hadoop/common/lib/slf4j-log4j12-1.7.25.jar!/org/slf4j/impl/StaticLoggerBinder.class]</span><br><span class="line">SLF4J: Found binding <span class="keyword">in</span> [jar:file:/usr/local/hbase/lib/client-facing-thirdparty/slf4j-log4j12-1.7.25.jar!/org/slf4j/impl/StaticLoggerBinder.class]</span><br><span class="line">SLF4J: See http://www.slf4j.org/codes.html#multiple_bindings <span class="keyword">for</span> an explanation.</span><br><span class="line">SLF4J: Actual binding is of <span class="built_in">type</span> [org.slf4j.impl.Log4jLoggerFactory]</span><br><span class="line">running master, logging to /usr/local/hbase/logs/hbase-root-master-zhaohadoop1.out</span><br><span class="line">SLF4J: Class path contains multiple SLF4J bindings.</span><br><span class="line">SLF4J: Found binding <span class="keyword">in</span> [jar:file:/usr/local/hadoop/share/hadoop/common/lib/slf4j-log4j12-1.7.25.jar!/org/slf4j/impl/StaticLoggerBinder.class]</span><br><span class="line">SLF4J: Found binding <span class="keyword">in</span> [jar:file:/usr/local/hbase/lib/client-facing-thirdparty/slf4j-log4j12-1.7.25.jar!/org/slf4j/impl/StaticLoggerBinder.class]</span><br><span class="line">SLF4J: See http://www.slf4j.org/codes.html#multiple_bindings <span class="keyword">for</span> an explanation.</span><br><span class="line">SLF4J: Actual binding is of <span class="built_in">type</span> [org.slf4j.impl.Log4jLoggerFactory]</span><br><span class="line">zhaohadoop2: regionserver running as process 27254. Stop it first.</span><br><span class="line">zhaohadoop3: regionserver running as process 3619. Stop it first.</span><br><span class="line">zhaohadoop4: regionserver running as process 4569. Stop it first.</span><br><span class="line"></span><br><span class="line"><span class="comment">#查看四台机器jps命令：</span></span><br><span class="line">[root@zhaohadoop1 hbase]# jps</span><br><span class="line">2018 NameNode</span><br><span class="line">2298 ResourceManager</span><br><span class="line">25245 HMaster       <span class="comment">#成功</span></span><br><span class="line">25439 Jps</span><br><span class="line"></span><br><span class="line">[root@zhaohadoop2 ~]# jps</span><br><span class="line">2134 SecondaryNameNode</span><br><span class="line">27254 HRegionServer</span><br><span class="line">2215 NodeManager</span><br><span class="line">2029 DataNode</span><br><span class="line">3309 QuorumPeerMain</span><br><span class="line">28015 Jps</span><br><span class="line"></span><br><span class="line">[root@zhaohadoop3 ~]# jps</span><br><span class="line">3619 HRegionServer</span><br><span class="line">7189 QuorumPeerMain</span><br><span class="line">4248 Jps</span><br><span class="line">1948 NodeManager</span><br><span class="line">1838 DataNode</span><br><span class="line"></span><br><span class="line">[root@zhaohadoop4 ~]# jps</span><br><span class="line">1873 DataNode</span><br><span class="line">5298 Jps</span><br><span class="line">6837 QuorumPeerMain</span><br><span class="line">4569 HRegionServer</span><br><span class="line">1983 NodeManager</span><br></pre></td></tr></table></figure>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://kkabuzs.github.io">Kkabuzs</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://kkabuzs.github.io/articles/2019/07/11/hadoopjiqunzhihbase/">https://kkabuzs.github.io/articles/2019/07/11/hadoopjiqunzhihbase/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://kkabuzs.github.io" target="_blank">kkabuzs博客屋</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Hadoop/">Hadoop</a></div><div class="post-share"><div class="social-share" data-image="/themes-img/touxiang.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/articles/2019/07/09/hadoopjiqunzhihive/" title="Hadoop集群之Hive"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">Hadoop集群之Hive</div></div><div class="info-2"><div class="info-item-1"> 无论你跑多少距离，放弃很容易，停下来，肉体得到暂时的舒服，但你最终会一无所得。坚持或许很难，但你最后一定会有所收获，跑过的路，永远不会欺骗自己。  Hadoop集群之Hive一，Hive概述1.1 数据仓库的概念 数据仓库（Data Warehouse）是一个面向主题的（Subject Oriented）、集成的（Integrated）、相对稳定的（Non-Volatile）、反映历史变化（Time Variant）的数据集合，用于支持管理决策。  传统数据仓库面临的挑战：  无法满足快速增长的海量数据存储需求。 无法有效处理不同类型的数据。 计算和处理能力不足。  1.2 Hive简介  Hive是一个构建于Hadoop顶层的数据仓库工具，可以查询和管理PB级别的分布式数据。 支持大规模数据存储、分析，具有良好的可扩展性 某种程度上可以看作是用户编程接口，本身不存储和处理数据。 依赖分布式文件系统HDFS存储数据。 依赖分布式并行计算模型MapReduce处理数据。 定义了简单的类似SQL...</div></div></div></a><a class="pagination-related" href="/articles/2019/08/01/kuberneteszhiconfigmap/" title="Kubernetes之ConfigMap"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">Kubernetes之ConfigMap</div></div><div class="info-2"><div class="info-item-1"> 无论你跑多少距离，放弃很容易，停下来，肉体得到暂时的舒服，但你最终会一无所得。坚持或许很难，但你最后一定会有所收获，跑过的路，永远不会欺骗自己。  Kubernetes之ConfigMap一，目的 把应用的代码和配置分开，通过配置configmap管理pod，一种统一的集群配置管理方案。ConcigMap...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/articles/2019/07/02/Centos-7-Hadoop-danjiediankuaisugoujian/" title="Centos 7 Hadoop单节点快速构建"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2019-07-02</div><div class="info-item-2">Centos 7 Hadoop单节点快速构建</div></div><div class="info-2"><div class="info-item-1">一，快速构建Hadoop单节点 无论你跑多少距离，放弃很容易，停下来，肉体得到暂时的舒服，但你最终会一无所得。坚持或许很难，但你最后一定会有所收获，跑过的路，永远不会欺骗自己。  环境介绍    主机名 ip 描述    hadoop1 192.168.101.83 hadoop部署   1.1 下载所需安装包  jdk下载地址：https://github.com/frekele/oracle-java/releaseshadoop下载地址：http://mirror.bit.edu.cn/apache/hadoop/common/ 123#安装包已经下载完毕[root@hadoop1 ~]# lshadoop-2.9.2.tar.gz  jdk-8u181-linux-x64.tar.gz  1.2 安装java jdk12345678910111213141516[root@hadoop1 ~]# tar xf jdk-8u181-linux-x64.tar.gz -C /usr/local/[root@hadoop1 ~]# ln -s...</div></div></div></a><a class="pagination-related" href="/articles/2019/07/08/centos7bushuhadoopjiqun/" title="CentOS 7部署Hadoop集群（完全分布式）"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2019-07-08</div><div class="info-item-2">CentOS 7部署Hadoop集群（完全分布式）</div></div><div class="info-2"><div class="info-item-1"> 无论你跑多少距离，放弃很容易，停下来，肉体得到暂时的舒服，但你最终会一无所得。坚持或许很难，但你最后一定会有所收获，跑过的路，永远不会欺骗自己。  CentOS 7部署Hadoop集群（完全分布式）测试环境  Linux版本： CentOS 7 64位Hadoop版本： hadoop-2.9.2Java版本： jdk-8u181-linux-x64   一，集群服务器节点与进程 Hadoop中的HDFS和YARN都是主从结构，主从结构中的主节点和从节点有多重概念方式：     主节点 从节点    master slave   管理者 工作者   leader followe    Hadoop集群中各个角色的名称：     服务 主节点 从节点    HDFS NameNode DataNode   YARN ResourceManager NodeManager   1.1...</div></div></div></a><a class="pagination-related" href="/articles/2019/07/09/hadoopjiqunzhihive/" title="Hadoop集群之Hive"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2019-07-09</div><div class="info-item-2">Hadoop集群之Hive</div></div><div class="info-2"><div class="info-item-1"> 无论你跑多少距离，放弃很容易，停下来，肉体得到暂时的舒服，但你最终会一无所得。坚持或许很难，但你最后一定会有所收获，跑过的路，永远不会欺骗自己。  Hadoop集群之Hive一，Hive概述1.1 数据仓库的概念 数据仓库（Data Warehouse）是一个面向主题的（Subject Oriented）、集成的（Integrated）、相对稳定的（Non-Volatile）、反映历史变化（Time Variant）的数据集合，用于支持管理决策。  传统数据仓库面临的挑战：  无法满足快速增长的海量数据存储需求。 无法有效处理不同类型的数据。 计算和处理能力不足。  1.2 Hive简介  Hive是一个构建于Hadoop顶层的数据仓库工具，可以查询和管理PB级别的分布式数据。 支持大规模数据存储、分析，具有良好的可扩展性 某种程度上可以看作是用户编程接口，本身不存储和处理数据。 依赖分布式文件系统HDFS存储数据。 依赖分布式并行计算模型MapReduce处理数据。 定义了简单的类似SQL...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/themes-img/touxiang.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">Kkabuzs</div><div class="author-info-description">学习记录和整理</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">67</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">18</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">6</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/xxxxxx"><i class="fab fa-github"></i><span>Follow Me</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">三人行，必有我师！</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Hadoop%E9%9B%86%E7%BE%A4%E4%B9%8BHbase"><span class="toc-number">1.</span> <span class="toc-text">Hadoop集群之Hbase</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%EF%BC%8C%E6%A6%82%E8%BF%B0"><span class="toc-number">1.1.</span> <span class="toc-text">一，概述</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-1-Hbase%E8%A1%A8%E7%9A%84%E7%89%B9%E7%82%B9"><span class="toc-number">1.1.1.</span> <span class="toc-text">1.1 Hbase表的特点</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-2-Hbase%E9%80%BB%E8%BE%91%E8%A7%86%E5%9B%BE"><span class="toc-number">1.1.2.</span> <span class="toc-text">1.2 Hbase逻辑视图</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-3-Hbase%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5"><span class="toc-number">1.1.3.</span> <span class="toc-text">1.3 Hbase基本概念</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%EF%BC%8CHbase%E9%83%A8%E7%BD%B2%E6%90%AD%E5%BB%BA"><span class="toc-number">1.2.</span> <span class="toc-text">二，Hbase部署搭建</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-%E7%8E%AF%E5%A2%83%E5%87%86%E5%A4%87"><span class="toc-number">1.2.1.</span> <span class="toc-text">2.1 环境准备</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-%E5%AE%89%E8%A3%85Hbase"><span class="toc-number">1.2.2.</span> <span class="toc-text">2.2 安装Hbase</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-3-%E5%90%AF%E5%8A%A8Hbase"><span class="toc-number">1.2.3.</span> <span class="toc-text">2.3 启动Hbase</span></a></li></ol></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/articles/2025/04/22/mongodb-6-0-21-lixian-fenpianjiqun/" title="MongoDB-6.0.21离线分片集群部署">MongoDB-6.0.21离线分片集群部署</a><time datetime="2025-04-21T17:53:44.000Z" title="发表于 2025-04-22 01:53:44">2025-04-22</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/articles/2025/04/22/mongodb-6-0-21-lixian-fubenjibushu/" title="MongoDB-6.0.21副本集离线部署手册-（Replica Set）副本集模式">MongoDB-6.0.21副本集离线部署手册-（Replica Set）副本集模式</a><time datetime="2025-04-21T17:51:21.000Z" title="发表于 2025-04-22 01:51:21">2025-04-22</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/articles/2025/04/21/mongodb-6-0-21-lixian-danjiedianbushu/" title="MongoDB-6.0.21离线单节点部署">MongoDB-6.0.21离线单节点部署</a><time datetime="2025-04-21T15:55:06.000Z" title="发表于 2025-04-21 23:55:06">2025-04-21</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/articles/2023/05/10/jichengyupaisheng/" title="继承与派生">继承与派生</a><time datetime="2023-05-10T05:52:52.000Z" title="发表于 2023-05-10 13:52:52">2023-05-10</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/articles/2023/05/09/fengzhuang/" title="封装">封装</a><time datetime="2023-05-09T01:37:55.000Z" title="发表于 2023-05-09 09:37:55">2023-05-09</time></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2019 - 2025 By Kkabuzs</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 7.3.0</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.3.5</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
