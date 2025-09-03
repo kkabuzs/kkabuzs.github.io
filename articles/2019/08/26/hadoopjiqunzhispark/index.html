@@ -1,0 +1,253 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>Hadoop集群之Spark | kkabuzs博客屋</title><meta name="author" content="Kkabuzs"><meta name="copyright" content="Kkabuzs"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="无论你跑多少距离，放弃很容易，停下来，肉体得到暂时的舒服，但你最终会一无所得。坚持或许很难，但你最后一定会有所收获，跑过的路，永远不会欺骗自己。  Hadoop集群之Spark一，Spark概述1.1 Spark 基于内存的分布式的计算框架，是一个针对海量数据处理的非常快的通用的计算引擎(计算框架)。  1.2 特点 先进架构： 采用Scala语言编写，底层采用actormodel的akka作为">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Hadoop集群之Spark">
+<meta property="og:url" content="https://kkabuzs.github.io/articles/2019/08/26/hadoopjiqunzhispark/index.html">
+<meta property="og:site_name" content="kkabuzs博客屋">
+<meta property="og:description" content="无论你跑多少距离，放弃很容易，停下来，肉体得到暂时的舒服，但你最终会一无所得。坚持或许很难，但你最后一定会有所收获，跑过的路，永远不会欺骗自己。  Hadoop集群之Spark一，Spark概述1.1 Spark 基于内存的分布式的计算框架，是一个针对海量数据处理的非常快的通用的计算引擎(计算框架)。  1.2 特点 先进架构： 采用Scala语言编写，底层采用actormodel的akka作为">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://kkabuzs.github.io/themes-img/touxiang.jpg">
+<meta property="article:published_time" content="2019-08-26T09:53:33.000Z">
+<meta property="article:modified_time" content="2019-08-26T09:53:33.000Z">
+<meta property="article:author" content="Kkabuzs">
+<meta property="article:tag" content="Hadoop">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://kkabuzs.github.io/themes-img/touxiang.jpg"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Hadoop集群之Spark",
+  "url": "https://kkabuzs.github.io/articles/2019/08/26/hadoopjiqunzhispark/",
+  "image": "https://kkabuzs.github.io/themes-img/touxiang.jpg",
+  "datePublished": "2019-08-26T09:53:33.000Z",
+  "dateModified": "2019-08-26T09:53:33.000Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "Kkabuzs",
+      "url": "https://kkabuzs.github.io/"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/themes-img/touxiang.jpg"><link rel="canonical" href="https://kkabuzs.github.io/articles/2019/08/26/hadoopjiqunzhispark/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'Hadoop集群之Spark',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 7.3.0"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/themes-img/touxiang.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">73</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">19</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">6</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(/themes-img/yinhe.jpg);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><img class="site-icon" src="/themes-img/touxiang.jpg" alt="Logo"><span class="site-name">kkabuzs博客屋</span></a><a class="nav-page-title" href="/"><span class="site-name">Hadoop集群之Spark</span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">Hadoop集群之Spark</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2019-08-26T09:53:33.000Z" title="发表于 2019-08-26 17:53:33">2019-08-26</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2019-08-26T09:53:33.000Z" title="更新于 2019-08-26 17:53:33">2019-08-26</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%A4%A7%E6%95%B0%E6%8D%AE/">大数据</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><blockquote>
+<p><em>无论你跑多少距离，放弃很容易，停下来，肉体得到暂时的舒服，但你最终会一无所得。</em><br><em>坚持或许很难，但你最后一定会有所收获，跑过的路，永远不会欺骗自己。</em></p>
+</blockquote>
+<h1 id="Hadoop集群之Spark"><a href="#Hadoop集群之Spark" class="headerlink" title="Hadoop集群之Spark"></a>Hadoop集群之Spark</h1><h2 id="一，Spark概述"><a href="#一，Spark概述" class="headerlink" title="一，Spark概述"></a>一，Spark概述</h2><h3 id="1-1-Spark"><a href="#1-1-Spark" class="headerlink" title="1.1 Spark"></a>1.1 Spark</h3><blockquote>
+<p>基于内存的分布式的计算框架，是一个针对海量数据处理的非常快的通用的计算引擎(计算框架)。</p>
+</blockquote>
+<h3 id="1-2-特点"><a href="#1-2-特点" class="headerlink" title="1.2 特点"></a>1.2 特点</h3><ul>
+<li><p><strong>先进架构：</strong> 采用Scala语言编写，底层采用actormodel的akka作为通讯框架，代码十分简洁高效。基于DAG图执行引擎，减少多次计算中间结果写到HDFS的开销。建立在统一抽象的RDD之上，以基本一致的方式应对不同的大数据处理。</p>
+</li>
+<li><p><strong>高效：</strong> 基于cache机制来支持需要反复迭代的计算或者多次数据共享，减少数据读取的IO开销。基于内存运算比MR要快100倍，基于硬盘的运算也比MR快10倍。</p>
+</li>
+<li><p><strong>易用：</strong> 提供广泛的数据集操作类型（20+种），而MR只有两种。Spark支持Java，Python和ScalaAPI，支持交互的Python和Scala的shell</p>
+</li>
+<li><p><strong>整体解决方案：</strong> Spark内存中批处理 SparkSQL交互式查询 SparkStreaming流式计算 Graphx和MLib提供的常用图计算和机器学习算法。</p>
+</li>
+<li><p><strong>与Hadoop无缝链接：</strong> 可以使用Yarn作为集群管理框架，读取HDFS、Hbase等一切Hadoop数据。</p>
+</li>
+</ul>
+<h3 id="1-3-核心组件"><a href="#1-3-核心组件" class="headerlink" title="1.3 核心组件"></a>1.3 核心组件</h3><blockquote>
+<ul>
+<li>SparkCore: 核心部分 包含Spark基本功能（任务调度 内存管理 容错机制等）</li>
+<li>SparkSQL: Spark中交互式处理模块</li>
+<li>SparkStreaming: Spark中流式数据处理的模块</li>
+<li>SparkMLib：Spark机器学习相关模块 &#x3D;&gt; MahoutSparkGraphX: - Spark中图形计算的模块</li>
+<li>SparkManagers：集群管理（HadoopYARN、ApacheMesos、Spark自带的单独调度器）</li>
+</ul>
+</blockquote>
+<h3 id="1-4-spark与mapreduce的比较"><a href="#1-4-spark与mapreduce的比较" class="headerlink" title="1.4 spark与mapreduce的比较"></a>1.4 spark与mapreduce的比较</h3><blockquote>
+<ul>
+<li>MapReduce: 分布式的计算框架 -&gt; Hive问题：shuffle：大文件的排序+读写磁盘+网络传输 &#x3D;&gt; 比较慢只有两种执行算子&#x2F;API: MapTask(数据转换+过滤)和ReduceTask(数据聚合) &#x3D;&#x3D;&gt; 定制化稍微有点差。不适合迭代式的计算。对于需要快速执行的产生结果的应用场景不适合。Spark：为了解决MapReduce执行慢、不适合迭代执行的问题。</li>
+<li>Spark计算的核心思路就是将数据集缓存在内存中加快读取速度，Spark的中间结果放到内存中，一次创建数据集，可以多次迭代运算，减少IOK开销。适合运算比较多的ML和DL。</li>
+</ul>
+</blockquote>
+<p><img src="/articles/2019/08/26/hadoopjiqunzhispark/1.png"></p>
+<h2 id="二，部署Spark"><a href="#二，部署Spark" class="headerlink" title="二，部署Spark"></a>二，部署Spark</h2><h3 id="2-1-环境准备"><a href="#2-1-环境准备" class="headerlink" title="2.1 环境准备"></a>2.1 环境准备</h3><table>
+<thead>
+<tr>
+<th>主机名</th>
+<th>ip地址</th>
+<th>用户名</th>
+<th>运行组件</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>zhaohadoop1</td>
+<td>192.168.101.150</td>
+<td>hadoop</td>
+<td>DataNode、NodeManager、Hbase</td>
+</tr>
+<tr>
+<td>zhaohadoop2</td>
+<td>192.168.101.154</td>
+<td>hadoop</td>
+<td>DataNode、NodeManager、SecondaryNameNode、zookeeper、Hbase</td>
+</tr>
+<tr>
+<td>zhaohadoop3</td>
+<td>192.168.101.156</td>
+<td>hadoop</td>
+<td>NameNode、ResourceManager、zookeeper、Hbase、hive、spark</td>
+</tr>
+<tr>
+<td>zhaohadoop4</td>
+<td>192.168.101.157</td>
+<td>hadoop</td>
+<td>DataNode、NodeManager、zookeeper、Hbase</td>
+</tr>
+</tbody></table>
+<h3 id="2-1-安装scala-所有节点"><a href="#2-1-安装scala-所有节点" class="headerlink" title="2.1 安装scala(所有节点)"></a>2.1 安装scala(所有节点)</h3><blockquote>
+<p>Spark官方要求 Scala 版本为 2.11.x，注意不要下错版本，我这里下了 2.11.12<br>官方下载地址：<a target="_blank" rel="noopener" href="http://www.scala-lang.org/download/">http://www.scala-lang.org/download/</a><br>github地址：<a target="_blank" rel="noopener" href="https://github.com/scala/scala">https://github.com/scala/scala</a></p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@zhaohadoop3 ~]# wget https://downloads.lightbend.com/scala/2.11.12/scala-2.11.12.tgz</span><br><span class="line">[root@zhaohadoop3 ~]# tar xf scala-2.11.12.tgz -C /usr/local/</span><br><span class="line">[root@zhaohadoop3 ~]# <span class="built_in">mv</span> /usr/local/scala-2.11.12 /usr/local/scala</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-2-配置环境变量"><a href="#2-2-配置环境变量" class="headerlink" title="2.2 配置环境变量"></a>2.2 配置环境变量</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">[root@zhaohadoop3 ~]# vim /etc/profile</span><br><span class="line">追加如下内容：</span><br><span class="line"><span class="comment">#scala</span></span><br><span class="line"><span class="built_in">export</span> SCALA_HOME=/usr/local/scala</span><br><span class="line"><span class="built_in">export</span> PATH=<span class="variable">$PATH</span>:<span class="variable">$SCALA_HOME</span>/bin</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">#是环境变量生效</span></span><br><span class="line">[root@zhaohadoop3 ~]# <span class="built_in">source</span> /etc/profile</span><br><span class="line"></span><br><span class="line">[root@zhaohadoop3 ~]# scala -version</span><br><span class="line">Scala code runner version 2.11.12 -- Copyright 2002-2017, LAMP/EPFL</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-3-下载Spark源码包"><a href="#2-3-下载Spark源码包" class="headerlink" title="2.3 下载Spark源码包"></a>2.3 下载Spark源码包</h3><blockquote>
+<p>官方网址：<a target="_blank" rel="noopener" href="https://spark.apache.org/downloads.html">https://spark.apache.org/downloads.html</a></p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@zhaohadoop3 ~]# wget http://mirror.bit.edu.cn/apache/spark/spark-2.4.3/spark-2.4.3-bin-hadoop2.7.tgz</span><br><span class="line">[root@zhaohadoop3 ~]# tar xf spark-2.4.3-bin-hadoop2.7.tgz -C /usr/local/</span><br><span class="line">[root@zhaohadoop3 ~]# <span class="built_in">mv</span> /usr/local/spark-2.4.3-bin-hadoop2.7 /usr/local/spark</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-4-配置Spark"><a href="#2-4-配置Spark" class="headerlink" title="2.4 配置Spark"></a>2.4 配置Spark</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line">[root@zhaohadoop3 ~]# <span class="built_in">cd</span> /usr/local/spark/conf/</span><br><span class="line">[root@zhaohadoop3 conf]# <span class="built_in">ls</span></span><br><span class="line">docker.properties.template  fairscheduler.xml.template  log4j.properties.template  metrics.properties.template  slaves.template  spark-defaults.conf.template  spark-env.sh.template</span><br><span class="line">[root@zhaohadoop3 conf]# <span class="built_in">cp</span> spark-env.sh.template spark-env.sh  <span class="comment">#从模版复制一份配置文件</span></span><br><span class="line">[root@zhaohadoop3 conf]# vim spark-env.sh</span><br><span class="line">末尾追加如下内容：</span><br><span class="line"><span class="built_in">export</span> SCALA_HOME=/usr/local/scala</span><br><span class="line"><span class="built_in">export</span> JAVA_HOME=/usr/local/jdk</span><br><span class="line"><span class="built_in">export</span> HADOOP_HOME=/usr/local/hadoop</span><br><span class="line"><span class="built_in">export</span> HADOOP_CONF_DIR=<span class="variable">$HADOOP_HOME</span>/etc/hadoop</span><br><span class="line">SPARK_MASTER_IP=192.168.101.150</span><br><span class="line">SPARK_LOCAL_DIRS=/usr/local/spark</span><br><span class="line">SPARK_DRIVER_MEMORY=512M</span><br><span class="line"></span><br><span class="line">变量说明</span><br><span class="line"></span><br><span class="line">JAVA_HOME：Java安装目录</span><br><span class="line">SCALA_HOME：Scala安装目录</span><br><span class="line">HADOOP_HOME：hadoop安装目录</span><br><span class="line">HADOOP_CONF_DIR：hadoop集群的配置文件的目录</span><br><span class="line">SPARK_MASTER_IP：spark集群的Master节点的ip地址</span><br><span class="line">SPARK_WORKER_MEMORY：每个worker节点能够最大分配给exectors的内存大小</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">#注：在设置Worker进程的CPU个数和内存大小，要注意机器的实际硬件条件，如果配置的超过当前Worker节点的硬件条件，Worker进程会启动失败。</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#配置环境变量</span></span><br><span class="line">[root@zhaohadoop3 conf]# vim /etc/profile</span><br><span class="line">末尾追加如下内容：</span><br><span class="line"><span class="comment">#spark</span></span><br><span class="line"><span class="built_in">export</span> SPARK_HOME=/usr/local/spark</span><br><span class="line"><span class="built_in">export</span> PATH=<span class="variable">$PATH</span>:<span class="variable">$SPARK_HOME</span>/bin</span><br><span class="line"></span><br><span class="line">[root@zhaohadoop3 conf]# <span class="built_in">source</span> /etc/profile</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-5-在slaves文件下填上slave主机名"><a href="#2-5-在slaves文件下填上slave主机名" class="headerlink" title="2.5 在slaves文件下填上slave主机名"></a>2.5 在slaves文件下填上slave主机名</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[root@zhaohadoop3 conf]# <span class="built_in">cp</span> slaves.template slaves</span><br><span class="line">[root@zhaohadoop3 conf]# vim slaves</span><br><span class="line">zhaohadoop1</span><br><span class="line">zhaohadoop2</span><br><span class="line">zhaohadoop4</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-6-spark目录复制到所有从节点"><a href="#2-6-spark目录复制到所有从节点" class="headerlink" title="2.6 spark目录复制到所有从节点"></a>2.6 spark目录复制到所有从节点</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@zhaohadoop3 ~]# scp -r /usr/local/spark zhaohadoop1:/usr/local/</span><br><span class="line">[root@zhaohadoop3 ~]# scp -r /usr/local/spark zhaohadoop2:/usr/local/</span><br><span class="line">[root@zhaohadoop3 ~]# scp -r /usr/local/spark zhaohadoop1:/usr/local/</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-7-启动Spark"><a href="#2-7-启动Spark" class="headerlink" title="2.7 启动Spark"></a>2.7 启动Spark</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">[root@zhaohadoop3 sbin]# <span class="built_in">pwd</span></span><br><span class="line">/usr/local/spark/sbin</span><br><span class="line">[root@zhaohadoop3 sbin]# ./start-all.sh</span><br><span class="line">starting org.apache.spark.deploy.master.Master, logging to /usr/local/spark/logs/spark-root-org.apache.spark.deploy.master.Master-1-zhaohadoop3.out</span><br><span class="line">zhaohadoop2: starting org.apache.spark.deploy.worker.Worker, logging to /usr/local/spark/logs/spark-root-org.apache.spark.deploy.worker.Worker-1-zhaohadoop2.out</span><br><span class="line">zhaohadoop1: starting org.apache.spark.deploy.worker.Worker, logging to /usr/local/spark/logs/spark-root-org.apache.spark.deploy.worker.Worker-1-zhaohadoop1.out</span><br><span class="line">zhaohadoop4: starting org.apache.spark.deploy.worker.Worker, logging to /usr/local/spark/logs/spark-root-org.apache.spark.deploy.worker.Worker-1-zhaohadoop4.out</span><br><span class="line"></span><br><span class="line">[root@zhaohadoop3 sbin]# jps</span><br><span class="line">7665 RunJar</span><br><span class="line">19073 QuorumPeerMain</span><br><span class="line">19555 RunJar</span><br><span class="line">7350 RunJar</span><br><span class="line">21958 Jps</span><br><span class="line">21895 Master</span><br><span class="line">7194 RunJar</span><br><span class="line">18186 NameNode</span><br><span class="line">18476 ResourceManager</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+<p><strong>进入Spark的Web管理页面： <a target="_blank" rel="noopener" href="http://master:8080/">http://master:8080</a></strong></p>
+<p><img src="/articles/2019/08/26/hadoopjiqunzhispark/2.png"></p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://kkabuzs.github.io">Kkabuzs</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://kkabuzs.github.io/articles/2019/08/26/hadoopjiqunzhispark/">https://kkabuzs.github.io/articles/2019/08/26/hadoopjiqunzhispark/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://kkabuzs.github.io" target="_blank">kkabuzs博客屋</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Hadoop/">Hadoop</a></div><div class="post-share"><div class="social-share" data-image="/themes-img/touxiang.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/articles/2019/08/23/kubernetescalicowangluozhijiyucanceldewangluocelue/" title="kubernetes calico网络之基于canel的网络策略"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">kubernetes calico网络之基于canel的网络策略</div></div><div class="info-2"><div class="info-item-1"> 无论你跑多少距离，放弃很容易，停下来，肉体得到暂时的舒服，但你最终会一无所得。坚持或许很难，但你最后一定会有所收获，跑过的路，永远不会欺骗自己。  kubernetes calico网络之基于canel的网络策略一，为什么要使用canel网络策略  在kubernetes集群中flannel网络插件为集群提供了pod网段一致性的功能，但是我们可能还希望在单个pod或者单个对单个pod进出站做一些类似于物理务器的iptables的网络策略限制  那么我们就需要安装calico，但是calico是基于bgp的网络协议才能提供它的网络功能，所以我们在此也仅仅是使用它的canel的网络策略   1.1 canal 通过 Egress 和Ingress来控制不同的网络策略 Egress： 表示出栈 代表pod作为一个源地址 对客户端访问进行响应 自己端口可预测Ingress：表示入栈 代表pod作为一个客户端 对别的pod的原地址进行访问...</div></div></div></a><a class="pagination-related" href="/articles/2019/08/30/hadoopjiqunzhi-cdh5-13-1lixiandajian/" title="Hadoop集群之 CDH v5.13.1 搭建 (离线本地Parcels）"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">Hadoop集群之 CDH v5.13.1 搭建 (离线本地Parcels）</div></div><div class="info-2"><div class="info-item-1"> 无论你跑多少距离，放弃很容易，停下来，肉体得到暂时的舒服，但你最终会一无所得。坚持或许很难，但你最后一定会有所收获，跑过的路，永远不会欺骗自己。  Hadoop集群之 CDH v5.13.1 搭建 (离线本地Parcels）一，CDH Parcels 离线安装 官方一共给了三种方法：  Installation Path A - Automated Installation by Cloudera Manager：要求所有机器都能连网，而且外国网站不太稳定。一旦失败，重装非常痛苦。 Installation Path B - Manual Installation Using Cloudera Manager Packages：设置Red Hat&#x2F;CentOS或者Debian&#x2F;Ubuntu，下载系统package安装，下载量数目众多 Installation Path C - Manual Installation Using Tarballs and...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/articles/2019/07/02/Centos-7-Hadoop-danjiediankuaisugoujian/" title="Centos 7 Hadoop单节点快速构建"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2019-07-02</div><div class="info-item-2">Centos 7 Hadoop单节点快速构建</div></div><div class="info-2"><div class="info-item-1">一，快速构建Hadoop单节点 无论你跑多少距离，放弃很容易，停下来，肉体得到暂时的舒服，但你最终会一无所得。坚持或许很难，但你最后一定会有所收获，跑过的路，永远不会欺骗自己。  环境介绍    主机名 ip 描述    hadoop1 192.168.101.83 hadoop部署   1.1 下载所需安装包  jdk下载地址：https://github.com/frekele/oracle-java/releaseshadoop下载地址：http://mirror.bit.edu.cn/apache/hadoop/common/ 123#安装包已经下载完毕[root@hadoop1 ~]# lshadoop-2.9.2.tar.gz  jdk-8u181-linux-x64.tar.gz  1.2 安装java jdk12345678910111213141516[root@hadoop1 ~]# tar xf jdk-8u181-linux-x64.tar.gz -C /usr/local/[root@hadoop1 ~]# ln -s...</div></div></div></a><a class="pagination-related" href="/articles/2019/07/08/centos7bushuhadoopjiqun/" title="CentOS 7部署Hadoop集群（完全分布式）"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2019-07-08</div><div class="info-item-2">CentOS 7部署Hadoop集群（完全分布式）</div></div><div class="info-2"><div class="info-item-1"> 无论你跑多少距离，放弃很容易，停下来，肉体得到暂时的舒服，但你最终会一无所得。坚持或许很难，但你最后一定会有所收获，跑过的路，永远不会欺骗自己。  CentOS 7部署Hadoop集群（完全分布式）测试环境  Linux版本： CentOS 7 64位Hadoop版本： hadoop-2.9.2Java版本： jdk-8u181-linux-x64   一，集群服务器节点与进程 Hadoop中的HDFS和YARN都是主从结构，主从结构中的主节点和从节点有多重概念方式：     主节点 从节点    master slave   管理者 工作者   leader followe    Hadoop集群中各个角色的名称：     服务 主节点 从节点    HDFS NameNode DataNode   YARN ResourceManager NodeManager   1.1...</div></div></div></a><a class="pagination-related" href="/articles/2019/08/30/hadoopjiqunzhi-cdh5-13-1lixiandajian/" title="Hadoop集群之 CDH v5.13.1 搭建 (离线本地Parcels）"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2019-08-30</div><div class="info-item-2">Hadoop集群之 CDH v5.13.1 搭建 (离线本地Parcels）</div></div><div class="info-2"><div class="info-item-1"> 无论你跑多少距离，放弃很容易，停下来，肉体得到暂时的舒服，但你最终会一无所得。坚持或许很难，但你最后一定会有所收获，跑过的路，永远不会欺骗自己。  Hadoop集群之 CDH v5.13.1 搭建 (离线本地Parcels）一，CDH Parcels 离线安装 官方一共给了三种方法：  Installation Path A - Automated Installation by Cloudera Manager：要求所有机器都能连网，而且外国网站不太稳定。一旦失败，重装非常痛苦。 Installation Path B - Manual Installation Using Cloudera Manager Packages：设置Red Hat&#x2F;CentOS或者Debian&#x2F;Ubuntu，下载系统package安装，下载量数目众多 Installation Path C - Manual Installation Using Tarballs and...</div></div></div></a><a class="pagination-related" href="/articles/2019/07/11/hadoopjiqunzhihbase/" title="Hadoop集群之Hbase"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2019-07-11</div><div class="info-item-2">Hadoop集群之Hbase</div></div><div class="info-2"><div class="info-item-1"> 无论你跑多少距离，放弃很容易，停下来，肉体得到暂时的舒服，但你最终会一无所得。坚持或许很难，但你最后一定会有所收获，跑过的路，永远不会欺骗自己。  Hadoop集群之Hbase一，概述  HBase是一个构建在HDFS上的分布式列存储系统； HBase是基于Google BigTable模型开发的，典型的key&#x2F;value系统； HBase是Apache Hadoop生态系统中的重要一员，主要用于海量结构化数据存储； 从逻辑上讲，HBase将数据按照表、行和列进行存储。 与hadoop一样，Hbase目标主要依靠横向扩展，通过不断增加廉价的商用服务器，来增加计算和存储能力。   1.1...</div></div></div></a><a class="pagination-related" href="/articles/2019/07/09/hadoopjiqunzhihive/" title="Hadoop集群之Hive"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2019-07-09</div><div class="info-item-2">Hadoop集群之Hive</div></div><div class="info-2"><div class="info-item-1"> 无论你跑多少距离，放弃很容易，停下来，肉体得到暂时的舒服，但你最终会一无所得。坚持或许很难，但你最后一定会有所收获，跑过的路，永远不会欺骗自己。  Hadoop集群之Hive一，Hive概述1.1 数据仓库的概念 数据仓库（Data Warehouse）是一个面向主题的（Subject Oriented）、集成的（Integrated）、相对稳定的（Non-Volatile）、反映历史变化（Time Variant）的数据集合，用于支持管理决策。  传统数据仓库面临的挑战：  无法满足快速增长的海量数据存储需求。 无法有效处理不同类型的数据。 计算和处理能力不足。  1.2 Hive简介  Hive是一个构建于Hadoop顶层的数据仓库工具，可以查询和管理PB级别的分布式数据。 支持大规模数据存储、分析，具有良好的可扩展性 某种程度上可以看作是用户编程接口，本身不存储和处理数据。 依赖分布式文件系统HDFS存储数据。 依赖分布式并行计算模型MapReduce处理数据。 定义了简单的类似SQL...</div></div></div></a><a class="pagination-related" href="/articles/2019/07/18/hadoopjiqunzhizookeeper/" title="Hadoop集群之Zookeeper"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2019-07-18</div><div class="info-item-2">Hadoop集群之Zookeeper</div></div><div class="info-2"><div class="info-item-1"> 无论你跑多少距离，放弃很容易，停下来，肉体得到暂时的舒服，但你最终会一无所得。坚持或许很难，但你最后一定会有所收获，跑过的路，永远不会欺骗自己。  Hadoop集群之Zookeeper一，Zookeeper概述  ZooKeeper是一个分布式的，开放源码的分布式应用程序协调服务，是Google的Chubby一个开源的实现，是Hadoop和Hbase的重要组件。它是一个为分布式应用提供一致性服务的软件，提供的功能包括：配置维护、域名服务、分布式同步、组服务等。 ZooKeeper的目标就是封装好复杂易出错的关键服务，将简单易用的接口和性能高效、功能稳定的系统提供给用户。   二，基本概念2.1...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/themes-img/touxiang.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">Kkabuzs</div><div class="author-info-description">学习记录和整理</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">73</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">19</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">6</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/xxxxxx"><i class="fab fa-github"></i><span>Follow Me</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">三人行，必有我师！</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Hadoop%E9%9B%86%E7%BE%A4%E4%B9%8BSpark"><span class="toc-number">1.</span> <span class="toc-text">Hadoop集群之Spark</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%EF%BC%8CSpark%E6%A6%82%E8%BF%B0"><span class="toc-number">1.1.</span> <span class="toc-text">一，Spark概述</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-1-Spark"><span class="toc-number">1.1.1.</span> <span class="toc-text">1.1 Spark</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-2-%E7%89%B9%E7%82%B9"><span class="toc-number">1.1.2.</span> <span class="toc-text">1.2 特点</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-3-%E6%A0%B8%E5%BF%83%E7%BB%84%E4%BB%B6"><span class="toc-number">1.1.3.</span> <span class="toc-text">1.3 核心组件</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-4-spark%E4%B8%8Emapreduce%E7%9A%84%E6%AF%94%E8%BE%83"><span class="toc-number">1.1.4.</span> <span class="toc-text">1.4 spark与mapreduce的比较</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%EF%BC%8C%E9%83%A8%E7%BD%B2Spark"><span class="toc-number">1.2.</span> <span class="toc-text">二，部署Spark</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-%E7%8E%AF%E5%A2%83%E5%87%86%E5%A4%87"><span class="toc-number">1.2.1.</span> <span class="toc-text">2.1 环境准备</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-%E5%AE%89%E8%A3%85scala-%E6%89%80%E6%9C%89%E8%8A%82%E7%82%B9"><span class="toc-number">1.2.2.</span> <span class="toc-text">2.1 安装scala(所有节点)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-%E9%85%8D%E7%BD%AE%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F"><span class="toc-number">1.2.3.</span> <span class="toc-text">2.2 配置环境变量</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-3-%E4%B8%8B%E8%BD%BDSpark%E6%BA%90%E7%A0%81%E5%8C%85"><span class="toc-number">1.2.4.</span> <span class="toc-text">2.3 下载Spark源码包</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-4-%E9%85%8D%E7%BD%AESpark"><span class="toc-number">1.2.5.</span> <span class="toc-text">2.4 配置Spark</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-5-%E5%9C%A8slaves%E6%96%87%E4%BB%B6%E4%B8%8B%E5%A1%AB%E4%B8%8Aslave%E4%B8%BB%E6%9C%BA%E5%90%8D"><span class="toc-number">1.2.6.</span> <span class="toc-text">2.5 在slaves文件下填上slave主机名</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-6-spark%E7%9B%AE%E5%BD%95%E5%A4%8D%E5%88%B6%E5%88%B0%E6%89%80%E6%9C%89%E4%BB%8E%E8%8A%82%E7%82%B9"><span class="toc-number">1.2.7.</span> <span class="toc-text">2.6 spark目录复制到所有从节点</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-7-%E5%90%AF%E5%8A%A8Spark"><span class="toc-number">1.2.8.</span> <span class="toc-text">2.7 启动Spark</span></a></li></ol></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/articles/2025/04/22/mongodb-6-0-21-lixian-fenpianjiqun/" title="MongoDB-6.0.21离线分片集群部署">MongoDB-6.0.21离线分片集群部署</a><time datetime="2025-04-21T17:53:44.000Z" title="发表于 2025-04-22 01:53:44">2025-04-22</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/articles/2025/04/22/mongodb-6-0-21-lixian-fubenjibushu/" title="MongoDB-6.0.21副本集离线部署手册-（Replica Set）副本集模式">MongoDB-6.0.21副本集离线部署手册-（Replica Set）副本集模式</a><time datetime="2025-04-21T17:51:21.000Z" title="发表于 2025-04-22 01:51:21">2025-04-22</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/articles/2025/04/21/mongodb-6-0-21-lixian-danjiedianbushu/" title="MongoDB-6.0.21离线单节点部署">MongoDB-6.0.21离线单节点部署</a><time datetime="2025-04-21T15:55:06.000Z" title="发表于 2025-04-21 23:55:06">2025-04-21</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/articles/2023/05/10/jichengyupaisheng/" title="继承与派生">继承与派生</a><time datetime="2023-05-10T05:52:52.000Z" title="发表于 2023-05-10 13:52:52">2023-05-10</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/articles/2023/05/09/fengzhuang/" title="封装">封装</a><time datetime="2023-05-09T01:37:55.000Z" title="发表于 2023-05-09 09:37:55">2023-05-09</time></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2019 - 2025 By Kkabuzs</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 7.3.0</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.3.5</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

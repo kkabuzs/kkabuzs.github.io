@@ -1,0 +1,320 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>Hadoop集群之Zookeeper | kkabuzs博客屋</title><meta name="author" content="Kkabuzs"><meta name="copyright" content="Kkabuzs"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="无论你跑多少距离，放弃很容易，停下来，肉体得到暂时的舒服，但你最终会一无所得。坚持或许很难，但你最后一定会有所收获，跑过的路，永远不会欺骗自己。  Hadoop集群之Zookeeper一，Zookeeper概述  ZooKeeper是一个分布式的，开放源码的分布式应用程序协调服务，是Google的Chubby一个开源的实现，是Hadoop和Hbase的重要组件。它是一个为分布式应用提供一致性服务">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Hadoop集群之Zookeeper">
+<meta property="og:url" content="https://kkabuzs.github.io/articles/2019/07/18/hadoopjiqunzhizookeeper/index.html">
+<meta property="og:site_name" content="kkabuzs博客屋">
+<meta property="og:description" content="无论你跑多少距离，放弃很容易，停下来，肉体得到暂时的舒服，但你最终会一无所得。坚持或许很难，但你最后一定会有所收获，跑过的路，永远不会欺骗自己。  Hadoop集群之Zookeeper一，Zookeeper概述  ZooKeeper是一个分布式的，开放源码的分布式应用程序协调服务，是Google的Chubby一个开源的实现，是Hadoop和Hbase的重要组件。它是一个为分布式应用提供一致性服务">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://kkabuzs.github.io/themes-img/touxiang.jpg">
+<meta property="article:published_time" content="2019-07-18T01:32:02.000Z">
+<meta property="article:modified_time" content="2019-07-18T01:32:02.000Z">
+<meta property="article:author" content="Kkabuzs">
+<meta property="article:tag" content="Hadoop">
+<meta property="article:tag" content="Zookeeper">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://kkabuzs.github.io/themes-img/touxiang.jpg"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Hadoop集群之Zookeeper",
+  "url": "https://kkabuzs.github.io/articles/2019/07/18/hadoopjiqunzhizookeeper/",
+  "image": "https://kkabuzs.github.io/themes-img/touxiang.jpg",
+  "datePublished": "2019-07-18T01:32:02.000Z",
+  "dateModified": "2019-07-18T01:32:02.000Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "Kkabuzs",
+      "url": "https://kkabuzs.github.io/"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/themes-img/touxiang.jpg"><link rel="canonical" href="https://kkabuzs.github.io/articles/2019/07/18/hadoopjiqunzhizookeeper/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'Hadoop集群之Zookeeper',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 7.3.0"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/themes-img/touxiang.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">73</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">19</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">6</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(/themes-img/yinhe.jpg);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><img class="site-icon" src="/themes-img/touxiang.jpg" alt="Logo"><span class="site-name">kkabuzs博客屋</span></a><a class="nav-page-title" href="/"><span class="site-name">Hadoop集群之Zookeeper</span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">Hadoop集群之Zookeeper</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2019-07-18T01:32:02.000Z" title="发表于 2019-07-18 09:32:02">2019-07-18</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2019-07-18T01:32:02.000Z" title="更新于 2019-07-18 09:32:02">2019-07-18</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%A4%A7%E6%95%B0%E6%8D%AE/">大数据</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><blockquote>
+<p><em>无论你跑多少距离，放弃很容易，停下来，肉体得到暂时的舒服，但你最终会一无所得。</em><br><em>坚持或许很难，但你最后一定会有所收获，跑过的路，永远不会欺骗自己。</em></p>
+</blockquote>
+<h1 id="Hadoop集群之Zookeeper"><a href="#Hadoop集群之Zookeeper" class="headerlink" title="Hadoop集群之Zookeeper"></a>Hadoop集群之Zookeeper</h1><h2 id="一，Zookeeper概述"><a href="#一，Zookeeper概述" class="headerlink" title="一，Zookeeper概述"></a>一，Zookeeper概述</h2><blockquote>
+<ul>
+<li>ZooKeeper是一个分布式的，开放源码的分布式应用程序协调服务，是Google的Chubby一个开源的实现，是Hadoop和Hbase的重要组件。它是一个为分布式应用提供一致性服务的软件，提供的功能包括：配置维护、域名服务、分布式同步、组服务等。</li>
+<li>ZooKeeper的目标就是封装好复杂易出错的关键服务，将简单易用的接口和性能高效、功能稳定的系统提供给用户。</li>
+</ul>
+</blockquote>
+<h2 id="二，基本概念"><a href="#二，基本概念" class="headerlink" title="二，基本概念"></a>二，基本概念</h2><h3 id="2-1-集群角色"><a href="#2-1-集群角色" class="headerlink" title="2.1 集群角色"></a>2.1 集群角色</h3><blockquote>
+<p>在zookeeper集群中，有以下三种角色：</p>
+</blockquote>
+<ul>
+<li>Leader（领导者）：领导者负责进行和发起投票决议，更新系统状态。</li>
+<li>Follower（跟随者）：用于接收客户请求并向客户端返回结果，在选主过程中参与投票。</li>
+<li>Observer（观察者）：可以接收客户端连接，将写请求转发给leader节点，但Observer不参加投票过程，只同步leader状态，Observer的目的是为了扩展系统，提高读取速度。</li>
+</ul>
+<blockquote>
+<p>一个ZooKeeper集群同一时刻只会有一个Leader，其他都是Follower或Observer。</p>
+</blockquote>
+<h3 id="2-2-特性"><a href="#2-2-特性" class="headerlink" title="2.2 特性"></a>2.2 特性</h3><ol>
+<li><p>最终一致性：client不论连接到哪个Server，展示给它都是同一个视图，这是zookeeper最重要的性能。</p>
+</li>
+<li><p>可靠性：具有简单、健壮、良好的性能，如果消息m被到一台服务器接受，那么它将被所有的服务器接受。</p>
+</li>
+<li><p>实时性：Zookeeper保证客户端将在一个时间间隔范围内获得服务器的更新信息，或者服务器失效的信息。但由于网络延时等原因，Zookeeper不能保证两个客户端能同时得到刚更新的数据，如果需要最新数据，应该在读数据之前调用sync()接口。</p>
+</li>
+<li><p>等待无关（wait-free）：慢的或者失效的client不得干预快速的client的请求，使得每个client都能有效的等待。</p>
+</li>
+<li><p>原子性：更新只能成功或者失败，没有中间状态。</p>
+</li>
+<li><p>顺序性：包括全局有序和偏序两种：全局有序是指如果在一台服务器上消息a在消息b前发布，则在所有Server上消息a都将在消息b前被发布；偏序是指如果一个消息b在消息a后被同一个发送者发布，a必将排在b前面。</p>
+</li>
+</ol>
+<h2 id="三，工作原理"><a href="#三，工作原理" class="headerlink" title="三，工作原理"></a>三，工作原理</h2><blockquote>
+<ul>
+<li>Zookeeper的核心是原子广播，这个机制保证了各个Server之间的同步。实现这个机制的协议叫做Zab协议。Zab协议有两种模式，它们分别是恢复模式（选主）和广播模式（同步）。当服务启动或者在领导者崩溃后，Zab就进入了恢复模式，当领导者被选举出来，且大多数Server完成了和leader的状态同步以后，恢复模式就结束了。状态同步保证了leader和Server具有相同的系统状态。</li>
+<li>为了保证事务的顺序一致性，zookeeper采用了递增的事务id号（zxid）来标识事务。所有的提议（proposal）都在被提出的时候加上了zxid。实现中zxid是一个64位的数字，它高32位是epoch用来标识leader关系是否改变，每次一个leader被选出来，它都会有一个新的epoch，标识当前属于那个leader的统治时期。低32位用于递增计数。</li>
+</ul>
+</blockquote>
+<p><strong>每个Server在工作过程中有三种状态：</strong></p>
+<blockquote>
+<p><strong>LOOKING：</strong> 当前Server不知道leader是谁，正在搜寻<br><strong>LEADING：</strong> 当前Server即为选举出来的leader<br><strong>FOLLOWING：</strong> leader已经选举出来，当前Server与之同步</p>
+</blockquote>
+<h3 id="3-1-选主流程"><a href="#3-1-选主流程" class="headerlink" title="3.1 选主流程"></a>3.1 选主流程</h3><blockquote>
+<p>当leader崩溃或者leader失去大多数的follower，这时候zk进入恢复模式，恢复模式需要重新选举出一个新的leader，让所有的Server都恢复到一个正确的状态。Zk的选举算法有两种：一种是基于basic paxos实现的，另外一种是基于fast paxos算法实现的。系统默认的选举算法为fast paxos。先介绍basic paxos流程：</p>
+</blockquote>
+<ol>
+<li>选举线程由当前Server发起选举的线程担任，其主要功能是对投票结果进行统计，并选出推荐的Server；</li>
+<li>选举线程首先向所有Server发起一次询问(包括自己)；</li>
+<li>选举线程收到回复后，验证是否是自己发起的询问(验证zxid是否一致)，然后获取对方的id(myid)，并存储到当前询问对象列表中，最后获取对方提议的leader相关信息(id,zxid)，并将这些信息存储到当次选举的投票记录表中；</li>
+<li>收到所有Server回复以后，就计算出zxid最大的那个Server，并将这个Server相关信息设置成下一次要投票的Server；</li>
+<li>线程将当前zxid最大的Server设置为当前Server要推荐的Leader，如果此时获胜的Server获得n&#x2F;2 + 1的Server票数， 设置当前推荐的leader为获胜的Server，将根据获胜的Server相关信息设置自己的状态，否则，继续这个过程，直到leader被选举出来。</li>
+</ol>
+<blockquote>
+<p>通过流程分析我们可以得出：要使Leader获得多数Server的支持，则Server总数必须是奇数2n+1，且存活的Server的数目不得少于n+1.</p>
+</blockquote>
+<p><strong>每个Server启动后都会重复以上流程。在恢复模式下，如果是刚从崩溃状态恢复的或者刚启动的server还会从磁盘快照中恢复数据和会话信息，zk会记录事务日志并定期进行快照，方便在恢复时进行状态恢复。选主的具体流程图如下所示：</strong></p>
+<p><img src="/articles/2019/07/18/hadoopjiqunzhizookeeper/1.png"></p>
+<p><strong>fast paxos流程是在选举过程中，某Server首先向所有Server提议自己要成为leader，当其它Server收到提议以后，解决epoch和zxid的冲突，并接受对方的提议，然后向对方发送接受提议完成的消息，重复这个流程，最后一定能选举出Leader。其流程图如下所示：</strong></p>
+<p><img src="/articles/2019/07/18/hadoopjiqunzhizookeeper/2.png"></p>
+<h3 id="3-2-同步流程"><a href="#3-2-同步流程" class="headerlink" title="3.2 同步流程"></a>3.2 同步流程</h3><blockquote>
+<p>选完leader以后，zk就进入状态同步过程。</p>
+</blockquote>
+<ol>
+<li>leader等待server连接；</li>
+<li>Follower连接leader，将最大的zxid发送给leader；</li>
+<li>Leader根据follower的zxid确定同步点；</li>
+<li>完成同步后通知follower 已经成为uptodate状态；</li>
+<li>Follower收到uptodate消息后，又可以重新接受client的请求进行服务了。</li>
+</ol>
+<p><strong>流程图如下所示：</strong></p>
+<p><img src="/articles/2019/07/18/hadoopjiqunzhizookeeper/3.png"></p>
+<h3 id="3-3-工作流程"><a href="#3-3-工作流程" class="headerlink" title="3.3 工作流程"></a>3.3 工作流程</h3><h4 id="3-3-1-Leader工作流程"><a href="#3-3-1-Leader工作流程" class="headerlink" title="3.3.1 Leader工作流程"></a>3.3.1 Leader工作流程</h4><blockquote>
+<p>Leader主要有三个功能：</p>
+<ul>
+<li>恢复数据；</li>
+<li>维持与Learner的心跳，接收Learner请求并判断Learner的请求消息类型；</li>
+<li>Learner的消息类型主要有PING消息、REQUEST消息、ACK消息、REVALIDATE消息，根据不同的消息类型，进行不同的处理。</li>
+</ul>
+</blockquote>
+<blockquote>
+<p>PING消息是指Learner的心跳信息；REQUEST消息是Follower发送的提议信息，包括写请求及同步请求；ACK消息是Follower的对提议的回复，超过半数的Follower通过，则commit该提议；REVALIDATE消息是用来延长SESSION有效时间。</p>
+</blockquote>
+<p><strong>Leader的工作流程简图如下所示，在实际实现中，流程要比下图复杂得多，启动了三个线程来实现功能。</strong></p>
+<p><img src="/articles/2019/07/18/hadoopjiqunzhizookeeper/4.png"></p>
+<h4 id="3-3-2-Follower工作流程"><a href="#3-3-2-Follower工作流程" class="headerlink" title="3.3.2 Follower工作流程"></a>3.3.2 Follower工作流程</h4><blockquote>
+<p><strong>Follower主要有四个功能：</strong></p>
+<ol>
+<li>向Leader发送请求（PING消息、REQUEST消息、ACK消息、REVALIDATE消息）；</li>
+<li>接收Leader消息并进行处理；</li>
+<li>接收Client的请求，如果为写请求，发送给Leader进行投票；</li>
+<li>返回Client结果。</li>
+</ol>
+</blockquote>
+<hr>
+<blockquote>
+<p><strong>Follower的消息循环处理如下几种来自Leader的消息：</strong></p>
+<ol>
+<li>PING消息： 心跳消息；</li>
+<li>PROPOSAL消息：Leader发起的提案，要求Follower投票；</li>
+<li>COMMIT消息：服务器端最新一次提案的信息；</li>
+<li>UPTODATE消息：表明同步完成；</li>
+<li>REVALIDATE消息：根据Leader的REVALIDATE结果，关闭待revalidate的session还是允许其接受消息；</li>
+<li>SYNC消息：返回SYNC结果到客户端，这个消息最初由客户端发起，用来强制得到最新的更新。</li>
+</ol>
+</blockquote>
+<p><strong>Follower的工作流程简图如下所示，在实际实现中，Follower是通过5个线程来实现功能的。</strong></p>
+<p><img src="/articles/2019/07/18/hadoopjiqunzhizookeeper/5.png"></p>
+<blockquote>
+<p><strong>说明：</strong><br>对于observer的流程不再叙述，observer流程和Follower的唯一不同的地方就是observer不会参加leader发起的投票。</p>
+</blockquote>
+<h2 id="三，zookeeper集群部署"><a href="#三，zookeeper集群部署" class="headerlink" title="三，zookeeper集群部署"></a>三，zookeeper集群部署</h2><blockquote>
+<p>下载地址：<a target="_blank" rel="noopener" href="https://mirrors.tuna.tsinghua.edu.cn/apache/zookeeper/">https://mirrors.tuna.tsinghua.edu.cn/apache/zookeeper/</a></p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>主机名</th>
+<th>ip地址</th>
+<th>用户名</th>
+<th>运行组件</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>zhaohadoop1</td>
+<td>192.168.101.150</td>
+<td>hadoop</td>
+<td>DataNode、NodeManager</td>
+</tr>
+<tr>
+<td>zhaohadoop2</td>
+<td>192.168.101.154</td>
+<td>hadoop</td>
+<td>DataNode、NodeManager、SecondaryNameNode、zookeeper</td>
+</tr>
+<tr>
+<td>zhaohadoop3</td>
+<td>192.168.101.156</td>
+<td>hadoop</td>
+<td>NameNode、ResourceManager、zookeeper</td>
+</tr>
+<tr>
+<td>zhaohadoop4</td>
+<td>192.168.101.157</td>
+<td>hadoop</td>
+<td>DataNode、NodeManager、zookeeper</td>
+</tr>
+</tbody></table>
+<h3 id="3-1-下载zookeeper源码包"><a href="#3-1-下载zookeeper源码包" class="headerlink" title="3.1 下载zookeeper源码包"></a>3.1 下载zookeeper源码包</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">[root@zhaohadoop2 ~]# wget https://mirrors.tuna.tsinghua.edu.cn/apache/zookeeper/zookeeper-3.4.14/zookeeper-3.4.14.tar.gz</span><br><span class="line"></span><br><span class="line"><span class="comment">#前提先安装好jdk</span></span><br><span class="line"></span><br><span class="line">[root@zhaohadoop2 ~]# tar xf zookeeper-3.4.14.tar.gz -C /usr/local/</span><br><span class="line">[root@zhaohadoop2 ~]# <span class="built_in">mv</span> /usr/local/zookeeper-3.4.14 /usr/local/zookeeper</span><br><span class="line">[root@zhaohadoop2 ~]# <span class="built_in">cd</span> /usr/local/zookeeper/</span><br><span class="line">[root@zhaohadoop2 zookeeper]# <span class="built_in">ls</span></span><br><span class="line">bin        dist-maven       lib          pom.xml               src                       zookeeper-3.4.14.jar.md5   zookeeper-contrib  zookeeper-jute</span><br><span class="line">build.xml  ivysettings.xml  LICENSE.txt  README.md             zookeeper-3.4.14.jar      zookeeper-3.4.14.jar.sha1  zookeeper-docs     zookeeper-recipes</span><br><span class="line">conf       ivy.xml          NOTICE.txt   README_packaging.txt  zookeeper-3.4.14.jar.asc  zookeeper-client           zookeeper-it       zookeeper-server</span><br><span class="line"></span><br><span class="line"><span class="comment">#在每个zookeeper目录下创建一个data目录。在data目录下创建一个myid文件，文件名就叫做“myid”。内容就是每个实例的id。例如1、2、3。</span></span><br><span class="line">[root@zhaohadoop2 zookeeper]# <span class="built_in">mkdir</span> data</span><br><span class="line">[root@zhaohadoop2 zookeeper]# <span class="built_in">echo</span> <span class="string">&quot;1&quot;</span> &gt; data/myid</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-2-修改配置文件zoo-cfg"><a href="#3-2-修改配置文件zoo-cfg" class="headerlink" title="3.2 修改配置文件zoo.cfg"></a>3.2 修改配置文件zoo.cfg</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line">[root@zhaohadoop2 zookeeper]# <span class="built_in">cd</span> conf/</span><br><span class="line">[root@zhaohadoop2 conf]# <span class="built_in">ls</span></span><br><span class="line">configuration.xsl  log4j.properties  zoo_sample.cfg</span><br><span class="line">[root@zhaohadoop2 conf]# <span class="built_in">cp</span> zoo_sample.cfg zoo.cfg</span><br><span class="line">[root@zhaohadoop2 conf]# vim zoo.cfg</span><br><span class="line"><span class="comment">#修改成如下：</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># The number of milliseconds of each tick</span></span><br><span class="line">tickTime=2000</span><br><span class="line"><span class="comment"># The number of ticks that the initial</span></span><br><span class="line"><span class="comment"># synchronization phase can take</span></span><br><span class="line">initLimit=10</span><br><span class="line"><span class="comment"># The number of ticks that can pass between</span></span><br><span class="line"><span class="comment"># sending a request and getting an acknowledgement</span></span><br><span class="line">syncLimit=5</span><br><span class="line"><span class="comment"># the directory where the snapshot is stored.</span></span><br><span class="line"><span class="comment"># do not use /tmp for storage, /tmp here is just</span></span><br><span class="line"><span class="comment"># example sakes.</span></span><br><span class="line">dataDir=/usr/local/zookeeper/data</span><br><span class="line"><span class="comment"># the port at which the clients will connect</span></span><br><span class="line">clientPort=2181</span><br><span class="line"><span class="comment"># the maximum number of client connections.</span></span><br><span class="line"><span class="comment"># increase this if you need to handle more clients</span></span><br><span class="line"><span class="comment">#maxClientCnxns=60</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># Be sure to read the maintenance section of the</span></span><br><span class="line"><span class="comment"># administrator guide before turning on autopurge.</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># http://zookeeper.apache.org/doc/current/zookeeperAdmin.html#sc_maintenance</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># The number of snapshots to retain in dataDir</span></span><br><span class="line"><span class="comment">#autopurge.snapRetainCount=3</span></span><br><span class="line"><span class="comment"># Purge task interval in hours</span></span><br><span class="line"><span class="comment"># Set to &quot;0&quot; to disable auto purge feature</span></span><br><span class="line"><span class="comment">#autopurge.purgeInterval=1</span></span><br><span class="line">server.1=192.168.101.154:2881:3881</span><br><span class="line">server.2=192.168.101.156:2881:3881</span><br><span class="line">server.3=192.168.101.157:2881:3881</span><br><span class="line"></span><br><span class="line">说明：server后面的数字代表节点<span class="built_in">id</span>。IP后面的端口分别为zookeeper内部通讯端口和投票选举端口。</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>三台都配置好，注意myid，不要冲突，1为主。</p>
+</blockquote>
+<h3 id="3-3-启动zookeeper"><a href="#3-3-启动zookeeper" class="headerlink" title="3.3 启动zookeeper"></a>3.3 启动zookeeper</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line">[root@zhaohadoop2 zookeeper]# ./bin/zkServer.sh start</span><br><span class="line"></span><br><span class="line"><span class="comment">#查看状态：</span></span><br><span class="line">[root@zhaohadoop2 zookeeper]# ./bin/zkServer.sh status</span><br><span class="line">ZooKeeper JMX enabled by default</span><br><span class="line">Using config: /usr/local/zookeeper/bin/../conf/zoo.cfg</span><br><span class="line">Error contacting service. It is probably not running.       <span class="comment">#报错提示可能未运行。别急 往下看：</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#查看端口：</span></span><br><span class="line">[root@zhaohadoop2 zookeeper]# netstat -antup | grep 2181</span><br><span class="line">tcp6       0      0 :::2181                 :::*                    LISTEN      3309/java       <span class="comment">#端口已经被监听</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#启动第二个zookeeper，第三个zookeeper</span></span><br><span class="line">[root@zhaohadoop3 zookeeper]# ./bin/zkServer.sh start</span><br><span class="line">ZooKeeper JMX enabled by default</span><br><span class="line">Using config: /usr/local/zookeeper/bin/../conf/zoo.cfg</span><br><span class="line">Starting zookeeper ... STARTED</span><br><span class="line"></span><br><span class="line">[root@zhaohadoop4 zookeeper]# ./bin/zkServer.sh start</span><br><span class="line">ZooKeeper JMX enabled by default</span><br><span class="line">Using config: /usr/local/zookeeper/bin/../conf/zoo.cfg</span><br><span class="line">Starting zookeeper ... STARTED</span><br><span class="line"></span><br><span class="line"><span class="comment">#再来查看zookeeper运行状态</span></span><br><span class="line">第一台：</span><br><span class="line">[root@zhaohadoop2 zookeeper]# ./bin/zkServer.sh status</span><br><span class="line">ZooKeeper JMX enabled by default</span><br><span class="line">Using config: /usr/local/zookeeper/bin/../conf/zoo.cfg</span><br><span class="line">Mode: follower</span><br><span class="line"></span><br><span class="line">第二台：</span><br><span class="line">[root@zhaohadoop3 zookeeper]# ./bin/zkServer.sh status</span><br><span class="line">ZooKeeper JMX enabled by default</span><br><span class="line">Using config: /usr/local/zookeeper/bin/../conf/zoo.cfg</span><br><span class="line">Mode: leader</span><br><span class="line"></span><br><span class="line">第三台：</span><br><span class="line">[root@zhaohadoop4 zookeeper]# ./bin/zkServer.sh status</span><br><span class="line">ZooKeeper JMX enabled by default</span><br><span class="line">Using config: /usr/local/zookeeper/bin/../conf/zoo.cfg</span><br><span class="line">Mode: follower</span><br><span class="line"></span><br><span class="line"><span class="comment">#说明：显示无问题，leader为第二台机器。</span></span><br></pre></td></tr></table></figure>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://kkabuzs.github.io">Kkabuzs</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://kkabuzs.github.io/articles/2019/07/18/hadoopjiqunzhizookeeper/">https://kkabuzs.github.io/articles/2019/07/18/hadoopjiqunzhizookeeper/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://kkabuzs.github.io" target="_blank">kkabuzs博客屋</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Hadoop/">Hadoop</a><a class="post-meta__tags" href="/tags/Zookeeper/">Zookeeper</a></div><div class="post-share"><div class="social-share" data-image="/themes-img/touxiang.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/articles/2019/07/11/hadoopjiqunzhihbase/" title="Hadoop集群之Hbase"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">Hadoop集群之Hbase</div></div><div class="info-2"><div class="info-item-1"> 无论你跑多少距离，放弃很容易，停下来，肉体得到暂时的舒服，但你最终会一无所得。坚持或许很难，但你最后一定会有所收获，跑过的路，永远不会欺骗自己。  Hadoop集群之Hbase一，概述  HBase是一个构建在HDFS上的分布式列存储系统； HBase是基于Google BigTable模型开发的，典型的key&#x2F;value系统； HBase是Apache Hadoop生态系统中的重要一员，主要用于海量结构化数据存储； 从逻辑上讲，HBase将数据按照表、行和列进行存储。 与hadoop一样，Hbase目标主要依靠横向扩展，通过不断增加廉价的商用服务器，来增加计算和存储能力。   1.1...</div></div></div></a><a class="pagination-related" href="/articles/2019/07/22/win10zhuangjizhiwufaanzhuanggptxingshicipan/" title="win 10 装机之无法安装到gpt分区形式磁盘"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">win 10 装机之无法安装到gpt分区形式磁盘</div></div><div class="info-2"><div class="info-item-1"> 无论你跑多少距离，放弃很容易，停下来，肉体得到暂时的舒服，但你最终会一无所得。坚持或许很难，但你最后一定会有所收获，跑过的路，永远不会欺骗自己。  win 10 装机之无法安装到gpt分区形式磁盘 解决办法如下 12345678910111213141516171819在系统提示无法安装的那一步，按住“shift+f10”，呼出“cmd”命令符；输入：diskpart，回车进入diskpart。输入：list disk，回车显示磁盘信息输入：select disk 0，回车选择第0个磁盘（电脑的硬盘编号是从0开始的）输入：clean，回车删除磁盘分区&amp;格式化输入：convert mbr，回车将当前磁盘分区设置为Mbr形式输入：create partition primary size = xxx，回车创建主分区大小（MB）输入：format fs=ntfs quick，回车格式化磁盘为ntfs输入：exit，回车退出diskpart输入：exit，回车退出cmd </div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/articles/2019/07/02/Centos-7-Hadoop-danjiediankuaisugoujian/" title="Centos 7 Hadoop单节点快速构建"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2019-07-02</div><div class="info-item-2">Centos 7 Hadoop单节点快速构建</div></div><div class="info-2"><div class="info-item-1">一，快速构建Hadoop单节点 无论你跑多少距离，放弃很容易，停下来，肉体得到暂时的舒服，但你最终会一无所得。坚持或许很难，但你最后一定会有所收获，跑过的路，永远不会欺骗自己。  环境介绍    主机名 ip 描述    hadoop1 192.168.101.83 hadoop部署   1.1 下载所需安装包  jdk下载地址：https://github.com/frekele/oracle-java/releaseshadoop下载地址：http://mirror.bit.edu.cn/apache/hadoop/common/ 123#安装包已经下载完毕[root@hadoop1 ~]# lshadoop-2.9.2.tar.gz  jdk-8u181-linux-x64.tar.gz  1.2 安装java jdk12345678910111213141516[root@hadoop1 ~]# tar xf jdk-8u181-linux-x64.tar.gz -C /usr/local/[root@hadoop1 ~]# ln -s...</div></div></div></a><a class="pagination-related" href="/articles/2019/07/08/centos7bushuhadoopjiqun/" title="CentOS 7部署Hadoop集群（完全分布式）"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2019-07-08</div><div class="info-item-2">CentOS 7部署Hadoop集群（完全分布式）</div></div><div class="info-2"><div class="info-item-1"> 无论你跑多少距离，放弃很容易，停下来，肉体得到暂时的舒服，但你最终会一无所得。坚持或许很难，但你最后一定会有所收获，跑过的路，永远不会欺骗自己。  CentOS 7部署Hadoop集群（完全分布式）测试环境  Linux版本： CentOS 7 64位Hadoop版本： hadoop-2.9.2Java版本： jdk-8u181-linux-x64   一，集群服务器节点与进程 Hadoop中的HDFS和YARN都是主从结构，主从结构中的主节点和从节点有多重概念方式：     主节点 从节点    master slave   管理者 工作者   leader followe    Hadoop集群中各个角色的名称：     服务 主节点 从节点    HDFS NameNode DataNode   YARN ResourceManager NodeManager   1.1...</div></div></div></a><a class="pagination-related" href="/articles/2019/08/30/hadoopjiqunzhi-cdh5-13-1lixiandajian/" title="Hadoop集群之 CDH v5.13.1 搭建 (离线本地Parcels）"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2019-08-30</div><div class="info-item-2">Hadoop集群之 CDH v5.13.1 搭建 (离线本地Parcels）</div></div><div class="info-2"><div class="info-item-1"> 无论你跑多少距离，放弃很容易，停下来，肉体得到暂时的舒服，但你最终会一无所得。坚持或许很难，但你最后一定会有所收获，跑过的路，永远不会欺骗自己。  Hadoop集群之 CDH v5.13.1 搭建 (离线本地Parcels）一，CDH Parcels 离线安装 官方一共给了三种方法：  Installation Path A - Automated Installation by Cloudera Manager：要求所有机器都能连网，而且外国网站不太稳定。一旦失败，重装非常痛苦。 Installation Path B - Manual Installation Using Cloudera Manager Packages：设置Red Hat&#x2F;CentOS或者Debian&#x2F;Ubuntu，下载系统package安装，下载量数目众多 Installation Path C - Manual Installation Using Tarballs and...</div></div></div></a><a class="pagination-related" href="/articles/2019/07/11/hadoopjiqunzhihbase/" title="Hadoop集群之Hbase"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2019-07-11</div><div class="info-item-2">Hadoop集群之Hbase</div></div><div class="info-2"><div class="info-item-1"> 无论你跑多少距离，放弃很容易，停下来，肉体得到暂时的舒服，但你最终会一无所得。坚持或许很难，但你最后一定会有所收获，跑过的路，永远不会欺骗自己。  Hadoop集群之Hbase一，概述  HBase是一个构建在HDFS上的分布式列存储系统； HBase是基于Google BigTable模型开发的，典型的key&#x2F;value系统； HBase是Apache Hadoop生态系统中的重要一员，主要用于海量结构化数据存储； 从逻辑上讲，HBase将数据按照表、行和列进行存储。 与hadoop一样，Hbase目标主要依靠横向扩展，通过不断增加廉价的商用服务器，来增加计算和存储能力。   1.1...</div></div></div></a><a class="pagination-related" href="/articles/2019/07/09/hadoopjiqunzhihive/" title="Hadoop集群之Hive"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2019-07-09</div><div class="info-item-2">Hadoop集群之Hive</div></div><div class="info-2"><div class="info-item-1"> 无论你跑多少距离，放弃很容易，停下来，肉体得到暂时的舒服，但你最终会一无所得。坚持或许很难，但你最后一定会有所收获，跑过的路，永远不会欺骗自己。  Hadoop集群之Hive一，Hive概述1.1 数据仓库的概念 数据仓库（Data Warehouse）是一个面向主题的（Subject Oriented）、集成的（Integrated）、相对稳定的（Non-Volatile）、反映历史变化（Time Variant）的数据集合，用于支持管理决策。  传统数据仓库面临的挑战：  无法满足快速增长的海量数据存储需求。 无法有效处理不同类型的数据。 计算和处理能力不足。  1.2 Hive简介  Hive是一个构建于Hadoop顶层的数据仓库工具，可以查询和管理PB级别的分布式数据。 支持大规模数据存储、分析，具有良好的可扩展性 某种程度上可以看作是用户编程接口，本身不存储和处理数据。 依赖分布式文件系统HDFS存储数据。 依赖分布式并行计算模型MapReduce处理数据。 定义了简单的类似SQL...</div></div></div></a><a class="pagination-related" href="/articles/2019/08/26/hadoopjiqunzhispark/" title="Hadoop集群之Spark"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2019-08-26</div><div class="info-item-2">Hadoop集群之Spark</div></div><div class="info-2"><div class="info-item-1"> 无论你跑多少距离，放弃很容易，停下来，肉体得到暂时的舒服，但你最终会一无所得。坚持或许很难，但你最后一定会有所收获，跑过的路，永远不会欺骗自己。  Hadoop集群之Spark一，Spark概述1.1 Spark 基于内存的分布式的计算框架，是一个针对海量数据处理的非常快的通用的计算引擎(计算框架)。  1.2 特点 先进架构： 采用Scala语言编写，底层采用actormodel的akka作为通讯框架，代码十分简洁高效。基于DAG图执行引擎，减少多次计算中间结果写到HDFS的开销。建立在统一抽象的RDD之上，以基本一致的方式应对不同的大数据处理。  高效： 基于cache机制来支持需要反复迭代的计算或者多次数据共享，减少数据读取的IO开销。基于内存运算比MR要快100倍，基于硬盘的运算也比MR快10倍。  易用： 提供广泛的数据集操作类型（20+种），而MR只有两种。Spark支持Java，Python和ScalaAPI，支持交互的Python和Scala的shell  整体解决方案： Spark内存中批处理 SparkSQL交互式查询 SparkStreaming流式计算...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/themes-img/touxiang.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">Kkabuzs</div><div class="author-info-description">学习记录和整理</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">73</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">19</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">6</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/xxxxxx"><i class="fab fa-github"></i><span>Follow Me</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">三人行，必有我师！</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Hadoop%E9%9B%86%E7%BE%A4%E4%B9%8BZookeeper"><span class="toc-number">1.</span> <span class="toc-text">Hadoop集群之Zookeeper</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%EF%BC%8CZookeeper%E6%A6%82%E8%BF%B0"><span class="toc-number">1.1.</span> <span class="toc-text">一，Zookeeper概述</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%EF%BC%8C%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5"><span class="toc-number">1.2.</span> <span class="toc-text">二，基本概念</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-%E9%9B%86%E7%BE%A4%E8%A7%92%E8%89%B2"><span class="toc-number">1.2.1.</span> <span class="toc-text">2.1 集群角色</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-%E7%89%B9%E6%80%A7"><span class="toc-number">1.2.2.</span> <span class="toc-text">2.2 特性</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%89%EF%BC%8C%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86"><span class="toc-number">1.3.</span> <span class="toc-text">三，工作原理</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#3-1-%E9%80%89%E4%B8%BB%E6%B5%81%E7%A8%8B"><span class="toc-number">1.3.1.</span> <span class="toc-text">3.1 选主流程</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-2-%E5%90%8C%E6%AD%A5%E6%B5%81%E7%A8%8B"><span class="toc-number">1.3.2.</span> <span class="toc-text">3.2 同步流程</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-3-%E5%B7%A5%E4%BD%9C%E6%B5%81%E7%A8%8B"><span class="toc-number">1.3.3.</span> <span class="toc-text">3.3 工作流程</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#3-3-1-Leader%E5%B7%A5%E4%BD%9C%E6%B5%81%E7%A8%8B"><span class="toc-number">1.3.3.1.</span> <span class="toc-text">3.3.1 Leader工作流程</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-3-2-Follower%E5%B7%A5%E4%BD%9C%E6%B5%81%E7%A8%8B"><span class="toc-number">1.3.3.2.</span> <span class="toc-text">3.3.2 Follower工作流程</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%89%EF%BC%8Czookeeper%E9%9B%86%E7%BE%A4%E9%83%A8%E7%BD%B2"><span class="toc-number">1.4.</span> <span class="toc-text">三，zookeeper集群部署</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#3-1-%E4%B8%8B%E8%BD%BDzookeeper%E6%BA%90%E7%A0%81%E5%8C%85"><span class="toc-number">1.4.1.</span> <span class="toc-text">3.1 下载zookeeper源码包</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-2-%E4%BF%AE%E6%94%B9%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6zoo-cfg"><span class="toc-number">1.4.2.</span> <span class="toc-text">3.2 修改配置文件zoo.cfg</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-3-%E5%90%AF%E5%8A%A8zookeeper"><span class="toc-number">1.4.3.</span> <span class="toc-text">3.3 启动zookeeper</span></a></li></ol></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/articles/2025/04/22/mongodb-6-0-21-lixian-fenpianjiqun/" title="MongoDB-6.0.21离线分片集群部署">MongoDB-6.0.21离线分片集群部署</a><time datetime="2025-04-21T17:53:44.000Z" title="发表于 2025-04-22 01:53:44">2025-04-22</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/articles/2025/04/22/mongodb-6-0-21-lixian-fubenjibushu/" title="MongoDB-6.0.21副本集离线部署手册-（Replica Set）副本集模式">MongoDB-6.0.21副本集离线部署手册-（Replica Set）副本集模式</a><time datetime="2025-04-21T17:51:21.000Z" title="发表于 2025-04-22 01:51:21">2025-04-22</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/articles/2025/04/21/mongodb-6-0-21-lixian-danjiedianbushu/" title="MongoDB-6.0.21离线单节点部署">MongoDB-6.0.21离线单节点部署</a><time datetime="2025-04-21T15:55:06.000Z" title="发表于 2025-04-21 23:55:06">2025-04-21</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/articles/2023/05/10/jichengyupaisheng/" title="继承与派生">继承与派生</a><time datetime="2023-05-10T05:52:52.000Z" title="发表于 2023-05-10 13:52:52">2023-05-10</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/articles/2023/05/09/fengzhuang/" title="封装">封装</a><time datetime="2023-05-09T01:37:55.000Z" title="发表于 2023-05-09 09:37:55">2023-05-09</time></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2019 - 2025 By Kkabuzs</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 7.3.0</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.3.5</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
