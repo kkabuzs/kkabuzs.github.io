@@ -921,13 +921,14 @@ figure.figcaption,
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   cursor: pointer;
-  opacity: 0;
+  opacity: 0.7;
   transition: opacity 0.15s ease, color 0.15s ease, border-color 0.15s ease;
 }
 .has-copy:hover .code-copy {
   opacity: 1;
 }
 .code-copy:hover {
+  opacity: 1;
   color: var(--primary);
   border-color: var(--primary);
 }
