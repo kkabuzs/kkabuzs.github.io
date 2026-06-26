@@ -445,15 +445,12 @@ body.search-open .search-overlay {
   min-width: 0;
 }
 .side-col {
-  position: fixed;
+  position: sticky;
   top: calc(var(--header-h) + 8px);
-  right: max(20px, calc((100vw - var(--maxw)) / 2 + 20px));
-  width: 300px;
   display: flex;
   flex-direction: column;
   gap: 24px;
   max-height: calc(100vh - var(--header-h) - 24px);
-  z-index: 90;
 }
 .post-list {
   display: flex;
@@ -518,11 +515,22 @@ body.search-open .search-overlay {
   gap: 8px;
 }
 .tag-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
   color: var(--muted);
-  font-size: 13px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.5;
+  transition: color 0.15s ease, border-color 0.15s ease, background-color 0.15s ease;
 }
 .tag-chip:hover {
   color: var(--primary);
+  border-color: var(--primary);
+  background: var(--bg);
 }
 .widget {
   background: var(--surface);
@@ -1477,7 +1485,7 @@ html[data-theme="dark"] pre .hljs-bullet {
   background: var(--surface);
 }
 .tag-shelf-hot {
-  background: linear-gradient(180deg, var(--primary-weak), var(--surface));
+  background: linear-gradient(180deg, rgba(47,111,235,0.06), var(--surface));
 }
 .tag-shelf-head {
   display: flex;
@@ -1500,28 +1508,30 @@ html[data-theme="dark"] pre .hljs-bullet {
 .tag-heat-list {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 8px;
 }
 .tag-heat-chip {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 7px 12px;
+  gap: 7px;
+  padding: 6px 11px;
   color: var(--text);
   background: var(--bg);
   border: 1px solid var(--border);
   border-radius: 999px;
-  transition: border-color 0.15s ease, transform 0.15s ease, color 0.15s ease;
+  font-weight: 500;
+  transition: border-color 0.15s ease, background-color 0.15s ease, transform 0.15s ease, color 0.15s ease;
 }
 .tag-heat-chip:hover {
   color: var(--primary);
   border-color: var(--primary);
+  background: var(--surface);
   transform: translateY(-1px);
 }
 .tag-shelf-hot .tag-heat-chip {
-  padding: 9px 14px;
-  font-size: 17px;
-  font-weight: 700;
+  padding: 7px 13px;
+  font-size: 15px;
+  font-weight: 650;
 }
 .tag-shelf-mid .tag-heat-chip {
   font-size: 14px;
@@ -1553,17 +1563,21 @@ html[data-theme="dark"] pre .hljs-bullet {
 .keyword-scope-chip {
   display: inline-flex;
   align-items: center;
-  padding: 2px 9px;
+  padding: 3px 9px;
   color: var(--muted);
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 999px;
   font-size: 12px;
+  font-weight: 500;
+  line-height: 1.45;
+  transition: color 0.15s ease, border-color 0.15s ease, background-color 0.15s ease;
 }
 .topic-chip:hover,
 .keyword-scope-chip:hover {
   color: var(--primary);
   border-color: var(--primary);
+  background: var(--bg);
 }
 .topic-directory {
   display: grid;
