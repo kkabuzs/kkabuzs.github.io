@@ -1647,7 +1647,19 @@ html[data-theme="dark"] pre .hljs-bullet {
   grid-template-columns: 96px minmax(0, 1fr);
   gap: 18px;
   padding: 16px 0;
+  color: var(--text);
   border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  transition: color 0.15s ease, background-color 0.15s ease;
+}
+.keyword-result:hover {
+  color: var(--text);
+}
+.keyword-result:hover .keyword-result-title {
+  color: var(--primary);
+}
+.keyword-result:active {
+  background: var(--surface);
 }
 .keyword-result:last-child {
   border-bottom: none;
@@ -1663,11 +1675,9 @@ html[data-theme="dark"] pre .hljs-bullet {
   font-size: 19px;
   line-height: 1.45;
 }
-.keyword-result-title a {
+.keyword-result-title {
   color: var(--text-strong);
-}
-.keyword-result-title a:hover {
-  color: var(--primary);
+  transition: color 0.15s ease;
 }
 .keyword-result-cats {
   display: flex;
