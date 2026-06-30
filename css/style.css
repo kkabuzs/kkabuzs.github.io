@@ -769,6 +769,11 @@ figure.highlight {
   padding: 0;
   border: 1px solid var(--code-border);
 }
+.code-block.has-copy,
+figure.highlight.has-copy {
+  display: flex;
+  flex-direction: column;
+}
 .code-scroll {
   overflow-x: auto;
   overflow-y: hidden;
@@ -912,13 +917,15 @@ figure.figcaption,
   display: none;
 }
 .code-toolbar {
-  position: absolute;
-  top: 6px;
-  right: 8px;
-  z-index: 3;
-  display: inline-flex;
+  order: -1;
+  display: flex;
   align-items: center;
+  justify-content: flex-end;
   gap: 6px;
+  min-height: 32px;
+  padding: 5px 8px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--code-border);
 }
 .code-copy {
   position: static;
@@ -929,7 +936,7 @@ figure.figcaption,
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   cursor: pointer;
-  opacity: 0.7;
+  opacity: 0.9;
   transition: opacity 0.15s ease, color 0.15s ease, border-color 0.15s ease;
 }
 .has-copy:hover .code-copy {
@@ -2044,8 +2051,8 @@ html[data-theme="dark"] pre .hljs-bullet {
     font-size: 12px;
   }
   .code-toolbar {
-    top: 5px;
-    right: 6px;
+    min-height: 30px;
+    padding: 4px 6px;
   }
   .code-copy,
   .code-lang {
