@@ -34,10 +34,11 @@
 </blockquote>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> foo <span class="keyword">import</span> x,get,change <span class="comment">#将模块foo中的x和get导入到当前名称空间</span></span><br><span class="line">a=x <span class="comment">#直接使用模块foo中的x赋值给a</span></span><br><span class="line">get() <span class="comment">#直接执行foo中的get函数</span></span><br><span class="line">change() <span class="comment">#即便是当前有重名的x，修改的仍然是源文件中的x</span></span><br></pre></td></tr></table></figure>
 
-<pre><code>from ... import ... 导入模块在使用时不需要加前缀
-优点：代码更精简
-缺点：容易与当前名称空间混淆
-</code></pre>
+<p><code>from ... import ...</code> 导入模块在使用时不需要加前缀：</p>
+<ul>
+<li>优点：代码更精简</li>
+<li>缺点：容易与当前名称空间混淆</li>
+</ul>
 <p><strong>另外from语句支持from foo import 语法，代表将foo中所有的名字都导入到当前位置</strong></p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 一行导入多个名字（不推荐）</span></span><br><span class="line"><span class="comment"># from foo import x,get,change</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># *: 导入模块中所有的名字</span></span><br><span class="line"><span class="comment"># （不推荐使用此方法）</span></span><br><span class="line"><span class="comment"># from foo import *</span></span><br></pre></td></tr></table></figure>
 

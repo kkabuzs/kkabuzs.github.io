@@ -33,17 +33,13 @@
 <h2 id="六，json与pickle模块"><a href="#六，json与pickle模块" class="headerlink" title="六，json与pickle模块"></a>六，json与pickle模块</h2><h3 id="6-1什么是序列化与反序列化"><a href="#6-1什么是序列化与反序列化" class="headerlink" title="6.1什么是序列化与反序列化"></a>6.1什么是序列化与反序列化</h3><blockquote>
 <p>指的是把内存的数据类型转换成一个特定格式的内容</p>
 </blockquote>
-<pre><code>内存中的数据类型 ----&gt; 序列化 ----&gt; 特定的格式（json格式或者pickle格式）
-内存中的数据类型 &lt;---- 反序列化 &lt;---- 特定的格式（json格式或者pickle格式）
-</code></pre>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">内存中的数据类型 ----&gt; 序列化 ----&gt; 特定的格式（json格式或者pickle格式）</span><br><span class="line">内存中的数据类型 &lt;---- 反序列化 &lt;---- 特定的格式（json格式或者pickle格式）</span><br></pre></td></tr></table></figure>
+
 <h3 id="6-2-为何要序列化"><a href="#6-2-为何要序列化" class="headerlink" title="6.2 为何要序列化"></a>6.2 为何要序列化</h3><blockquote>
 <p>序列化得到结果&#x3D;&gt;特定格式的内容（有两种用途）</p>
 </blockquote>
-<pre><code>1、可用于存储 =&gt; 用于存档
-2、传输给其他平台使用 =&gt; 跨平台数据交互
-    python              java
-     列表    特定的格式    数组
-</code></pre>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">1、可用于存储 =&gt; 用于存档</span><br><span class="line">2、传输给其他平台使用 =&gt; 跨平台数据交互</span><br><span class="line">    python              java</span><br><span class="line">     列表    特定的格式    数组</span><br></pre></td></tr></table></figure>
+
 <blockquote>
 <p><strong>强调:</strong></p>
 </blockquote>

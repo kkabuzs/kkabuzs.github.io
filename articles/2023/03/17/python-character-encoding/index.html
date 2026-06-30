@@ -101,8 +101,8 @@
 <blockquote>
 <p>理论上是可以将内存中unicode格式的二进制直接存放于硬盘中的，但由于unicode固定使用两个字节来存储一个字符，如果多国字符中包含大量的英文字符时，使用unicode格式存放会额外占用一倍空间（英文字符其实只需要用一个字节存放即可），然而空间占用并不是最致命的问题，最致命地是当我们由内存写入硬盘时会额外耗费一倍的时间，所以将内存中的unicode二进制写入硬盘或者基于网络传输时必须将其转换成一种精简的格式，这种格式即utf-8（全称Unicode Transformation Format，即unicode的转换格式）</p>
 </blockquote>
-<pre><code># 多国字符—√—》内存（unicode格式的二进制）——√—》硬盘（utf-8格式的二进制）
-</code></pre>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"># 多国字符—√—》内存（unicode格式的二进制）——√—》硬盘（utf-8格式的二进制）</span><br></pre></td></tr></table></figure>
+
 <p><img src="/articles/2023/03/17/python-character-encoding/8.png"></p>
 <p><strong>那为何在内存中不直接使用utf-8呢？</strong></p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">utf-8是针对Unicode的可变长度字符编码：一个英文字符占1Bytes，一个中文字符占3Bytes，生僻字用更多的Bytes存储</span><br><span class="line"></span><br><span class="line">unicode更像是一个过渡版本，我们新开发的软件或文件存入硬盘都采用utf-8格式，等过去几十年，所有老编码的文件都淘汰掉之后，会出现一个令人开心的场景，即硬盘里放的都是utf-8格式，此时unicode便可以退出历史舞台，内存里也改用utf-8，天下重新归于统一</span><br></pre></td></tr></table></figure>

@@ -170,9 +170,8 @@
 
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">[direct: mongos] <span class="built_in">test</span>&gt; use testdb</span><br><span class="line">switched to db testdb</span><br><span class="line">[direct: mongos] testdb&gt; db.users.getShardDistribution()</span><br><span class="line">Shard shard1 at shard1/192.168.79.138:27018,192.168.79.139:27018</span><br><span class="line">&#123;</span><br><span class="line">  data: <span class="string">&#x27;50KiB&#x27;</span>,</span><br><span class="line">  docs: 1000,</span><br><span class="line">  chunks: 2,</span><br><span class="line">  <span class="string">&#x27;estimated data per chunk&#x27;</span>: <span class="string">&#x27;25KiB&#x27;</span>,</span><br><span class="line">  <span class="string">&#x27;estimated docs per chunk&#x27;</span>: 500</span><br><span class="line">&#125;</span><br><span class="line">---</span><br><span class="line">Totals</span><br><span class="line">&#123;</span><br><span class="line">  data: <span class="string">&#x27;50KiB&#x27;</span>,</span><br><span class="line">  docs: 1000,</span><br><span class="line">  chunks: 2,</span><br><span class="line">  <span class="string">&#x27;Shard shard1&#x27;</span>: [</span><br><span class="line">    <span class="string">&#x27;100 % data&#x27;</span>,</span><br><span class="line">    <span class="string">&#x27;100 % docs in cluster&#x27;</span>,</span><br><span class="line">    <span class="string">&#x27;51B avg obj size on shard&#x27;</span></span><br><span class="line">  ]</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
 
-<blockquote>
-<p>sh.status()  &#x2F;&#x2F; 查看分片状态<br>db.stats()   &#x2F;&#x2F; 查看数据库统计</p>
-</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&gt; sh.status()  // 查看分片状态</span><br><span class="line">&gt; db.stats()   // 查看数据库统计</span><br></pre></td></tr></table></figure>
+
 <p><strong>测试clusteradmin用户登录</strong></p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">/usr/local/mongosh/bin/mongosh --host 192.168.79.138 --port 27017 -u clusteradmin -p zs@@123 --authenticationDatabase admin</span><br><span class="line"></span><br><span class="line">&gt; sh.status()  // 查看分片状态</span><br><span class="line"></span><br><span class="line"><span class="comment"># 添加了安全认证之后，重新测试分片功能</span></span><br><span class="line">// 启用数据库分片</span><br><span class="line">sh.enableSharding(<span class="string">&quot;testdb1&quot;</span>)</span><br><span class="line"></span><br><span class="line">// 创建分片集合</span><br><span class="line">db.adminCommand(&#123;</span><br><span class="line">  shardCollection: <span class="string">&quot;testdb1.users&quot;</span>,</span><br><span class="line">  key: &#123; userId: <span class="string">&quot;hashed&quot;</span> &#125;</span><br><span class="line">&#125;)</span><br><span class="line"></span><br><span class="line">// 插入测试数据</span><br><span class="line">use testdb1</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> (i=1; i&lt;=12341; i++) &#123;</span><br><span class="line">  db.users.insert(&#123;userId: i, data: <span class="string">&quot;test&quot;</span>+i&#125;)</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
 
@@ -268,19 +267,8 @@
 <p>分片节点添加成功</p>
 </blockquote>
 <p><strong>验证操作</strong></p>
-<pre><code>// 检查分片状态，mongos操作
-&gt; use admin
-&gt; sh.status()
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">// 检查分片状态，mongos操作</span><br><span class="line">&gt; use admin</span><br><span class="line">&gt; sh.status()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">// 查看集群分片列表</span><br><span class="line">&gt; db.adminCommand(&#123; listShards: 1 &#125;)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">// 查看数据平衡</span><br><span class="line">&gt; use config</span><br><span class="line">&gt; db.chunks.find().<span class="built_in">sort</span>(&#123;shard:1&#125;)  // 查看数据分布</span><br></pre></td></tr></table></figure>
 
-
-// 查看集群分片列表
-&gt; db.adminCommand({ listShards: 1 })
-
-
-// 查看数据平衡
-&gt; use config
-&gt; db.chunks.find().sort({shard:1})  // 查看数据分布
-</code></pre>
 <h4 id="6-4-3-移除配置节点"><a href="#6-4-3-移除配置节点" class="headerlink" title="6.4.3 移除配置节点"></a>6.4.3 移除配置节点</h4><p><strong>删除配置节点前的准备工作</strong></p>
 <blockquote>
 <p>检查当前配置节点状态</p>
