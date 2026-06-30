@@ -1,0 +1,111 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#ffffff"><title>计算机核心基础 | kkabuzs博客屋</title><meta name="description" content="学习记录和整理"><meta name="author" content="Kkabuzs"><link rel="icon" href="/images/touxiang.jpg"><link rel="stylesheet" href="/css/style.css"><script>(function () {
+  try {
+    var darkQuery = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)');
+    var override = localStorage.getItem('theme-override');
+    var theme = override === 'light' || override === 'dark' ? override : (darkQuery && darkQuery.matches ? 'dark' : 'light');
+    document.documentElement.setAttribute('data-theme', theme);
+    var meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.setAttribute('content', theme === 'dark' ? '#1c1c1e' : '#ffffff');
+  } catch (e) {}
+})();</script><meta name="generator" content="Hexo 8.1.2"></head><body><header class="site-header"><div class="container nav-inner"><a class="brand" href="/"><img class="brand-avatar" src="/images/touxiang.jpg" alt="Kkabuzs"><span class="brand-name">kkabuzs博客屋</span></a><button class="nav-toggle" type="button" aria-label="菜单" aria-expanded="false"><span class="nav-toggle-bar"></span><span class="nav-toggle-bar"></span><span class="nav-toggle-bar"></span></button><nav class="nav-menu"><a class="nav-link" href="/">首页</a><a class="nav-link" href="/categories/">分类</a><a class="nav-link" href="/tags/">标签</a><a class="nav-link" href="/archives/">时间轴</a></nav><div class="nav-actions"><button class="search-toggle" type="button" aria-label="打开搜索" title="搜索"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><path d="M21 21l-4.3-4.3"></path></svg></button><button class="theme-toggle" type="button" aria-label="切换深色模式" title="切换深色模式"><svg class="icon-sun" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path></svg><svg class="icon-moon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg></button></div></div></header><div class="search-overlay" aria-hidden="true"><div class="search-panel" role="dialog" aria-modal="true" aria-label="站内搜索"><div class="search-head"><div class="search-input-wrap"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><path d="M21 21l-4.3-4.3"></path></svg><input class="search-input" type="search" placeholder="搜索全部文章..." autocomplete="off"></div><button class="search-close" type="button" aria-label="关闭搜索">×</button></div><div class="search-scope">搜索全部文章</div><div class="search-results"><div class="search-empty">输入关键词开始搜索</div></div></div></div><main class="container site-main"><div class="layout-grid"><article class="main-col post"><header class="post-header"><h1 class="post-title">计算机核心基础</h1><div class="post-meta"><time class="post-date">发布 2023-03-16</time><time class="post-date">更新 2023-03-16</time><a class="tag-pill" href="/categories/Python-%E7%BC%96%E7%A8%8B/">Python 编程</a></div></header><div class="post-motto" data-motto-text="无论你跑多少距离，放弃很容易，停下来，肉体得到暂时的舒服，但你最终会一无所得。 坚持或许很难，但你最后一定会有所收获，跑过的路，永远不会欺骗自己。"><p>无论你跑多少距离，放弃很容易，停下来，肉体得到暂时的舒服，但你最终会一无所得。</p><p>坚持或许很难，但你最后一定会有所收获，跑过的路，永远不会欺骗自己。</p></div><div class="post-content markdown-preview"><h1 id="1、计算机核心基础"><a href="#1、计算机核心基础" class="headerlink" title="1、计算机核心基础"></a>1、计算机核心基础</h1><h2 id="一，引子"><a href="#一，引子" class="headerlink" title="一，引子"></a>一，引子</h2><blockquote>
+<p>接下来一段时间，我们的目标的是：学会使用python这门编程语言来编写ATM+购物车程序，那么问题来了:</p>
+</blockquote>
+<h3 id="1-1-什么是语言？什么是编程语言？为何要有编程语言？"><a href="#1-1-什么是语言？什么是编程语言？为何要有编程语言？" class="headerlink" title="1.1 什么是语言？什么是编程语言？为何要有编程语言？"></a>1.1 什么是语言？什么是编程语言？为何要有编程语言？</h3><blockquote>
+<p>语言其实就是人与人之间沟通的介质，如英语，汉语，俄语等。</p>
+</blockquote>
+<blockquote>
+<p>而编程语言则是人与计算机之间沟通的介质。</p>
+</blockquote>
+<blockquote>
+<p>那么为何要有编程语言，或者说人为何要与计算机沟通呢？这是因为在编程的世界里，计算机就好比是人的奴隶，人与计算机沟通的目的就是为了奴役计算机，让计算机按照人类的思维逻辑自发地去工作从而把人力解放出来。</p>
+</blockquote>
+<ul>
+<li>此处我们可以提炼出如下两个重要的概念</li>
+</ul>
+<h3 id="1-2-什么是编程？为什么要编程？"><a href="#1-2-什么是编程？为什么要编程？" class="headerlink" title="1.2 什么是编程？为什么要编程？"></a>1.2 什么是编程？为什么要编程？</h3><blockquote>
+<p>编程就是人把自己想命令计算机干的事用编程语言翻译出来并写到文件里（这一系列的文件就是程序），那么为什么要编程？</p>
+</blockquote>
+<blockquote>
+<p>小人类编程的目的就是为了让计算机按照人类的思维逻辑(程序)自发地去工作从而把人力解放出来。</p>
+</blockquote>
+<blockquote>
+<p>综上，我们接下来的学习应该分为两个层面</p>
+</blockquote>
+<ul>
+<li>为了更好地控制人类的奴隶（即计算机），我们需要学习计算机是由什么组成的、它能做什么事、它是怎样工作的（详见计算机组成原理、操作系统概述）</li>
+<li>我们需要学习编程语言，从而把原来需要人力来完成的业务（比如ATM和购物）交给计算机去做</li>
+</ul>
+<h2 id="二，计算机组成原理"><a href="#二，计算机组成原理" class="headerlink" title="二，计算机组成原理"></a>二，计算机组成原理</h2><h3 id="2-1-什么是计算机？"><a href="#2-1-什么是计算机？" class="headerlink" title="2.1 什么是计算机？"></a>2.1 什么是计算机？</h3><blockquote>
+<p>俗称电脑，即通电的大脑，电脑二字蕴含了人类对计算机的终极期望，希望它能真的像人脑一样去工作，从而解放人力。</p>
+</blockquote>
+<h3 id="2-2-为什么要用计算机？"><a href="#2-2-为什么要用计算机？" class="headerlink" title="2.2 为什么要用计算机？"></a>2.2 为什么要用计算机？</h3><blockquote>
+<p>世界是由聪明的懒人统治的，任何时期，总有一群聪明的懒人想要奴隶别人。在奴隶制社会，聪明的懒人奴役的是真正的人，而人是无法不吃、不喝、不睡觉一直工作的，但是计算机作为一台机器是可以做到的，所以把计算机当奴隶是上上之选。</p>
+</blockquote>
+<h3 id="2-3-计算机的五大组成部分"><a href="#2-3-计算机的五大组成部分" class="headerlink" title="2.3 计算机的五大组成部分"></a>2.3 计算机的五大组成部分</h3><blockquote>
+<p>计算机有五大组成部分，既然计算机是人的奴隶，那么计算机设计核心肯定也是在模仿真正的人，所以我们完全可以把计算机的五大组件比喻成人类的各种器官</p>
+</blockquote>
+<h4 id="2-3-1-控制器"><a href="#2-3-1-控制器" class="headerlink" title="2.3.1 控制器"></a>2.3.1 控制器</h4><pre><code>控制器是计算机的指挥系统，用来控制计算机其他组件的运行，相当于人类的大脑
+</code></pre>
+<h4 id="2-3-2-运算器"><a href="#2-3-2-运算器" class="headerlink" title="2.3.2 运算器"></a>2.3.2 运算器</h4><pre><code>运算器是计算机的运算功能，用来做算术运算和逻辑运算，相当于人脑。
+
+ps：控制器+运算器=CPU，cpu相当于人的大脑
+</code></pre>
+<h4 id="2-3-3-存储器"><a href="#2-3-3-存储器" class="headerlink" title="2.3.3 存储器"></a>2.3.3 存储器</h4><pre><code>存储器是计算机的记忆功能，用来存取数据。
+
+存储器主要分为内存与外存：
+
+- 内存相当于人的短期记忆。断电数据丢失
+- 外存(如磁盘),相当于记事的本子，断电数据不会丢失，是用来永久保存数据的
+ps：内存的存取速度要远远高于外存
+</code></pre>
+<h4 id="2-3-4-输入设备input"><a href="#2-3-4-输入设备input" class="headerlink" title="2.3.4 输入设备input"></a>2.3.4 输入设备input</h4><pre><code>输入设备是计算接收外界输入数据的工具，如键盘、鼠标，相当于人的眼睛或耳朵。
+</code></pre>
+<h4 id="2-3-5-输出设备output"><a href="#2-3-5-输出设备output" class="headerlink" title="2.3.5 输出设备output"></a>2.3.5 输出设备output</h4><pre><code>输出设备是计算机向外输出数据的工具，如显示器、打印机，相当于人说的话，写出的文章。
+
+ps：存储器如内存、磁盘等既是输入设备又是输出设备，统称为IO设备
+</code></pre>
+<p><strong>一个非常重要的基础知识:与运行程序相关的三大核心硬件</strong></p>
+<ul>
+<li><p>我们编写的程序一定是要运行于计算机硬件之上，而站在硬件的角度，与运行程序有关的三大核心硬件为CPU、内存、硬盘。</p>
+</li>
+<li><p>程序最先是存放于硬盘中的，程序的运行是先从硬盘把代码加载到内存中，然后cpu是从内存中读取指令运行。</p>
+</li>
+</ul>
+<h2 id="三，操作系统概述"><a href="#三，操作系统概述" class="headerlink" title="三，操作系统概述"></a>三，操作系统概述</h2><h3 id="3-1-操作系统的由来"><a href="#3-1-操作系统的由来" class="headerlink" title="3.1 操作系统的由来"></a>3.1 操作系统的由来</h3><blockquote>
+<p>大前提：我们编程目的就是为了奴役计算机，让计算机硬件自发地运行起来，然而硬件毕竟是”死的“，硬件的运行都是由软件支配。</p>
+</blockquote>
+<blockquote>
+<p>倘若我们要开发一个应用程序，比如暴风音影，该软件的一个核心业务就是播放视频，开发者若要编写程序完成播放视频这个业务逻辑，必先涉及到底层硬件硬盘的基本运作（视频文件都是先存放于硬盘中），这意味着开发者在编写业务逻辑代码之前，必须先编写一个控制硬盘基本运行的控制程序，然而这仅仅只是一个开始，事实上，在编写应用程序的业务逻辑前，需要开发者编写出一套完整的控制程序用来控制所有硬件的基本运行（这要求开发者需要详细了解计算机硬件的各种控制细节，例如我们必须把CPU里面所有指令集都掌握一遍），如此，所有的开发者在开发程序时都必须依次开发两种：</p>
+</blockquote>
+<blockquote>
+<ul>
+<li>编写一套完整的的控制程序，用来控制硬件的基本运行，以及把复杂的硬件的操作封装成简单的接口</li>
+</ul>
+</blockquote>
+<ul>
+<li>基于控制程序的接口开发包含一系列业务逻辑的程序，为了与控制程序区分，可以称为应用程序，以ATM这款应用程序为例，业务逻辑有提款、转账、查询余额等</li>
+</ul>
+<blockquote>
+<p>综上，对于不同公司的开发者来说，应用程序的业务逻辑各不相同，但硬件的控制程序都大致相同，为了避免所有程序员做重复劳动，以及不用再耗费精力去了解所有硬件的运行细节，有公司专门跳出来承担起控制程序的开发任务，这里所说的控制程序指的就是操作系统。</p>
+</blockquote>
+<pre><code>操作系统的功能就是帮我们把复杂的硬件的控制封装成简单的接口，对于开发应用程序来说只需要调用操作系统提供给我们的接口即可
+</code></pre>
+<h3 id="3-2-系统软件与应用软件"><a href="#3-2-系统软件与应用软件" class="headerlink" title="3.2 系统软件与应用软件"></a>3.2 系统软件与应用软件</h3><blockquote>
+<p>硬件以上运行的都是软件，而软件分为两类：</p>
+</blockquote>
+<pre><code>1.应用软件（例如qq、word、暴风影音，我们学习python就是为了开发应用软件的）
+2.操作系统，操作系统应用软件与硬件之间的一个桥梁，是协调、管理、控制计算机硬件与应用软件资源的控制程序。
+</code></pre>
+<h3 id="3-3-计算机系统三层结构"><a href="#3-3-计算机系统三层结构" class="headerlink" title="3.3 计算机系统三层结构"></a>3.3 计算机系统三层结构</h3><blockquote>
+<p>综上，我们开发应用程序本质是在控制硬件，但是我们直接打交道的是操作系统，应用程序都是通过操作系统来间接地操作硬件的，所以一套完整的计算机系统分为三层，如下</p>
+</blockquote>
+<p><img src="/articles/2023/03/16/computer-fundamentals/1.png"></p>
+<p><strong>一个非常重要的基础概念：平台</strong></p>
+<pre><code>应用程序都是运行于操作系统之上，而操作系统则是运行于硬件之上的，所以承载应用程序的是一台运行有操作系统的计算机，称之为应用程序的运行平台，即：硬件 + 操作系统 == 平台
+</code></pre>
+<p><img src="/articles/2023/03/16/computer-fundamentals/2.png"></p>
+<blockquote>
+<p>常见的平台有：windows系统+某款硬件、linux系统+某款硬件、ubuntu+某款硬件等，我们在开发应用程序时就需要考虑到应用程序的跨平台性，如果能开发出一款可以在任意平台运行的应用程序，那对于开发者来说真是极大的福音。而决定应用软件的跨平台性的关键因素往往是编程语言的选择，python恰好是一款跨平台性语言，这也是我们学习它的原因之一。</p>
+</blockquote>
+</div><section class="post-thanks"><h2 class="post-thanks-title">致谢 / 参考来源</h2><ul class="post-thanks-list"><li class="post-thanks-item"><span class="post-thanks-name">b站老男孩agen老师</span><span class="post-thanks-note">Python 系列课程学习笔记</span></li></ul></section><div class="post-tags post-tags-footer"><a class="tag-chip" href="/tags/Python/">Python</a></div><nav class="post-nav"><a class="post-nav-item post-nav-prev" href="/articles/2023/03/16/python-language-introduction/"><span class="post-nav-label">上一篇</span><span class="post-nav-title">编程语言与Python介绍</span></a><a class="post-nav-item post-nav-next" href="/articles/2020/09/24/kubernetes-join-token-guide/"><span class="post-nav-label">下一篇</span><span class="post-nav-title">节点加入k8s集群如何获取token等参数值</span></a></nav></article><aside class="side-col"><div class="widget toc-widget"><h3 class="widget-title">目录</h3><div class="post-toc"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#1%E3%80%81%E8%AE%A1%E7%AE%97%E6%9C%BA%E6%A0%B8%E5%BF%83%E5%9F%BA%E7%A1%80"><span class="toc-text">1、计算机核心基础</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%EF%BC%8C%E5%BC%95%E5%AD%90"><span class="toc-text">一，引子</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-1-%E4%BB%80%E4%B9%88%E6%98%AF%E8%AF%AD%E8%A8%80%EF%BC%9F%E4%BB%80%E4%B9%88%E6%98%AF%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80%EF%BC%9F%E4%B8%BA%E4%BD%95%E8%A6%81%E6%9C%89%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80%EF%BC%9F"><span class="toc-text">1.1 什么是语言？什么是编程语言？为何要有编程语言？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-2-%E4%BB%80%E4%B9%88%E6%98%AF%E7%BC%96%E7%A8%8B%EF%BC%9F%E4%B8%BA%E4%BB%80%E4%B9%88%E8%A6%81%E7%BC%96%E7%A8%8B%EF%BC%9F"><span class="toc-text">1.2 什么是编程？为什么要编程？</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%EF%BC%8C%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86"><span class="toc-text">二，计算机组成原理</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-%E4%BB%80%E4%B9%88%E6%98%AF%E8%AE%A1%E7%AE%97%E6%9C%BA%EF%BC%9F"><span class="toc-text">2.1 什么是计算机？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-%E4%B8%BA%E4%BB%80%E4%B9%88%E8%A6%81%E7%94%A8%E8%AE%A1%E7%AE%97%E6%9C%BA%EF%BC%9F"><span class="toc-text">2.2 为什么要用计算机？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-3-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%9A%84%E4%BA%94%E5%A4%A7%E7%BB%84%E6%88%90%E9%83%A8%E5%88%86"><span class="toc-text">2.3 计算机的五大组成部分</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%89%EF%BC%8C%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E6%A6%82%E8%BF%B0"><span class="toc-text">三，操作系统概述</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#3-1-%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%9A%84%E7%94%B1%E6%9D%A5"><span class="toc-text">3.1 操作系统的由来</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-2-%E7%B3%BB%E7%BB%9F%E8%BD%AF%E4%BB%B6%E4%B8%8E%E5%BA%94%E7%94%A8%E8%BD%AF%E4%BB%B6"><span class="toc-text">3.2 系统软件与应用软件</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-3-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%B3%BB%E7%BB%9F%E4%B8%89%E5%B1%82%E7%BB%93%E6%9E%84"><span class="toc-text">3.3 计算机系统三层结构</span></a></li></ol></li></ol></li></ol></div></div></aside></div><button class="mobile-toc-toggle" type="button" aria-label="打开目录" aria-expanded="false" aria-controls="mobile-toc-panel">目录</button><div class="mobile-toc-overlay" aria-hidden="true"><div class="mobile-toc-panel" id="mobile-toc-panel" role="dialog" aria-modal="true" aria-label="文章目录"><div class="mobile-toc-head"><h3 class="mobile-toc-title">目录</h3><button class="mobile-toc-close" type="button" aria-label="关闭目录">×</button></div><div class="post-toc mobile-post-toc"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#1%E3%80%81%E8%AE%A1%E7%AE%97%E6%9C%BA%E6%A0%B8%E5%BF%83%E5%9F%BA%E7%A1%80"><span class="toc-text">1、计算机核心基础</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%EF%BC%8C%E5%BC%95%E5%AD%90"><span class="toc-text">一，引子</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-1-%E4%BB%80%E4%B9%88%E6%98%AF%E8%AF%AD%E8%A8%80%EF%BC%9F%E4%BB%80%E4%B9%88%E6%98%AF%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80%EF%BC%9F%E4%B8%BA%E4%BD%95%E8%A6%81%E6%9C%89%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80%EF%BC%9F"><span class="toc-text">1.1 什么是语言？什么是编程语言？为何要有编程语言？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-2-%E4%BB%80%E4%B9%88%E6%98%AF%E7%BC%96%E7%A8%8B%EF%BC%9F%E4%B8%BA%E4%BB%80%E4%B9%88%E8%A6%81%E7%BC%96%E7%A8%8B%EF%BC%9F"><span class="toc-text">1.2 什么是编程？为什么要编程？</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%EF%BC%8C%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86"><span class="toc-text">二，计算机组成原理</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-%E4%BB%80%E4%B9%88%E6%98%AF%E8%AE%A1%E7%AE%97%E6%9C%BA%EF%BC%9F"><span class="toc-text">2.1 什么是计算机？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-%E4%B8%BA%E4%BB%80%E4%B9%88%E8%A6%81%E7%94%A8%E8%AE%A1%E7%AE%97%E6%9C%BA%EF%BC%9F"><span class="toc-text">2.2 为什么要用计算机？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-3-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%9A%84%E4%BA%94%E5%A4%A7%E7%BB%84%E6%88%90%E9%83%A8%E5%88%86"><span class="toc-text">2.3 计算机的五大组成部分</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%89%EF%BC%8C%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E6%A6%82%E8%BF%B0"><span class="toc-text">三，操作系统概述</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#3-1-%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%9A%84%E7%94%B1%E6%9D%A5"><span class="toc-text">3.1 操作系统的由来</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-2-%E7%B3%BB%E7%BB%9F%E8%BD%AF%E4%BB%B6%E4%B8%8E%E5%BA%94%E7%94%A8%E8%BD%AF%E4%BB%B6"><span class="toc-text">3.2 系统软件与应用软件</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-3-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%B3%BB%E7%BB%9F%E4%B8%89%E5%B1%82%E7%BB%93%E6%9E%84"><span class="toc-text">3.3 计算机系统三层结构</span></a></li></ol></li></ol></li></ol></div></div></div></main><footer class="site-footer"><div class="container footer-inner"><p class="footer-copy">© 2018–2026 Kkabuzs</p><p class="footer-powered">Powered by
+ <a href="https://hexo.io" target="_blank" rel="noopener">Hexo</a> ·  Theme kk-tech</p></div></footer><script src="/js/main.js"></script></body></html>
