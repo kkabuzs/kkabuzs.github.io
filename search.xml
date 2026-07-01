@@ -4,6 +4,31 @@
   
     
     <entry>
+      <title>神经网络</title>
+      <link href="/articles/2026/06/30/neural-network/"/>
+      <url>/articles/2026/06/30/neural-network/</url>
+      
+        <content type="html"><![CDATA[<h1 id="神经网络"><a href="#神经网络" class="headerlink" title="神经网络"></a>神经网络</h1><h2 id="一，基础神经网络"><a href="#一，基础神经网络" class="headerlink" title="一，基础神经网络"></a>一，基础神经网络</h2><blockquote><p>神经网络就是一个能够自动学习 <strong>输入—&gt; 输出</strong> 的函数</p></blockquote><p><img src="/articles/2026/06/30/neural-network/1.jpeg"></p><blockquote><p><strong>最简单的神经元（Neuron）：</strong></p><p>最基础的神经网络，只有一个神经元。</p></blockquote><ul><li><p>假设有三个输入：x1 &#x3D; 身高，x2 &#x3D; 年龄，x3 &#x3D; 体重</p></li><li><p>神经元会给每一个输入都乘一个权重：x1*w1，x2*w2，x3*w3</p></li><li><p>再全部相加：z &#x3D; x1*w1 + x2*w2 + x3*w3</p></li><li><p>再加一个偏置（Bias）： z &#x3D; x1*w1 + x2*w2 + x3*w3 + b</p></li></ul><h3 id="1-1-激活函数"><a href="#1-1-激活函数" class="headerlink" title="1.1 激活函数"></a>1.1 激活函数</h3><blockquote><p>激活函数是一个非线性函数。若没有激活函数，那么神经网络就是一个直线。</p></blockquote><blockquote><p><strong>举个例子：</strong></p><ul><li>假如要判断<code>年龄</code> <code>学历</code> <code>收入</code> 然后是否批准贷款。</li><li>但真实情况不是年龄越大，贷款越容易。</li><li>可能是 <code>收入高</code>  <code>学历高</code>  <code>年龄适中</code>  ，更容易获批贷款。</li></ul></blockquote><p><strong>这种关系很复杂，没有激活函数，神经网络只能走直线，有了激活函数，才能走曲线，才能拟合现实世界。</strong></p><p><img src="/articles/2026/06/30/neural-network/3.png"></p><h3 id="1-2-常见的激活函数"><a href="#1-2-常见的激活函数" class="headerlink" title="1.2 常见的激活函数"></a>1.2 常见的激活函数</h3><h4 id="1-2-1-ReLU"><a href="#1-2-1-ReLU" class="headerlink" title="1.2.1 ReLU"></a>1.2.1 ReLU</h4><blockquote><p>公式：</p></blockquote><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">ReLU(x)=max(0,x)</span><br><span class="line"></span><br><span class="line"># 解释：</span><br><span class="line"># 如果小于0，输出0。如果大于0，原样输出。</span><br><span class="line"># 例如：-5 ----&gt; 0</span><br><span class="line">        3 ----&gt; 3</span><br></pre></td></tr></table></figure><blockquote><p><strong>优点：</strong></p><ul><li>非常简单，计算快，不容易梯度消失，计算快。</li></ul></blockquote><blockquote><p>目前大部分神经网络都是使用的ReLU或是它的变种。</p></blockquote><h4 id="1-2-2-GELU-（transformer重要）"><a href="#1-2-2-GELU-（transformer重要）" class="headerlink" title="1.2.2 GELU （transformer重要）"></a>1.2.2 GELU （transformer重要）</h4><blockquote><p>这是 Transformer 和大语言模型最常用的激活函数。<br>ReLU的特点是负数一刀切，全丢。GELU的特点是负数根据概率平滑保留。</p></blockquote><p><img src="/articles/2026/06/30/neural-network/4.jpeg"></p><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">Linear</span><br><span class="line">↓</span><br><span class="line"></span><br><span class="line">GELU</span><br><span class="line">↓</span><br><span class="line"></span><br><span class="line">Linear</span><br></pre></td></tr></table></figure><h2 id="二，RNN循环神经网络"><a href="#二，RNN循环神经网络" class="headerlink" title="二，RNN循环神经网络"></a>二，RNN循环神经网络</h2><blockquote><p><strong>RNN循环网络的特点：</strong></p><ul><li>在读取一句话的时候，读取第一个字，进行理解，然后读取第二个字，把第一个字的理解传过来，读取第三个字的时候，把第一个和第二个字的理解传递过来，依次类推。（类似一个流水线）</li></ul></blockquote><p><img src="/articles/2026/06/30/neural-network/RNN%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C.png"></p><blockquote><p><strong>弊端：</strong></p><ul><li>易丢失前面的信息。（流水线越长，前面的信息越容易被稀释）</li><li>不能并行，必须排队。（必须按顺序，第二个字要等待第一个字理解完）</li><li>训练起来巨慢，长距离信息丢光。</li></ul></blockquote><p><img src="/articles/2026/06/30/neural-network/2.png"></p><h2 id="三，CNN卷积神经网络"><a href="#三，CNN卷积神经网络" class="headerlink" title="三，CNN卷积神经网络"></a>三，CNN卷积神经网络</h2><blockquote><p>传统的神经网络在处理图片问题时，会遇见两个问题。</p><ul><li>由于像素点数量众多，计算量会非常大，对于每一个像素点，传统的神经网络都需要和其他的像素点建立起连接。</li><li>而且会忽略图像的空间结构信息。例如我们识别下面猫的基本特征时，要先识别猫的耳朵（像素点01），猫的脚趾（像素点31）。</li><li>对于神经网络来说，也应该用这种方式去理解猫的这个物种，但是对应到像素块，进行强行学习，费时费力也容易学习错误。</li></ul></blockquote><p><img src="/articles/2026/06/30/neural-network/5.png"></p><p>理想状态：神经网络在识别图像时，可以专注局部区域，进行更精确的特征提取。例如在识别猫耳朵的时候，只需要关注猫耳朵的像素点，从而总结出耳朵的特征描述。</p><h3 id="3-1-卷积核"><a href="#3-1-卷积核" class="headerlink" title="3.1 卷积核"></a>3.1 卷积核</h3><blockquote><p>假设设定一个2*2范围的像素块作为卷积核，并设置一个随机的k值，来让ai自主学习。每当卷积个经过一个像素块，就让<code>K1*00+k2*01+k3*10+k4*11</code>得出一个新值，这个值就是这个像素块集合的特征。</p></blockquote><p><img src="/articles/2026/06/30/neural-network/6.png"></p><blockquote><p>但是图像是由RGB（红绿蓝）三色叠加而来的。所以不仅局限于简单的二维平面，而是需要在每个颜色层面进行特征提取。</p></blockquote><p><strong>不同颜色层，同一像素位置，是同一像素特征，所以也要采用相同的方式处理</strong></p><p><img src="/articles/2026/06/30/neural-network/7.png"></p><blockquote><p>但是实际情况中，一个卷积核只能得出一个特征，所以要构建多份卷积核，每份卷积核都以不同的参数初始化，从而捕捉图像的不同特征。</p></blockquote>]]></content>
+      
+      
+      <categories>
+          
+          <category> AI Infra </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> Transformer </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>MongoDB-6.0.21离线分片集群部署</title>
       <link href="/articles/2025/04/22/mongodb-6-0-21-offline-sharded-cluster-install/"/>
       <url>/articles/2025/04/22/mongodb-6-0-21-offline-sharded-cluster-install/</url>
