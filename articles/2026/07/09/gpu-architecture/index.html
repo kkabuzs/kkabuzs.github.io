@@ -1,0 +1,158 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#ffffff"><title>GPU 架构详解 | kkabuzs博客屋</title><meta name="description" content="学习记录和整理"><meta name="author" content="Kkabuzs"><link rel="icon" href="/images/touxiang.jpg"><link rel="stylesheet" href="/css/style.css"><script>(function () {
+  try {
+    var darkQuery = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)');
+    var override = localStorage.getItem('theme-override');
+    var theme = override === 'light' || override === 'dark' ? override : (darkQuery && darkQuery.matches ? 'dark' : 'light');
+    document.documentElement.setAttribute('data-theme', theme);
+    var meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.setAttribute('content', theme === 'dark' ? '#1c1c1e' : '#ffffff');
+  } catch (e) {}
+})();</script><meta name="generator" content="Hexo 8.1.2"></head><body><header class="site-header"><div class="container nav-inner"><a class="brand" href="/"><img class="brand-avatar" src="/images/touxiang.jpg" alt="Kkabuzs"><span class="brand-name">kkabuzs博客屋</span></a><button class="nav-toggle" type="button" aria-label="菜单" aria-expanded="false"><span class="nav-toggle-bar"></span><span class="nav-toggle-bar"></span><span class="nav-toggle-bar"></span></button><nav class="nav-menu"><a class="nav-link" href="/">首页</a><a class="nav-link" href="/categories/">分类</a><a class="nav-link" href="/tags/">标签</a><a class="nav-link" href="/archives/">时间轴</a></nav><div class="nav-actions"><button class="search-toggle" type="button" aria-label="打开搜索" title="搜索"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><path d="M21 21l-4.3-4.3"></path></svg></button><button class="theme-toggle" type="button" aria-label="切换深色模式" title="切换深色模式"><svg class="icon-sun" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path></svg><svg class="icon-moon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg></button></div></div></header><div class="search-overlay" aria-hidden="true"><div class="search-panel" role="dialog" aria-modal="true" aria-label="站内搜索"><div class="search-head"><div class="search-input-wrap"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><path d="M21 21l-4.3-4.3"></path></svg><input class="search-input" type="search" placeholder="搜索全部文章..." autocomplete="off"></div><button class="search-close" type="button" aria-label="关闭搜索">×</button></div><div class="search-scope">搜索全部文章</div><div class="search-results"><div class="search-empty">输入关键词开始搜索</div></div></div></div><main class="container site-main"><div class="layout-grid"><article class="main-col post"><header class="post-header"><h1 class="post-title">GPU 架构详解</h1><div class="post-meta"><time class="post-date">发布 2026-07-09</time><time class="post-date">更新 2026-07-09</time><a class="tag-pill" href="/categories/AI-Infra/">AI Infra</a></div></header><div class="post-motto" data-motto-text="无论你跑多少距离，放弃很容易，停下来，肉体得到暂时的舒服，但你最终会一无所得。 坚持或许很难，但你最后一定会有所收获，跑过的路，永远不会欺骗自己。"><p>无论你跑多少距离，放弃很容易，停下来，肉体得到暂时的舒服，但你最终会一无所得。</p><p>坚持或许很难，但你最后一定会有所收获，跑过的路，永远不会欺骗自己。</p></div><div class="post-content markdown-preview"><h1 id="GPU-架构详解"><a href="#GPU-架构详解" class="headerlink" title="GPU 架构详解"></a>GPU 架构详解</h1><h2 id="一，CPU-和-GPU-的区别"><a href="#一，CPU-和-GPU-的区别" class="headerlink" title="一，CPU 和 GPU 的区别"></a>一，CPU 和 GPU 的区别</h2><h3 id="1-1-CPU-特点"><a href="#1-1-CPU-特点" class="headerlink" title="1.1 CPU 特点"></a>1.1 CPU 特点</h3><p><img src="/articles/2026/07/09/gpu-architecture/gpu-architecture-01.png"></p>
+<blockquote>
+<p><strong>特点：</strong> </p>
+<ul>
+<li>每个core很强。</li>
+<li>擅长串行</li>
+</ul>
+</blockquote>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 例如做复杂计算：</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> i = <span class="number">1</span>~<span class="number">10000</span></span><br><span class="line"></span><br><span class="line">Core1 --&gt; <span class="number">1</span> --&gt; <span class="number">2</span> --&gt; <span class="number">3</span> --&gt; <span class="number">4</span> ...</span><br><span class="line"></span><br><span class="line"><span class="comment"># 核心非常快</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="1-2-GPU-特点"><a href="#1-2-GPU-特点" class="headerlink" title="1.2 GPU 特点"></a>1.2 GPU 特点</h3><p><img src="/articles/2026/07/09/gpu-architecture/gpu-architecture-02.png"></p>
+<blockquote>
+<p><strong>特点：</strong> </p>
+<ul>
+<li>几千个小核心。</li>
+<li>例如 NVIDIA A100 大约 6912 CUDA Cores 。虽然GPU Core 很弱，但是并行能力很强，6912 个 Cores 同时负责计算。</li>
+</ul>
+</blockquote>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 例如 有10000张图片：</span></span><br><span class="line">GPU：</span><br><span class="line">	Thread1 图片<span class="number">1</span>  </span><br><span class="line">  </span><br><span class="line">	Thread2 图片<span class="number">2</span>  </span><br><span class="line">  </span><br><span class="line">	Thread3 图片<span class="number">3</span>  </span><br><span class="line">  </span><br><span class="line">	......  </span><br><span class="line">  </span><br><span class="line">	Thread1000000</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p><strong>总结：</strong> </p>
+<ul>
+<li>CPU 单个核心功能复杂、控制能力强，适合低延迟、分支多、串行依赖强的任务。</li>
+<li>GPU 单个执行单元相对简单，但数量多、吞吐量高，适合数据并行、规则重复、计算密集的任务。</li>
+</ul>
+</blockquote>
+<h2 id="二，SM（Streaming-Multiprocessor）"><a href="#二，SM（Streaming-Multiprocessor）" class="headerlink" title="二，SM（Streaming Multiprocessor）"></a>二，SM（Streaming Multiprocessor）</h2><blockquote>
+<p><strong>介绍：</strong><br>SM 是 GPU 内部的流式处理器。这个单元里面包含：</p>
+<ul>
+<li><code>CUDA核心（CUDA Core）</code></li>
+<li><code>寄存器（Register）</code></li>
+<li><code>共享内存（Shared Memory）</code></li>
+<li><code>Warp 调度器（Warp Scheduler）</code></li>
+<li><code>张量核心（Tensor Core）</code></li>
+<li><code>加载/存储单元（Load Store Unit (LSU)）</code></li>
+<li><code>特殊函数单元（Special Function Unit (SFU)）</code></li>
+</ul>
+</blockquote>
+<blockquote>
+<p>举例：一个 GPU 有 80 个 SM，每个 SM 有 128 CUDA Cores。<br>所以：80 * 128 &#x3D; 10240 CUDA Core<br>真正调度线程的是： SM</p>
+</blockquote>
+<p><strong>一个 Block 被分配给一个 SM，由 SM 负责内部的线程调度，GPU 调度任务的基本单位是 Block，而非单个线程。</strong></p>
+<blockquote>
+<p>补充：硬件真正执行指令的最小单位是 Warp，Block 是软件逻辑到硬件执行的任务封装。</p>
+</blockquote>
+<h3 id="2-1-CUDA-Core"><a href="#2-1-CUDA-Core" class="headerlink" title="2.1  CUDA Core"></a>2.1  CUDA Core</h3><blockquote>
+<p><strong>介绍：</strong><br>SM 是 GPU 的核心计算单元，Block 会被分配到 SM 上拆分为 Warp 执行。<strong>CUDA Core 就是 SM 内部真正执行通用算术运算的最小硬件单元。</strong></p>
+</blockquote>
+<p><strong>真正控制CUDA Core 工作的是Warp调度器。</strong></p>
+<h3 id="2-2-线程（Thread）的运行逻辑"><a href="#2-2-线程（Thread）的运行逻辑" class="headerlink" title="2.2 线程（Thread）的运行逻辑"></a>2.2 线程（Thread）的运行逻辑</h3><blockquote>
+<p>CUDA Kernel：</p>
+</blockquote>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">kernel&lt;&lt;&lt;Grid, Block&gt;&gt;&gt;();</span><br><span class="line"></span><br><span class="line"># 例如：</span><br><span class="line">Grid --&gt; <span class="number">100</span> Blocks --&gt; 每个 Block <span class="number">256</span> Threads</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>GPU：</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">Block0</span><br><span class="line">↓</span><br><span class="line">SM0  </span><br><span class="line">  </span><br><span class="line">Block1</span><br><span class="line">↓</span><br><span class="line">SM1</span><br><span class="line"></span><br><span class="line">Block2</span><br><span class="line">↓</span><br><span class="line">SM3</span><br><span class="line"></span><br><span class="line"># Block不会拆开，整个Block必须放进一个SM。</span><br></pre></td></tr></table></figure>
+
+
+<h3 id="2-3-Warp"><a href="#2-3-Warp" class="headerlink" title="2.3 Warp"></a>2.3 Warp</h3><blockquote>
+<p><strong>介绍：</strong><br>GPU 不是一个一个的执行 Thread ，而是一次执行 32 个 Thread 。这 32 个 Thread 就叫 Warp。<br><strong>（NVIDIA GPU 硬件就是这样设计的 32 个 Thread 是一个Warp ）</strong></p>
+</blockquote>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 举例：</span></span><br><span class="line">Thread（线程）：</span><br><span class="line"><span class="number">0</span></span><br><span class="line"><span class="number">1</span></span><br><span class="line"><span class="number">2</span></span><br><span class="line">...</span><br><span class="line"><span class="number">31</span></span><br><span class="line">组成 Warp0</span><br><span class="line"></span><br><span class="line"><span class="number">32</span>～<span class="number">63</span> 组成Warp1  ... 依次类推</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>所以 256 Threads &#x3D; 8 Warp</p>
+</blockquote>
+<blockquote>
+<p>Warp Scheduler 一次发射32 个 Thread。</p>
+</blockquote>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 正确运行逻辑：</span></span><br><span class="line">Warp --&gt; Warp --&gt; Warp</span><br><span class="line"></span><br><span class="line"><span class="comment"># 错误理解：</span></span><br><span class="line">Thread --&gt; Thread --&gt; Thread</span><br></pre></td></tr></table></figure>
+
+
+<h3 id="2-4-Warp-Divergence（分支发散）"><a href="#2-4-Warp-Divergence（分支发散）" class="headerlink" title="2.4 Warp Divergence（分支发散）"></a>2.4 Warp Divergence（分支发散）</h3><blockquote>
+<p>GPU 在运行时，必须先执行<code>if</code>，在执行<code>else</code>。不能像CPU那样去判断跳过。所以 CUDA 尽量避免 <code>if</code>，<code>switch</code>，<code>复杂判断</code>。</p>
+</blockquote>
+<h3 id="2-5-Memory-Hierarchy（内存层次）"><a href="#2-5-Memory-Hierarchy（内存层次）" class="headerlink" title="2.5 Memory Hierarchy（内存层次）"></a>2.5 Memory Hierarchy（内存层次）</h3><blockquote>
+<p>GPU 有很多种 Memory。</p>
+<ul>
+<li><code>Global Memory（全局内存）</code></li>
+<li><code>Shared Memory（共享内存）</code></li>
+<li><code>Register（寄存器）</code></li>
+</ul>
+</blockquote>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 三种内存的速度：</span></span><br><span class="line">Register（寄存器） &gt; Shared Memory（共享内存） &gt; Global Memory（全局内存）</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>CUDA 调优 百分之90都在优化减少访问 Global Memory。</p>
+</blockquote>
+<h4 id="2-5-1-Shared-Memory（共享内存）的存在意义"><a href="#2-5-1-Shared-Memory（共享内存）的存在意义" class="headerlink" title="2.5.1 Shared Memory（共享内存）的存在意义"></a>2.5.1 Shared Memory（共享内存）的存在意义</h4><blockquote>
+<p>例如 100 个线程都读取 <code>A[0]</code> 这块数据。就要访问100次 <code>Global Memory</code>，速度很慢。</p>
+</blockquote>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">Global Memory  </span><br><span class="line">  </span><br><span class="line">↓  </span><br><span class="line">  </span><br><span class="line">Shared Memory  </span><br><span class="line">  </span><br><span class="line">↓  </span><br><span class="line">  </span><br><span class="line"><span class="number">100</span> 个 Thread</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>这样只需要访问一次<code>Global Memory</code>，就大大加快了运行速度。</p>
+</blockquote>
+<blockquote>
+<p><strong>总结：</strong><br>Shared Memory就是一个Block 内所有线程共享的小缓存（Scratchpad）。</p>
+<ul>
+<li>若要使用<code>Shared Memory</code>，需要用代码显式地让某些线程把数据搬到 <code>Shared Memory</code>。</li>
+</ul>
+</blockquote>
+<h3 id="2-6-Register（寄存器）"><a href="#2-6-Register（寄存器）" class="headerlink" title="2.6 Register（寄存器）"></a>2.6 Register（寄存器）</h3><blockquote>
+<p><strong>介绍：</strong><br>速度最快，每个 Thread 都有自己的 Register，通常变量都会存在寄存器中，但是数量有限。例如 Register 的数量为65536。</p>
+<ul>
+<li>如果一个 Kernel 用了 太多的Register，GPU 同时运行的 Warp 数量就会下降（Occupancy 降低）。</li>
+</ul>
+</blockquote>
+<h4 id="2-6-1-Occupancy（占用率）"><a href="#2-6-1-Occupancy（占用率）" class="headerlink" title="2.6.1 Occupancy（占用率）"></a>2.6.1 Occupancy（占用率）</h4><blockquote>
+<p><strong>介绍：</strong><br><strong>Occupancy（占用率）是 CUDA 架构中，衡量单个 SM（流式多处理器）硬件线程资源被利用饱满程度的核心指标</strong>。</p>
+</blockquote>
+<blockquote>
+<p><strong>通俗解释：</strong></p>
+<ul>
+<li>GPU 希望 SM 一直运行，一个 SM 最多运行 64 Warp。但是如果 Kernel 只能发射 16 Warp ，就会导致很多硬件闲置。</li>
+</ul>
+<p><strong>结论：</strong></p>
+<ul>
+<li>Occupancy越高，通常越容易隐藏内存访问延迟。</li>
+</ul>
+<p><strong>注意：</strong></p>
+<ul>
+<li><strong>Occupancy 高 ≠ 性能一定最好。</strong> 有些计算密集型 Kernel 即使 Occupancy 不高，也可能已经把计算单元跑满了，因此真正目标是<strong>平衡资源使用与执行效率</strong>。</li>
+</ul>
+</blockquote>
+<h3 id="2-7-Tensor-Core"><a href="#2-7-Tensor-Core" class="headerlink" title="2.7 Tensor Core"></a>2.7 Tensor Core</h3><blockquote>
+<p><strong>介绍：</strong><br>专为AI的矩阵运算而设计的张量芯片。</p>
+</blockquote>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># CUDA Core</span></span><br><span class="line">A+B</span><br><span class="line">A*B</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># Tensor Core</span></span><br><span class="line">一次性完成矩阵乘法运算</span><br><span class="line"><span class="comment"># 例如：</span></span><br><span class="line"><span class="number">16</span> * <span class="number">16</span> 矩阵运算</span><br></pre></td></tr></table></figure>
+
+
+<h3 id="2-8-总结"><a href="#2-8-总结" class="headerlink" title="2.8 总结"></a>2.8 总结</h3><blockquote>
+<ul>
+<li><strong>Warp Scheduler：</strong> 决定 GPU 如何调度线程。</li>
+<li><strong>Register：</strong> 决定线程的局部变量存放位置，也影响 Occupancy。</li>
+<li><strong>Shared Memory：</strong> CUDA Kernel 优化最重要的手段之一。</li>
+<li><strong>Tensor Core：</strong> AI 训练和推理性能的关键硬件。</li>
+<li><strong>Load Store Unit：</strong> 决定数据搬运效率，是内存带宽优化的重要组成部分。</li>
+<li><strong>CUDA Core：</strong> 执行通用计算。</li>
+<li><strong>Special Function Unit：</strong> 在涉及复杂数学函数时才会成为关注重点。</li>
+</ul>
+</blockquote>
+<h2 id="三，GPU-计算流程简图"><a href="#三，GPU-计算流程简图" class="headerlink" title="三，GPU 计算流程简图"></a>三，GPU 计算流程简图</h2><p><img src="/articles/2026/07/09/gpu-architecture/gpu-architecture-03.png"></p>
+<p><img src="/articles/2026/07/09/gpu-architecture/gpu-architecture-04.png"></p>
+</div><div class="post-tags post-tags-footer"><a class="tag-chip" href="/tags/GPU/">GPU</a></div><nav class="post-nav"><a class="post-nav-item post-nav-next" href="/articles/2026/07/08/pytorch-tensor/"><span class="post-nav-label">下一篇</span><span class="post-nav-title">PyTorch：张量（Tensor）</span></a></nav><section class="post-comments" id="comments"><h2 class="post-comments-title">评论</h2><script src="https://giscus.app/client.js" data-repo="kkabuzs/hexo-boke" data-repo-id="R_kgDOOYTQbw" data-category="General" data-category-id="DIC_kwDOOYTQb84DALl4" data-mapping="pathname" data-strict="0" data-reactions-enabled="1" data-emit-metadata="0" data-input-position="bottom" data-theme="preferred_color_scheme" data-lang="zh-CN" data-loading="lazy" crossorigin="anonymous" async></script></section></article><aside class="side-col"><div class="widget toc-widget"><h3 class="widget-title">目录</h3><div class="post-toc"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#GPU-%E6%9E%B6%E6%9E%84%E8%AF%A6%E8%A7%A3"><span class="toc-text">GPU 架构详解</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%EF%BC%8CCPU-%E5%92%8C-GPU-%E7%9A%84%E5%8C%BA%E5%88%AB"><span class="toc-text">一，CPU 和 GPU 的区别</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-1-CPU-%E7%89%B9%E7%82%B9"><span class="toc-text">1.1 CPU 特点</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-2-GPU-%E7%89%B9%E7%82%B9"><span class="toc-text">1.2 GPU 特点</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%EF%BC%8CSM%EF%BC%88Streaming-Multiprocessor%EF%BC%89"><span class="toc-text">二，SM（Streaming Multiprocessor）</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-CUDA-Core"><span class="toc-text">2.1  CUDA Core</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-%E7%BA%BF%E7%A8%8B%EF%BC%88Thread%EF%BC%89%E7%9A%84%E8%BF%90%E8%A1%8C%E9%80%BB%E8%BE%91"><span class="toc-text">2.2 线程（Thread）的运行逻辑</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-3-Warp"><span class="toc-text">2.3 Warp</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-4-Warp-Divergence%EF%BC%88%E5%88%86%E6%94%AF%E5%8F%91%E6%95%A3%EF%BC%89"><span class="toc-text">2.4 Warp Divergence（分支发散）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-5-Memory-Hierarchy%EF%BC%88%E5%86%85%E5%AD%98%E5%B1%82%E6%AC%A1%EF%BC%89"><span class="toc-text">2.5 Memory Hierarchy（内存层次）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-6-Register%EF%BC%88%E5%AF%84%E5%AD%98%E5%99%A8%EF%BC%89"><span class="toc-text">2.6 Register（寄存器）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-7-Tensor-Core"><span class="toc-text">2.7 Tensor Core</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-8-%E6%80%BB%E7%BB%93"><span class="toc-text">2.8 总结</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%89%EF%BC%8CGPU-%E8%AE%A1%E7%AE%97%E6%B5%81%E7%A8%8B%E7%AE%80%E5%9B%BE"><span class="toc-text">三，GPU 计算流程简图</span></a></li></ol></li></ol></div></div></aside></div><button class="mobile-toc-toggle" type="button" aria-label="打开目录" aria-expanded="false" aria-controls="mobile-toc-panel">目录</button><div class="mobile-toc-overlay" aria-hidden="true"><div class="mobile-toc-panel" id="mobile-toc-panel" role="dialog" aria-modal="true" aria-label="文章目录"><div class="mobile-toc-head"><h3 class="mobile-toc-title">目录</h3><button class="mobile-toc-close" type="button" aria-label="关闭目录">×</button></div><div class="post-toc mobile-post-toc"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#GPU-%E6%9E%B6%E6%9E%84%E8%AF%A6%E8%A7%A3"><span class="toc-text">GPU 架构详解</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%EF%BC%8CCPU-%E5%92%8C-GPU-%E7%9A%84%E5%8C%BA%E5%88%AB"><span class="toc-text">一，CPU 和 GPU 的区别</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-1-CPU-%E7%89%B9%E7%82%B9"><span class="toc-text">1.1 CPU 特点</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-2-GPU-%E7%89%B9%E7%82%B9"><span class="toc-text">1.2 GPU 特点</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%EF%BC%8CSM%EF%BC%88Streaming-Multiprocessor%EF%BC%89"><span class="toc-text">二，SM（Streaming Multiprocessor）</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-CUDA-Core"><span class="toc-text">2.1  CUDA Core</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-%E7%BA%BF%E7%A8%8B%EF%BC%88Thread%EF%BC%89%E7%9A%84%E8%BF%90%E8%A1%8C%E9%80%BB%E8%BE%91"><span class="toc-text">2.2 线程（Thread）的运行逻辑</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-3-Warp"><span class="toc-text">2.3 Warp</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-4-Warp-Divergence%EF%BC%88%E5%88%86%E6%94%AF%E5%8F%91%E6%95%A3%EF%BC%89"><span class="toc-text">2.4 Warp Divergence（分支发散）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-5-Memory-Hierarchy%EF%BC%88%E5%86%85%E5%AD%98%E5%B1%82%E6%AC%A1%EF%BC%89"><span class="toc-text">2.5 Memory Hierarchy（内存层次）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-6-Register%EF%BC%88%E5%AF%84%E5%AD%98%E5%99%A8%EF%BC%89"><span class="toc-text">2.6 Register（寄存器）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-7-Tensor-Core"><span class="toc-text">2.7 Tensor Core</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-8-%E6%80%BB%E7%BB%93"><span class="toc-text">2.8 总结</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%89%EF%BC%8CGPU-%E8%AE%A1%E7%AE%97%E6%B5%81%E7%A8%8B%E7%AE%80%E5%9B%BE"><span class="toc-text">三，GPU 计算流程简图</span></a></li></ol></li></ol></div></div></div></main><footer class="site-footer"><div class="container footer-inner"><p class="footer-copy">© 2018–2026 Kkabuzs</p><p class="footer-powered">Powered by
+ <a href="https://hexo.io" target="_blank" rel="noopener">Hexo</a> ·  Theme kk-tech</p></div></footer><script src="/js/main.js"></script></body></html>

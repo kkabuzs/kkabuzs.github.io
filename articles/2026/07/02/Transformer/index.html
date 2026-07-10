@@ -1,0 +1,169 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#ffffff"><title>Transformer | kkabuzs博客屋</title><meta name="description" content="学习记录和整理"><meta name="author" content="Kkabuzs"><link rel="icon" href="/images/touxiang.jpg"><link rel="stylesheet" href="/css/style.css"><script>(function () {
+  try {
+    var darkQuery = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)');
+    var override = localStorage.getItem('theme-override');
+    var theme = override === 'light' || override === 'dark' ? override : (darkQuery && darkQuery.matches ? 'dark' : 'light');
+    document.documentElement.setAttribute('data-theme', theme);
+    var meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.setAttribute('content', theme === 'dark' ? '#1c1c1e' : '#ffffff');
+  } catch (e) {}
+})();</script><meta name="generator" content="Hexo 8.1.2"></head><body><header class="site-header"><div class="container nav-inner"><a class="brand" href="/"><img class="brand-avatar" src="/images/touxiang.jpg" alt="Kkabuzs"><span class="brand-name">kkabuzs博客屋</span></a><button class="nav-toggle" type="button" aria-label="菜单" aria-expanded="false"><span class="nav-toggle-bar"></span><span class="nav-toggle-bar"></span><span class="nav-toggle-bar"></span></button><nav class="nav-menu"><a class="nav-link" href="/">首页</a><a class="nav-link" href="/categories/">分类</a><a class="nav-link" href="/tags/">标签</a><a class="nav-link" href="/archives/">时间轴</a></nav><div class="nav-actions"><button class="search-toggle" type="button" aria-label="打开搜索" title="搜索"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><path d="M21 21l-4.3-4.3"></path></svg></button><button class="theme-toggle" type="button" aria-label="切换深色模式" title="切换深色模式"><svg class="icon-sun" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path></svg><svg class="icon-moon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg></button></div></div></header><div class="search-overlay" aria-hidden="true"><div class="search-panel" role="dialog" aria-modal="true" aria-label="站内搜索"><div class="search-head"><div class="search-input-wrap"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><path d="M21 21l-4.3-4.3"></path></svg><input class="search-input" type="search" placeholder="搜索全部文章..." autocomplete="off"></div><button class="search-close" type="button" aria-label="关闭搜索">×</button></div><div class="search-scope">搜索全部文章</div><div class="search-results"><div class="search-empty">输入关键词开始搜索</div></div></div></div><main class="container site-main"><div class="layout-grid"><article class="main-col post"><header class="post-header"><h1 class="post-title">Transformer</h1><div class="post-meta"><time class="post-date">发布 2026-07-02</time><time class="post-date">更新 2026-07-02</time><a class="tag-pill" href="/categories/AI-Infra/">AI Infra</a></div></header><div class="post-motto" data-motto-text="无论你跑多少距离，放弃很容易，停下来，肉体得到暂时的舒服，但你最终会一无所得。 坚持或许很难，但你最后一定会有所收获，跑过的路，永远不会欺骗自己。"><p>无论你跑多少距离，放弃很容易，停下来，肉体得到暂时的舒服，但你最终会一无所得。</p><p>坚持或许很难，但你最后一定会有所收获，跑过的路，永远不会欺骗自己。</p></div><div class="post-content markdown-preview"><h1 id="Transformer"><a href="#Transformer" class="headerlink" title="Transformer"></a>Transformer</h1><h2 id="一，溯源，从翻译开始"><a href="#一，溯源，从翻译开始" class="headerlink" title="一，溯源，从翻译开始"></a>一，溯源，从翻译开始</h2><blockquote>
+<p>若要翻译一句话：<br><code>货拉拉拉不拉拉布拉多</code> ，<code>can Huolala carry a Labrador</code><br>关键在于要理解这句话，才能翻译。<br>计算机很难理解，一个拉字不同的位置代表了不同的含义。</p>
+<ul>
+<li>拉不拉：拉可以翻译为：<code>拉货</code>,<code>carry</code> 、<code>拉扯</code>,<code>drag/pull</code></li>
+<li>所以必须结合前面的<code>货拉拉</code>和后面的<code>拉布拉多</code>才能理解拉不拉的含义。</li>
+</ul>
+</blockquote>
+<h2 id="二，Token与向量"><a href="#二，Token与向量" class="headerlink" title="二，Token与向量"></a>二，Token与向量</h2><blockquote>
+<p>计算机只认识<code>0</code>或<code>1</code>这样的数字，所以在翻译之前，计算机会先将<code>文本</code>转化为<code>数字</code>。最简单的办法是将<code>文本的每个字</code>转化为<code>对应的数字编号</code>。</p>
+<p><strong>弊端：</strong></p>
+<ul>
+<li>编号只是一个纯数字，不能承载任何语义信息。</li>
+<li>两个数字编号之间，无任何语义关联。</li>
+</ul>
+</blockquote>
+<p><img src="/articles/2026/07/02/Transformer/Transformer-01.png"></p>
+<p><strong>需要一个既可以数字化，又可以承载语义信息的办法</strong></p>
+<blockquote>
+<ul>
+<li>将一句话切分为多个词块</li>
+</ul>
+</blockquote>
+<p><img src="/articles/2026/07/02/Transformer/Transformer-03.png"></p>
+<blockquote>
+<ul>
+<li>含义相近的词块会在坐标系中相互靠近。</li>
+</ul>
+</blockquote>
+<p><img src="/articles/2026/07/02/Transformer/Transformer-02.png"></p>
+<p><img src="/articles/2026/07/02/Transformer/Transformer-04.png"></p>
+<blockquote>
+<ul>
+<li>随着纬度的增多，所有已知词汇的token，都能在这个多维坐标系里找到自己的位置。</li>
+</ul>
+</blockquote>
+<p><img src="/articles/2026/07/02/Transformer/Transformer-05.png"></p>
+<blockquote>
+<ul>
+<li>词和词之间还可以被数学计算。例如：<code>国王-男人+女人无限接近于王后</code></li>
+<li><code>拉不拉</code>这种模糊定位的词语，结合<code>货拉拉</code>和<code>拉布拉多</code>才会被拉向正确的语义位置。</li>
+</ul>
+</blockquote>
+<p><strong>每个坐标纬度都可表示为数字，所以每个token都可以用一组数字表示。这种表示方式就叫向量（vector）</strong></p>
+<blockquote>
+<p><strong>名词解释：</strong></p>
+<ul>
+<li><strong>token：</strong> 每个<code>字/词块</code>都是一个<code>token</code></li>
+<li><strong>embedding（嵌入）</strong>：模型里面有个巨大的表，真是纬度可能是几千维。把<code>token ID</code>映射成<code>向量</code>的过程就叫<code>embedding</code>。</li>
+<li><strong>vector（向量）</strong>： 每个<code>token</code>会被翻译成<code>ID数字</code>，这些<code>ID数字</code>的纬度坐标就叫<code>向量</code>。</li>
+</ul>
+</blockquote>
+<p><strong>一句话不仅有词义，还有顺序。若顺序颠倒，意思就会完全不同。所以模型还会为token增加一个位置信息。所以向量的内容包含：<code>是什么</code>和<code>在什么位置</code></strong>。</p>
+<h2 id="三，QKV"><a href="#三，QKV" class="headerlink" title="三，QKV"></a>三，QKV</h2><blockquote>
+<p>在注意力计算中，第一步是将编码器的每个输入向量（即词的特征表示）通过线性变换映射为三个新的向量：查询向量（Query），键向量（Key）和值向量（Value）。简称Q、K、V向量。</p>
+</blockquote>
+<h3 id="3-1-举例说明"><a href="#3-1-举例说明" class="headerlink" title="3.1 举例说明"></a>3.1 举例说明</h3><blockquote>
+<p><code>货拉拉拉不拉拉布拉多</code> 除了表面意思，还有背后的意思。例如<code>拉布拉多</code>除了字面意思，还有宠物，狗等含义。所以可以把一句话抽象成一个词块数据库。</p>
+<ul>
+<li>key：就是词块本身</li>
+<li>value：就是词块背后的含义。</li>
+</ul>
+</blockquote>
+<blockquote>
+<p>当计算机在理解<code>拉不拉</code>这个词块的含义时，就会拿着<code>拉不拉</code>在词块数据库遍历一遍，找到和拉不拉意义最大的词。</p>
+</blockquote>
+<p><img src="/articles/2026/07/02/Transformer/Transformer-06.png"></p>
+<blockquote>
+<p>在词块数据库中进行遍历查询时，会有三个概念：<code>查询</code>，<code>键</code>，<code>值</code>。<br>但是直接拿token的向量去做这件事不够灵活，因为一个向量要扮演上面三个角色，所以需要三个权重矩阵：<code>w_q</code>，<code>w_k</code>，<code>w_v</code>。让每个token的向量变成三个专门的向量。<br><strong>（三个权重矩阵是模型初始化时随机生成）。</strong> </p>
+<ul>
+<li>承担查询角色的Q向量：代表token关注的信息。</li>
+<li>承担键角色的K向量：代表token提供的信息。</li>
+<li>承担值角色的V向量：代表token背后的真正含义。</li>
+</ul>
+</blockquote>
+<p><img src="/articles/2026/07/02/Transformer/Transformer-07.png"></p>
+<blockquote>
+<p><strong>点积：</strong> Q1 * K1 的数值越大，相关程度越高。说明这个token越值得被重点关注。</p>
+</blockquote>
+<p><img src="/articles/2026/07/02/Transformer/Transformer-08.png"></p>
+<blockquote>
+<p>最后将这些关注程度做一次<code>softmax</code> ，将它们转换成为一组权重。所有权重 （关注度）只和为1。</p>
+<ul>
+<li><code>softmax</code> ： 注意力分配比例公式。</li>
+</ul>
+</blockquote>
+<p><img src="/articles/2026/07/02/Transformer/Transformer-09.png"></p>
+<blockquote>
+<p>使用上面公式得出的权重 加权 所有token的V向量，得出一个新向量，记为H2。</p>
+<ul>
+<li>新向量H2：token <code>拉不拉</code>  融合了上下文信息之后的表示。</li>
+</ul>
+</blockquote>
+<p><img src="/articles/2026/07/02/Transformer/Transformer-10.png"></p>
+<blockquote>
+<p><strong>总结：</strong></p>
+<ul>
+<li>Q*V ：计算关注谁，关注程度。</li>
+<li>√d_k ：<code>scale</code>防止点积数值过大，避免<code>softmax</code>饱和，梯度消失，使模型训练更稳定。</li>
+<li>softmax：把关注程度转换为注意力权重。再乘以V，提取融合具体的语义内容。</li>
+<li>多头注意力：词与词之间的关系是多样的，有些是语义的关联，有些是语法结构的依赖，所以模型会多次不同侧重点的注意力计算。</li>
+</ul>
+</blockquote>
+<p><img src="/articles/2026/07/02/Transformer/Transformer-11.png"></p>
+<h3 id="3-2-KV-cache"><a href="#3-2-KV-cache" class="headerlink" title="3.2 KV cache"></a>3.2 KV cache</h3><blockquote>
+<p><strong>原理：<br>KV Cache 是将 Transformer Decoder 在生成第 t 个 token 时，之前所有 token 的 Key 和 Value 矩阵的计算结果缓存起来，避免在生成后续 token 时重复计算，从而大幅降低推理延时。</strong></p>
+</blockquote>
+<blockquote>
+<p><strong>特点：</strong></p>
+<ul>
+<li>KV cache 应用于推理阶段。（K和V的值是不变的）</li>
+<li>KV cache 只存在于 Decoder 解码器之中。</li>
+<li>目的是为了加速Q、K、V的两次矩阵相乘时的速度。</li>
+<li>KV cache 会加大显存占用。</li>
+</ul>
+</blockquote>
+<p><strong>未使用KV cache</strong></p>
+<p><img src="/articles/2026/07/02/Transformer/Transformer-12.png"></p>
+<p><strong>使用KV cache</strong></p>
+<p><img src="/articles/2026/07/02/Transformer/Transformer-13.png"></p>
+<blockquote>
+<p><strong>通俗解释：</strong></p>
+<ul>
+<li><p><strong>不使用kv cache：</strong> 当模型推理计算时</p>
+<ul>
+<li>第一次输入<code>中</code>，经过计算，输出<code>token1</code></li>
+<li>第二次输入<code>中华</code>，经过计算，输出<code>token1</code>，<code>token2</code></li>
+<li>第三次输入<code>中华人</code>，经过计算，输出<code>token1</code>，<code>token2</code>，<code>token3</code></li>
+<li>模型再预测<code>人</code>这个字的时候，跟上一轮的<code>华</code>的kv部分相关度最高，<code>中</code>这部分的计算就是多余的。</li>
+</ul>
+</li>
+<li><p><strong>使用kv cache：</strong> 当模型推理计算时</p>
+</li>
+<li><p>第一次输入<code>中</code>，缓存<code>中</code>的 kv 并计算，输出<code>token1</code></p>
+</li>
+<li><p>第二次输入<code>华</code>，计算<code>华</code>的 kv 并拼接缓存 ，输出<code>token2</code></p>
+</li>
+<li><p>第三次输入<code>人</code>，计算<code>人</code>的 kv 并拼接缓存 ，输出<code>token3</code></p>
+</li>
+<li><p>…. 类推</p>
+</li>
+</ul>
+<p><strong>说明：</strong> Transformer架构对token的位置信息不敏感，必须通过位置编码来让模型确定每个token在句子中的位置，才能正常理解语义。在使用kv cache 缓存时，每次输入都是单个token，所以需要修改token的位置编码。通过查询kv cache，可以确认这个token前面有几个token，来确认这个token的正确位置编码。</p>
+</blockquote>
+<p><strong>补充：</strong></p>
+<ol>
+<li>KV Cache 缓存的是全部历史</li>
+</ol>
+<ul>
+<li><strong>KV Cache 是一个累积缓冲区</strong>，保存了<strong>从开始到现在所有 token 的 K 和 V</strong></li>
+<li>每一步都要从缓存中<strong>拼接</strong>历史 K&#x2F;V 与新 K&#x2F;V</li>
+</ul>
+<ol start="2">
+<li>每层 Transformer 都有一个独立的 KV Cache</li>
+</ol>
+<ul>
+<li><strong>不是只有一个 KV Cache</strong>，而是 <strong>模型层数 × 注意力头数</strong> 个</li>
+<li>例如 LLaMA-7B（32层，32头）：有 <strong>1024 个独立的 KV Cache 缓冲区</strong></li>
+</ul>
+</div><div class="post-tags post-tags-footer"><a class="tag-chip" href="/tags/Transformer/">Transformer</a></div><nav class="post-nav"><a class="post-nav-item post-nav-prev" href="/articles/2026/07/07/pytorch-building-neural-networks/"><span class="post-nav-label">上一篇</span><span class="post-nav-title">PyTorch：构建神经网络</span></a><a class="post-nav-item post-nav-next" href="/articles/2026/06/30/neural-network/"><span class="post-nav-label">下一篇</span><span class="post-nav-title">神经网络</span></a></nav><section class="post-comments" id="comments"><h2 class="post-comments-title">评论</h2><script src="https://giscus.app/client.js" data-repo="kkabuzs/hexo-boke" data-repo-id="R_kgDOOYTQbw" data-category="General" data-category-id="DIC_kwDOOYTQb84DALl4" data-mapping="pathname" data-strict="0" data-reactions-enabled="1" data-emit-metadata="0" data-input-position="bottom" data-theme="preferred_color_scheme" data-lang="zh-CN" data-loading="lazy" crossorigin="anonymous" async></script></section></article><aside class="side-col"><div class="widget toc-widget"><h3 class="widget-title">目录</h3><div class="post-toc"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Transformer"><span class="toc-text">Transformer</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%EF%BC%8C%E6%BA%AF%E6%BA%90%EF%BC%8C%E4%BB%8E%E7%BF%BB%E8%AF%91%E5%BC%80%E5%A7%8B"><span class="toc-text">一，溯源，从翻译开始</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%EF%BC%8CToken%E4%B8%8E%E5%90%91%E9%87%8F"><span class="toc-text">二，Token与向量</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%89%EF%BC%8CQKV"><span class="toc-text">三，QKV</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#3-1-%E4%B8%BE%E4%BE%8B%E8%AF%B4%E6%98%8E"><span class="toc-text">3.1 举例说明</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-2-KV-cache"><span class="toc-text">3.2 KV cache</span></a></li></ol></li></ol></li></ol></div></div></aside></div><button class="mobile-toc-toggle" type="button" aria-label="打开目录" aria-expanded="false" aria-controls="mobile-toc-panel">目录</button><div class="mobile-toc-overlay" aria-hidden="true"><div class="mobile-toc-panel" id="mobile-toc-panel" role="dialog" aria-modal="true" aria-label="文章目录"><div class="mobile-toc-head"><h3 class="mobile-toc-title">目录</h3><button class="mobile-toc-close" type="button" aria-label="关闭目录">×</button></div><div class="post-toc mobile-post-toc"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Transformer"><span class="toc-text">Transformer</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%EF%BC%8C%E6%BA%AF%E6%BA%90%EF%BC%8C%E4%BB%8E%E7%BF%BB%E8%AF%91%E5%BC%80%E5%A7%8B"><span class="toc-text">一，溯源，从翻译开始</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%EF%BC%8CToken%E4%B8%8E%E5%90%91%E9%87%8F"><span class="toc-text">二，Token与向量</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%89%EF%BC%8CQKV"><span class="toc-text">三，QKV</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#3-1-%E4%B8%BE%E4%BE%8B%E8%AF%B4%E6%98%8E"><span class="toc-text">3.1 举例说明</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-2-KV-cache"><span class="toc-text">3.2 KV cache</span></a></li></ol></li></ol></li></ol></div></div></div></main><footer class="site-footer"><div class="container footer-inner"><p class="footer-copy">© 2018–2026 Kkabuzs</p><p class="footer-powered">Powered by
+ <a href="https://hexo.io" target="_blank" rel="noopener">Hexo</a> ·  Theme kk-tech</p></div></footer><script src="/js/main.js"></script></body></html>
