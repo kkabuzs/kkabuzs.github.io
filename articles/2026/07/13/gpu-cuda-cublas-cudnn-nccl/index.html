@@ -1,0 +1,264 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#ffffff"><title>CUDA 核心库：cuBLAS、cuDNN 与 NCCL | kkabuzs博客屋</title><meta name="description" content="学习记录和整理"><meta name="author" content="Kkabuzs"><link rel="icon" href="/images/touxiang.jpg"><link rel="stylesheet" href="/css/style.css"><script>(function () {
+  try {
+    var darkQuery = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)');
+    var override = localStorage.getItem('theme-override');
+    var theme = override === 'light' || override === 'dark' ? override : (darkQuery && darkQuery.matches ? 'dark' : 'light');
+    document.documentElement.setAttribute('data-theme', theme);
+    var meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.setAttribute('content', theme === 'dark' ? '#1c1c1e' : '#ffffff');
+  } catch (e) {}
+})();</script><meta name="generator" content="Hexo 8.1.2"></head><body><header class="site-header"><div class="container nav-inner"><a class="brand" href="/"><img class="brand-avatar" src="/images/touxiang.jpg" alt="Kkabuzs"><span class="brand-name">kkabuzs博客屋</span></a><button class="nav-toggle" type="button" aria-label="菜单" aria-expanded="false"><span class="nav-toggle-bar"></span><span class="nav-toggle-bar"></span><span class="nav-toggle-bar"></span></button><nav class="nav-menu"><a class="nav-link" href="/">首页</a><a class="nav-link" href="/categories/">分类</a><a class="nav-link" href="/tags/">标签</a><a class="nav-link" href="/archives/">时间轴</a></nav><div class="nav-actions"><button class="search-toggle" type="button" aria-label="打开搜索" title="搜索"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><path d="M21 21l-4.3-4.3"></path></svg></button><button class="theme-toggle" type="button" aria-label="切换深色模式" title="切换深色模式"><svg class="icon-sun" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path></svg><svg class="icon-moon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg></button></div></div></header><div class="search-overlay" aria-hidden="true"><div class="search-panel" role="dialog" aria-modal="true" aria-label="站内搜索"><div class="search-head"><div class="search-input-wrap"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><path d="M21 21l-4.3-4.3"></path></svg><input class="search-input" type="search" placeholder="搜索全部文章..." autocomplete="off"></div><button class="search-close" type="button" aria-label="关闭搜索">×</button></div><div class="search-scope">搜索全部文章</div><div class="search-results"><div class="search-empty">输入关键词开始搜索</div></div></div></div><main class="container site-main"><div class="layout-grid"><article class="main-col post"><header class="post-header"><h1 class="post-title">CUDA 核心库：cuBLAS、cuDNN 与 NCCL</h1><div class="post-meta"><time class="post-date">发布 2026-07-13</time><time class="post-date">更新 2026-07-13</time></div></header><div class="post-motto" data-motto-text="无论你跑多少距离，放弃很容易，停下来，肉体得到暂时的舒服，但你最终会一无所得。 坚持或许很难，但你最后一定会有所收获，跑过的路，永远不会欺骗自己。"><p>无论你跑多少距离，放弃很容易，停下来，肉体得到暂时的舒服，但你最终会一无所得。</p><p>坚持或许很难，但你最后一定会有所收获，跑过的路，永远不会欺骗自己。</p></div><div class="post-content markdown-preview"><h1 id="CUDA-核心库：cuBLAS、cuDNN-与-NCCL"><a href="#CUDA-核心库：cuBLAS、cuDNN-与-NCCL" class="headerlink" title="CUDA 核心库：cuBLAS、cuDNN 与 NCCL"></a>CUDA 核心库：cuBLAS、cuDNN 与 NCCL</h1><h2 id="一，介绍"><a href="#一，介绍" class="headerlink" title="一，介绍"></a>一，介绍</h2><blockquote>
+<p>cuBLAS、cuDNN 与 NCCL 都属于NVIDIA GPU 软件生态。</p>
+<ul>
+<li><code>cuBLAS：</code>负责矩阵计算</li>
+<li><code>cuDNN：</code>负责神经网络算子</li>
+<li><code>NCCL ：</code>负责 GPU 间通信</li>
+</ul>
+</blockquote>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">PyTorch / TensorFlow / JAX</span><br><span class="line">            ↓</span><br><span class="line">    cuBLAS / cuDNN / NCCL</span><br><span class="line">            ↓</span><br><span class="line">    CUDA Runtime / Driver</span><br><span class="line">            ↓</span><br><span class="line">        NVIDIA GPU</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>这些库不是取代CUDA，而是建立在 CUDA 能力之上，为常见任务提供高度优化的实现。</p>
+</blockquote>
+<h2 id="二，cuBLAS：矩阵计算库"><a href="#二，cuBLAS：矩阵计算库" class="headerlink" title="二，cuBLAS：矩阵计算库"></a>二，cuBLAS：矩阵计算库</h2><blockquote>
+<p><strong>cuBLAS &#x3D; CUDA Basic Linear Algebra Subprograms</strong><br>它是 NVIDIA 提供的 GPU 线性代数库，可以理解为运行在 NVIDIA GPU 上的 BLAS。<br>BLAS 是一套标准化的基础线性代数接口，传统 CPU 版本包括：</p>
+<ul>
+<li>Intel MKL</li>
+<li>OpenBLAS</li>
+<li>BLIS</li>
+</ul>
+</blockquote>
+<blockquote>
+<p>而 cuBLAS 是针对 NVIDIA GPU 优化的实现。</p>
+</blockquote>
+<h3 id="2-1-cuBLAS-解决的问题"><a href="#2-1-cuBLAS-解决的问题" class="headerlink" title="2.1 cuBLAS 解决的问题"></a>2.1 cuBLAS 解决的问题</h3><blockquote>
+<p>最重要的操作时矩阵乘法：</p>
+</blockquote>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">C = A × B</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>完整的 GEMM 形式：</p>
+</blockquote>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">C = α × op(A) × op(B) + β × C</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p><strong>说明：</strong></p>
+<ul>
+<li><code>A、B、C</code>：矩阵</li>
+<li><code>α、β</code>：标量</li>
+<li><code>op(A)</code>：A 本身或 A 的转置（<strong>转置的意思简单来说就是把矩阵的行和列沿主对角线互换</strong>）</li>
+<li><code>GEMM</code>：General Matrix Multiplication，通用矩阵乘法</li>
+</ul>
+</blockquote>
+<p>矩阵乘法广泛存在于：</p>
+<ul>
+<li>全连接层</li>
+<li>Transformer</li>
+<li>Attention（注意力计算）</li>
+<li>大语言模型</li>
+<li>科学计算</li>
+<li>推荐系统</li>
+<li>图像处理</li>
+</ul>
+<blockquote>
+<p>例如神经网络全连接层：<code>Y = XW + b</code> ，XW的本质就是矩阵乘法。</p>
+</blockquote>
+<h3 id="2-2-cuBLAS程序流程"><a href="#2-2-cuBLAS程序流程" class="headerlink" title="2.2 cuBLAS程序流程"></a>2.2 cuBLAS程序流程</h3><p><img src="/articles/2026/07/13/gpu-cuda-cublas-cudnn-nccl/gpu-cuda-cublas-cudnn-nccl-01.png"></p>
+<h3 id="2-3-cuBLASLt"><a href="#2-3-cuBLASLt" class="headerlink" title="2.3 cuBLASLt"></a>2.3 cuBLASLt</h3><blockquote>
+<p>cuBLASLt 是更加灵活的矩阵乘法接口。</p>
+</blockquote>
+<p>支持：</p>
+<ul>
+<li>FP32、FP16、BF16、TF32、FP8 等数据类型</li>
+<li>Tensor Core</li>
+<li>矩阵布局设置</li>
+<li>Bias 融合</li>
+<li>激活函数融合</li>
+<li>算法选择与启发式搜索</li>
+<li>Workspace 管理</li>
+</ul>
+<h3 id="2-4-cuBLAS-的注意事项"><a href="#2-4-cuBLAS-的注意事项" class="headerlink" title="2.4 cuBLAS 的注意事项"></a>2.4 cuBLAS 的注意事项</h3><blockquote>
+<p><strong>小矩阵不一定适合 GPU</strong><br>如果矩阵非常小：</p>
+<ul>
+<li>Kernel 启动有开销</li>
+<li>CPU 与 GPU 数据传输有开销</li>
+<li>GPU 并行资源无法充分利用</li>
+</ul>
+<p>因此 GPU 不一定比 CPU 快。</p>
+</blockquote>
+<blockquote>
+<p><strong>Tensor Core 的使用</strong><br>要高效使用 Tensor Core，通常需要：</p>
+<ul>
+<li>合适的数据类型</li>
+<li>合适的矩阵尺寸和对齐方式</li>
+<li>正确选择计算模式</li>
+<li>足够大的工作负载</li>
+</ul>
+</blockquote>
+<h2 id="三，cuDNN"><a href="#三，cuDNN" class="headerlink" title="三，cuDNN"></a>三，cuDNN</h2><h3 id="3-1-cuDNN-是什么"><a href="#3-1-cuDNN-是什么" class="headerlink" title="3.1 cuDNN 是什么"></a>3.1 cuDNN 是什么</h3><blockquote>
+<p><strong>cuDNN &#x3D; CUDA Deep Neural Network library</strong><br>它是 NVIDIA 提供的深度神经网络 GPU 加速库。<br>cuDNN 提供的不是一个完整的神经网络框架，而是经过高度优化的底层算子实现。</p>
+</blockquote>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">PyTorch：定义模型、训练流程、自动求导</span><br><span class="line">cuDNN ：快速执行其中的神经网络算子</span><br></pre></td></tr></table></figure>
+
+
+<h2 id="3-2-cuDNN-支持的典型算子"><a href="#3-2-cuDNN-支持的典型算子" class="headerlink" title="3.2 cuDNN 支持的典型算子"></a>3.2 cuDNN 支持的典型算子</h2><blockquote>
+<p>包括但不限于：</p>
+<ul>
+<li>卷积</li>
+<li>Pooling</li>
+<li>激活函数</li>
+<li>Softmax</li>
+<li>Batch Normalization</li>
+<li>张量变换</li>
+<li>Attention</li>
+<li>RNN</li>
+<li>融合算子</li>
+</ul>
+</blockquote>
+<p>例如卷积神经网络：<br><img src="/articles/2026/07/13/gpu-cuda-cublas-cudnn-nccl/gpu-cuda-cublas-cudnn-nccl-02.png"></p>
+<h3 id="3-3-为什么需要-cuDNN"><a href="#3-3-为什么需要-cuDNN" class="headerlink" title="3.3 为什么需要 cuDNN"></a>3.3 为什么需要 cuDNN</h3><p>以卷积为例，同一个数学操作可以有多种实现方法：</p>
+<ul>
+<li>Direct Convolution</li>
+<li>Implicit GEMM</li>
+<li>Winograd</li>
+<li>FFT</li>
+<li>针对特定形状优化的 Kernel</li>
+</ul>
+<p>不同算法适合不同情况：</p>
+<ul>
+<li>输入张量大小不同</li>
+<li>卷积核大小不同</li>
+<li>数据类型不同</li>
+<li>GPU 架构不同</li>
+<li>可用 Workspace 不同</li>
+<li>对确定性和精度的要求不同</li>
+</ul>
+<p>cuDNN 会根据具体条件选择合适的执行方案。</p>
+<p>因此，cuDNN 的价值不仅是“实现了卷积”，更重要的是：</p>
+<blockquote>
+<p>为不同 GPU 和张量形状提供经过高度优化的算法与执行方案。</p>
+</blockquote>
+<h3 id="3-4-cuDNN-的基本执行流程"><a href="#3-4-cuDNN-的基本执行流程" class="headerlink" title="3.4 cuDNN 的基本执行流程"></a>3.4 cuDNN 的基本执行流程</h3><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">创建 cuDNN Handle</span><br><span class="line">↓</span><br><span class="line">描述输入、输出和算子</span><br><span class="line">↓</span><br><span class="line">选择算法或执行方案</span><br><span class="line">↓</span><br><span class="line">分配输入输出及 Workspace</span><br><span class="line">↓</span><br><span class="line">执行算子</span><br><span class="line">↓</span><br><span class="line">释放资源</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-5-cuDNN-与-cuBLAS-的关系"><a href="#3-5-cuDNN-与-cuBLAS-的关系" class="headerlink" title="3.5 cuDNN 与 cuBLAS 的关系"></a>3.5 cuDNN 与 cuBLAS 的关系</h3><blockquote>
+<p>二者都负责计算，但抽象层级不同：</p>
+</blockquote>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">cuBLAS：矩阵和向量运算</span><br><span class="line">cuDNN ：卷积、激活、归一化、Attention 等神经网络算子</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>部分神经网络操作可以转化成矩阵乘法。例如卷积可以采用类似 GEMM 的方式实现。</p>
+<ul>
+<li>cuDNN 包含许多专门设计的 Kernel、融合方案和执行计划。</li>
+</ul>
+</blockquote>
+<h2 id="四，NCCL"><a href="#四，NCCL" class="headerlink" title="四，NCCL"></a>四，NCCL</h2><h3 id="4-1-NCCL-是什么"><a href="#4-1-NCCL-是什么" class="headerlink" title="4.1 NCCL 是什么"></a>4.1 NCCL 是什么</h3><blockquote>
+<p><strong>NCCL &#x3D; NVIDIA Collective Communications Library</strong><br>它是 NVIDIA 提供的多 GPU、多节点通信库。</p>
+<p><strong>主要职责：</strong></p>
+<ul>
+<li>GPU 之间传输数据</li>
+<li>多 GPU 梯度同步</li>
+<li>支持单机和跨节点通信</li>
+<li>自动选择 PCIe、NVLink、InfiniBand&#x2F;RoCE 等链路</li>
+</ul>
+</blockquote>
+<h3 id="4-2-NCCL-通信链路"><a href="#4-2-NCCL-通信链路" class="headerlink" title="4.2 NCCL 通信链路"></a>4.2 NCCL 通信链路</h3><blockquote>
+<p><strong>单服务器多 GPU</strong></p>
+</blockquote>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">GPU &lt;--&gt; NVLink/NVSwitch &lt;--&gt; GPU</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p><strong>没有 NVLink 时可能</strong></p>
+</blockquote>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">GPU0 --&gt; PCIe --&gt; CPU --&gt; PCIe --&gt; GPU1</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p><strong>多服务器多GPU</strong></p>
+</blockquote>
+<p><img src="/articles/2026/07/13/gpu-cuda-cublas-cudnn-nccl/gpu-cuda-cublas-cudnn-nccl-03.png"></p>
+<h3 id="4-3-Collective-Communication"><a href="#4-3-Collective-Communication" class="headerlink" title="4.3 Collective Communication"></a>4.3 Collective Communication</h3><blockquote>
+<p>Collective Communication 表示一组参与者共同完成一次通信操作。<br>参与者通常称为 <strong>Rank</strong>。</p>
+</blockquote>
+<p><strong>例如：</strong></p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Rank 0 → GPU 0</span><br><span class="line">Rank 1 → GPU 1</span><br><span class="line">Rank 2 → GPU 2</span><br><span class="line">Rank 3 → GPU 3</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>一个分布式训练进程通常对应一个 Rank。</p>
+</blockquote>
+<blockquote>
+<p><strong>常见参数：</strong></p>
+</blockquote>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">RANK：当前进程的全局编号</span><br><span class="line">LOCAL_RANK：当前节点内的进程编号</span><br><span class="line">WORLD_SIZE：所有进程总数</span><br><span class="line">MASTER_ADDR：主节点地址</span><br><span class="line">MASTER_PORT：进程集合建立连接使用的端口</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>两台服务器，每台 8 张 GPU：</p>
+</blockquote>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">WORLD_SIZE = 16</span><br><span class="line">LOCAL_WORLD_SIZE = 8</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>所有节点的 Rank 必须唯一，<code>WORLD_SIZE</code> 必须一致。</p>
+</blockquote>
+<h3 id="4-4-NCCL-常见通信操作"><a href="#4-4-NCCL-常见通信操作" class="headerlink" title="4.4 NCCL 常见通信操作"></a>4.4 NCCL 常见通信操作</h3><ul>
+<li><code>AllReduce</code>：汇总并同步所有 GPU 的数据，常用于梯度同步</li>
+<li><code>AllGather</code>：收集每个 GPU 的数据并分发给所有 GPU</li>
+<li><code>ReduceScatter</code>：归约数据并把结果分片给各 GPU</li>
+<li><code>Broadcast</code>：一个 GPU 向所有 GPU 分发数据</li>
+<li><code>Send/Receive</code>：两个 GPU 点对点传输</li>
+</ul>
+<h2 id="五，区分性能瓶颈"><a href="#五，区分性能瓶颈" class="headerlink" title="五，区分性能瓶颈"></a>五，区分性能瓶颈</h2><h3 id="5-1-计算瓶颈"><a href="#5-1-计算瓶颈" class="headerlink" title="5.1 计算瓶颈"></a>5.1 计算瓶颈</h3><blockquote>
+<p><strong>表现：</strong></p>
+<ul>
+<li>GPU 计算单元利用率高</li>
+<li>矩阵乘法或卷积占用时间长</li>
+<li>多 GPU 通信占比较低</li>
+</ul>
+</blockquote>
+<blockquote>
+<p><strong>主要关注：</strong></p>
+<ul>
+<li>cuBLAS&#x2F;cuDNN 算法</li>
+<li>Tensor Core</li>
+<li>数据类型</li>
+<li>算子融合</li>
+<li>Batch Size</li>
+<li>张量布局</li>
+</ul>
+</blockquote>
+<h3 id="5-2-显存带宽瓶颈"><a href="#5-2-显存带宽瓶颈" class="headerlink" title="5.2 显存带宽瓶颈"></a>5.2 显存带宽瓶颈</h3><blockquote>
+<p><strong>表现：</strong></p>
+<ul>
+<li>频繁读写大量数据</li>
+<li>计算量相对较少</li>
+<li>GPU 算力没有充分使用</li>
+</ul>
+</blockquote>
+<blockquote>
+<p><strong>主要关注：</strong></p>
+<ul>
+<li>减少中间张量</li>
+<li>算子融合</li>
+<li>连续内存访问</li>
+<li>更高效的数据布局</li>
+<li>避免不必要的数据复制</li>
+</ul>
+</blockquote>
+<h3 id="5-3-通信瓶颈"><a href="#5-3-通信瓶颈" class="headerlink" title="5.3 通信瓶颈"></a>5.3 通信瓶颈</h3><blockquote>
+<p><strong>表现：</strong></p>
+<ul>
+<li>GPU 经常等待其他 GPU</li>
+<li>AllReduce 占用大量时间</li>
+<li>增加 GPU 后性能提升不明显</li>
+</ul>
+</blockquote>
+<blockquote>
+<p><strong>主要关注：</strong></p>
+<ul>
+<li>NCCL 通信效率</li>
+<li>PCIe&#x2F;NVLink&#x2F;网络拓扑</li>
+<li>通信与计算重叠</li>
+<li>梯度分桶</li>
+<li>减少通信数据量</li>
+<li>合适的并行策略</li>
+</ul>
+</blockquote>
+</div><nav class="post-nav"><a class="post-nav-item post-nav-next" href="/articles/2026/07/10/gpu-cuda-overview/"><span class="post-nav-label">下一篇</span><span class="post-nav-title">GPU CUDA 概述</span></a></nav><section class="post-comments" id="comments"><h2 class="post-comments-title">评论</h2><script src="https://giscus.app/client.js" data-repo="kkabuzs/hexo-boke" data-repo-id="R_kgDOOYTQbw" data-category="General" data-category-id="DIC_kwDOOYTQb84DALl4" data-mapping="pathname" data-strict="0" data-reactions-enabled="1" data-emit-metadata="0" data-input-position="bottom" data-theme="preferred_color_scheme" data-lang="zh-CN" data-loading="lazy" crossorigin="anonymous" async></script></section></article><aside class="side-col"><div class="widget toc-widget"><h3 class="widget-title">目录</h3><div class="post-toc"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#CUDA-%E6%A0%B8%E5%BF%83%E5%BA%93%EF%BC%9AcuBLAS%E3%80%81cuDNN-%E4%B8%8E-NCCL"><span class="toc-text">CUDA 核心库：cuBLAS、cuDNN 与 NCCL</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%EF%BC%8C%E4%BB%8B%E7%BB%8D"><span class="toc-text">一，介绍</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%EF%BC%8CcuBLAS%EF%BC%9A%E7%9F%A9%E9%98%B5%E8%AE%A1%E7%AE%97%E5%BA%93"><span class="toc-text">二，cuBLAS：矩阵计算库</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-cuBLAS-%E8%A7%A3%E5%86%B3%E7%9A%84%E9%97%AE%E9%A2%98"><span class="toc-text">2.1 cuBLAS 解决的问题</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-cuBLAS%E7%A8%8B%E5%BA%8F%E6%B5%81%E7%A8%8B"><span class="toc-text">2.2 cuBLAS程序流程</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-3-cuBLASLt"><span class="toc-text">2.3 cuBLASLt</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-4-cuBLAS-%E7%9A%84%E6%B3%A8%E6%84%8F%E4%BA%8B%E9%A1%B9"><span class="toc-text">2.4 cuBLAS 的注意事项</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%89%EF%BC%8CcuDNN"><span class="toc-text">三，cuDNN</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#3-1-cuDNN-%E6%98%AF%E4%BB%80%E4%B9%88"><span class="toc-text">3.1 cuDNN 是什么</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-2-cuDNN-%E6%94%AF%E6%8C%81%E7%9A%84%E5%85%B8%E5%9E%8B%E7%AE%97%E5%AD%90"><span class="toc-text">3.2 cuDNN 支持的典型算子</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#3-3-%E4%B8%BA%E4%BB%80%E4%B9%88%E9%9C%80%E8%A6%81-cuDNN"><span class="toc-text">3.3 为什么需要 cuDNN</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-4-cuDNN-%E7%9A%84%E5%9F%BA%E6%9C%AC%E6%89%A7%E8%A1%8C%E6%B5%81%E7%A8%8B"><span class="toc-text">3.4 cuDNN 的基本执行流程</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-5-cuDNN-%E4%B8%8E-cuBLAS-%E7%9A%84%E5%85%B3%E7%B3%BB"><span class="toc-text">3.5 cuDNN 与 cuBLAS 的关系</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9B%9B%EF%BC%8CNCCL"><span class="toc-text">四，NCCL</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#4-1-NCCL-%E6%98%AF%E4%BB%80%E4%B9%88"><span class="toc-text">4.1 NCCL 是什么</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-2-NCCL-%E9%80%9A%E4%BF%A1%E9%93%BE%E8%B7%AF"><span class="toc-text">4.2 NCCL 通信链路</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-3-Collective-Communication"><span class="toc-text">4.3 Collective Communication</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-4-NCCL-%E5%B8%B8%E8%A7%81%E9%80%9A%E4%BF%A1%E6%93%8D%E4%BD%9C"><span class="toc-text">4.4 NCCL 常见通信操作</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%94%EF%BC%8C%E5%8C%BA%E5%88%86%E6%80%A7%E8%83%BD%E7%93%B6%E9%A2%88"><span class="toc-text">五，区分性能瓶颈</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#5-1-%E8%AE%A1%E7%AE%97%E7%93%B6%E9%A2%88"><span class="toc-text">5.1 计算瓶颈</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-2-%E6%98%BE%E5%AD%98%E5%B8%A6%E5%AE%BD%E7%93%B6%E9%A2%88"><span class="toc-text">5.2 显存带宽瓶颈</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-3-%E9%80%9A%E4%BF%A1%E7%93%B6%E9%A2%88"><span class="toc-text">5.3 通信瓶颈</span></a></li></ol></li></ol></li></ol></div></div></aside></div><button class="mobile-toc-toggle" type="button" aria-label="打开目录" aria-expanded="false" aria-controls="mobile-toc-panel">目录</button><div class="mobile-toc-overlay" aria-hidden="true"><div class="mobile-toc-panel" id="mobile-toc-panel" role="dialog" aria-modal="true" aria-label="文章目录"><div class="mobile-toc-head"><h3 class="mobile-toc-title">目录</h3><button class="mobile-toc-close" type="button" aria-label="关闭目录">×</button></div><div class="post-toc mobile-post-toc"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#CUDA-%E6%A0%B8%E5%BF%83%E5%BA%93%EF%BC%9AcuBLAS%E3%80%81cuDNN-%E4%B8%8E-NCCL"><span class="toc-text">CUDA 核心库：cuBLAS、cuDNN 与 NCCL</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%EF%BC%8C%E4%BB%8B%E7%BB%8D"><span class="toc-text">一，介绍</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%EF%BC%8CcuBLAS%EF%BC%9A%E7%9F%A9%E9%98%B5%E8%AE%A1%E7%AE%97%E5%BA%93"><span class="toc-text">二，cuBLAS：矩阵计算库</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-cuBLAS-%E8%A7%A3%E5%86%B3%E7%9A%84%E9%97%AE%E9%A2%98"><span class="toc-text">2.1 cuBLAS 解决的问题</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-cuBLAS%E7%A8%8B%E5%BA%8F%E6%B5%81%E7%A8%8B"><span class="toc-text">2.2 cuBLAS程序流程</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-3-cuBLASLt"><span class="toc-text">2.3 cuBLASLt</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-4-cuBLAS-%E7%9A%84%E6%B3%A8%E6%84%8F%E4%BA%8B%E9%A1%B9"><span class="toc-text">2.4 cuBLAS 的注意事项</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%89%EF%BC%8CcuDNN"><span class="toc-text">三，cuDNN</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#3-1-cuDNN-%E6%98%AF%E4%BB%80%E4%B9%88"><span class="toc-text">3.1 cuDNN 是什么</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-2-cuDNN-%E6%94%AF%E6%8C%81%E7%9A%84%E5%85%B8%E5%9E%8B%E7%AE%97%E5%AD%90"><span class="toc-text">3.2 cuDNN 支持的典型算子</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#3-3-%E4%B8%BA%E4%BB%80%E4%B9%88%E9%9C%80%E8%A6%81-cuDNN"><span class="toc-text">3.3 为什么需要 cuDNN</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-4-cuDNN-%E7%9A%84%E5%9F%BA%E6%9C%AC%E6%89%A7%E8%A1%8C%E6%B5%81%E7%A8%8B"><span class="toc-text">3.4 cuDNN 的基本执行流程</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-5-cuDNN-%E4%B8%8E-cuBLAS-%E7%9A%84%E5%85%B3%E7%B3%BB"><span class="toc-text">3.5 cuDNN 与 cuBLAS 的关系</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9B%9B%EF%BC%8CNCCL"><span class="toc-text">四，NCCL</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#4-1-NCCL-%E6%98%AF%E4%BB%80%E4%B9%88"><span class="toc-text">4.1 NCCL 是什么</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-2-NCCL-%E9%80%9A%E4%BF%A1%E9%93%BE%E8%B7%AF"><span class="toc-text">4.2 NCCL 通信链路</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-3-Collective-Communication"><span class="toc-text">4.3 Collective Communication</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-4-NCCL-%E5%B8%B8%E8%A7%81%E9%80%9A%E4%BF%A1%E6%93%8D%E4%BD%9C"><span class="toc-text">4.4 NCCL 常见通信操作</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%94%EF%BC%8C%E5%8C%BA%E5%88%86%E6%80%A7%E8%83%BD%E7%93%B6%E9%A2%88"><span class="toc-text">五，区分性能瓶颈</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#5-1-%E8%AE%A1%E7%AE%97%E7%93%B6%E9%A2%88"><span class="toc-text">5.1 计算瓶颈</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-2-%E6%98%BE%E5%AD%98%E5%B8%A6%E5%AE%BD%E7%93%B6%E9%A2%88"><span class="toc-text">5.2 显存带宽瓶颈</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-3-%E9%80%9A%E4%BF%A1%E7%93%B6%E9%A2%88"><span class="toc-text">5.3 通信瓶颈</span></a></li></ol></li></ol></li></ol></div></div></div></main><footer class="site-footer"><div class="container footer-inner"><p class="footer-copy">© 2018–2026 Kkabuzs</p><p class="footer-powered">Powered by
+ <a href="https://hexo.io" target="_blank" rel="noopener">Hexo</a> ·  Theme kk-tech</p></div></footer><script src="/js/main.js"></script></body></html>
