@@ -4,37 +4,6 @@
   
     
     <entry>
-      <title>NVIDIA GPU Operator：Kubernetes GPU 自动化管理</title>
-      <link href="/articles/2026/07/15/nvidia-gpu-operator/"/>
-      <url>/articles/2026/07/15/nvidia-gpu-operator/</url>
-      
-        <content type="html"><![CDATA[<h1 id="NVIDIA-GPU-Operator：Kubernetes-GPU-自动化管理"><a href="#NVIDIA-GPU-Operator：Kubernetes-GPU-自动化管理" class="headerlink" title="NVIDIA GPU Operator：Kubernetes GPU 自动化管理"></a>NVIDIA GPU Operator：Kubernetes GPU 自动化管理</h1>]]></content>
-      
-      
-      <categories>
-          
-          <category> AI Infra </category>
-          
-          <category> 云原生 </category>
-          
-      </categories>
-      
-      
-        <tags>
-            
-            <tag> Kubernetes </tag>
-            
-            <tag> Docker </tag>
-            
-            <tag> GPU </tag>
-            
-        </tags>
-      
-    </entry>
-    
-    
-    
-    <entry>
       <title>NVIDIA Container Toolkit 原理</title>
       <link href="/articles/2026/07/14/nvidia-container-toolkit/"/>
       <url>/articles/2026/07/14/nvidia-container-toolkit/</url>
