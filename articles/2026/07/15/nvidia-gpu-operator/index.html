@@ -1,0 +1,296 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#ffffff"><title>NVIDIA GPU Operator：Kubernetes GPU 自动化管理 | kkabuzs博客屋</title><meta name="description" content="学习记录和整理"><meta name="author" content="Kkabuzs"><link rel="icon" href="/images/touxiang.jpg"><link rel="stylesheet" href="/css/style.css"><script>(function () {
+  try {
+    var darkQuery = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)');
+    var override = localStorage.getItem('theme-override');
+    var theme = override === 'light' || override === 'dark' ? override : (darkQuery && darkQuery.matches ? 'dark' : 'light');
+    document.documentElement.setAttribute('data-theme', theme);
+    var meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.setAttribute('content', theme === 'dark' ? '#1c1c1e' : '#ffffff');
+  } catch (e) {}
+})();</script><meta name="generator" content="Hexo 8.1.2"></head><body><header class="site-header"><div class="container nav-inner"><a class="brand" href="/"><img class="brand-avatar" src="/images/touxiang.jpg" alt="Kkabuzs"><span class="brand-name">kkabuzs博客屋</span></a><button class="nav-toggle" type="button" aria-label="菜单" aria-expanded="false"><span class="nav-toggle-bar"></span><span class="nav-toggle-bar"></span><span class="nav-toggle-bar"></span></button><nav class="nav-menu"><a class="nav-link" href="/">首页</a><a class="nav-link" href="/categories/">分类</a><a class="nav-link" href="/tags/">标签</a><a class="nav-link" href="/archives/">时间轴</a></nav><div class="nav-actions"><button class="search-toggle" type="button" aria-label="打开搜索" title="搜索"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><path d="M21 21l-4.3-4.3"></path></svg></button><button class="theme-toggle" type="button" aria-label="切换深色模式" title="切换深色模式"><svg class="icon-sun" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path></svg><svg class="icon-moon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg></button></div></div></header><div class="search-overlay" aria-hidden="true"><div class="search-panel" role="dialog" aria-modal="true" aria-label="站内搜索"><div class="search-head"><div class="search-input-wrap"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><path d="M21 21l-4.3-4.3"></path></svg><input class="search-input" type="search" placeholder="搜索全部文章..." autocomplete="off"></div><button class="search-close" type="button" aria-label="关闭搜索">×</button></div><div class="search-scope">搜索全部文章</div><div class="search-results"><div class="search-empty">输入关键词开始搜索</div></div></div></div><main class="container site-main"><div class="layout-grid"><article class="main-col post"><header class="post-header"><h1 class="post-title">NVIDIA GPU Operator：Kubernetes GPU 自动化管理</h1><div class="post-meta"><time class="post-date">发布 2026-07-15</time><time class="post-date">更新 2026-07-15</time><a class="tag-pill" href="/categories/AI-Infra/">AI Infra</a><a class="tag-pill" href="/categories/AI-Infra/%E4%BA%91%E5%8E%9F%E7%94%9F/">云原生</a></div></header><div class="post-motto" data-motto-text="无论你跑多少距离，放弃很容易，停下来，肉体得到暂时的舒服，但你最终会一无所得。 坚持或许很难，但你最后一定会有所收获，跑过的路，永远不会欺骗自己。"><p>无论你跑多少距离，放弃很容易，停下来，肉体得到暂时的舒服，但你最终会一无所得。</p><p>坚持或许很难，但你最后一定会有所收获，跑过的路，永远不会欺骗自己。</p></div><div class="post-content markdown-preview"><h1 id="NVIDIA-GPU-Operator：Kubernetes-GPU-自动化管理"><a href="#NVIDIA-GPU-Operator：Kubernetes-GPU-自动化管理" class="headerlink" title="NVIDIA GPU Operator：Kubernetes GPU 自动化管理"></a>NVIDIA GPU Operator：Kubernetes GPU 自动化管理</h1><h2 id="一，为什么需要-GPU-Operator"><a href="#一，为什么需要-GPU-Operator" class="headerlink" title="一，为什么需要 GPU Operator"></a>一，为什么需要 GPU Operator</h2><blockquote>
+<p>如果不用 GPU Operator，要让 Kubernetes 使用 NVIDIA GPU，需要手动完成：</p>
+</blockquote>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">每台 GPU 节点安装 NVIDIA Driver</span><br><span class="line">        ↓</span><br><span class="line">安装 NVIDIA Container Toolkit</span><br><span class="line">        ↓</span><br><span class="line">配置 containerd / CRI-O</span><br><span class="line">        ↓</span><br><span class="line">部署 NVIDIA Device Plugin</span><br><span class="line">        ↓</span><br><span class="line">部署 DCGM Exporter</span><br><span class="line">        ↓</span><br><span class="line">配置节点标签、MIG 和监控</span><br></pre></td></tr></table></figure>
+
+<p>GPU 节点数量较多时，手动部署容易出现：</p>
+<ul>
+<li>驱动版本不一致</li>
+<li>容器运行时配置错误</li>
+<li>Device Plugin 遗漏</li>
+<li>监控组件版本不统一</li>
+<li>新增节点需要重复操作</li>
+</ul>
+<blockquote>
+<p>GPU Operator 使用 Kubernetes Operator 模式，将这些组件自动部署到 GPU 节点，并持续检查其状态。</p>
+</blockquote>
+<h2 id="二，整体架构"><a href="#二，整体架构" class="headerlink" title="二，整体架构"></a>二，整体架构</h2><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">Kubernetes</span><br><span class="line">│</span><br><span class="line">├─ GPU Operator</span><br><span class="line">│    └─ ClusterPolicy</span><br><span class="line">│</span><br><span class="line">├─ GPU 节点</span><br><span class="line">│   ├─ NVIDIA Driver</span><br><span class="line">│   ├─ NVIDIA Container Toolkit</span><br><span class="line">│   ├─ Device Plugin</span><br><span class="line">│   ├─ GPU Feature Discovery</span><br><span class="line">│   ├─ DCGM</span><br><span class="line">│   ├─ DCGM Exporter</span><br><span class="line">│   └─ Validator</span><br><span class="line">│</span><br><span class="line">└─ GPU 工作负载</span><br><span class="line">    └─ PyTorch / TensorFlow / CUDA Pod</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>GPU Operator 负责部署并管理 GPU 节点所需的软件组件。</p>
+</blockquote>
+<h2 id="三，Operator-工作原理"><a href="#三，Operator-工作原理" class="headerlink" title="三，Operator 工作原理"></a>三，Operator 工作原理</h2><blockquote>
+<p>安装 GPU Operator 后，会创建一个核心自定义资源：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ClusterPolicy</span><br></pre></td></tr></table></figure>
+
+<p>它描述集群希望部署的 GPU 软件栈，例如：</p>
+<ul>
+<li>是否安装 NVIDIA Driver</li>
+<li>是否部署 Device Plugin</li>
+<li>是否部署 DCGM Exporter</li>
+<li>是否启用 MIG Manager</li>
+<li>使用哪些组件版本</li>
+<li>哪些节点部署这些组件</li>
+</ul>
+<blockquote>
+<p>GPU Operator 的控制器不断执行协调循环：</p>
+</blockquote>
+<p><img src="/articles/2026/07/15/nvidia-gpu-operator/nvidia-gpu-operator-01.png"></p>
+<blockquote>
+<p>例如某个 Device Plugin Pod 被删除，Operator 会通过相关控制器资源让它重新创建。</p>
+</blockquote>
+<h2 id="四，NVIDIA-Driver（驱动）"><a href="#四，NVIDIA-Driver（驱动）" class="headerlink" title="四，NVIDIA Driver（驱动）"></a>四，NVIDIA Driver（驱动）</h2><h3 id="4-1-Driver-的作用"><a href="#4-1-Driver-的作用" class="headerlink" title="4.1 Driver 的作用"></a>4.1 Driver 的作用</h3><blockquote>
+<p>NVIDIA Driver 是操作系统与物理 GPU 之间的核心桥梁：</p>
+</blockquote>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">CUDA 应用 --&gt; 用户态驱动库 --&gt; NVIDIA 内核模块 --&gt; 物理 GPU</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>常见内核模块包括：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">nvidia</span><br><span class="line">nvidia_uvm</span><br><span class="line">nvidia_modeset</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>GPU 工作负载最终都要通过宿主机的 NVIDIA 内核驱动访问 GPU。</p>
+</blockquote>
+<h3 id="4-2-Operator-如何部署-Driver"><a href="#4-2-Operator-如何部署-Driver" class="headerlink" title="4.2 Operator 如何部署 Driver"></a>4.2 Operator 如何部署 Driver</h3><blockquote>
+<p>GPU Operator 可以在 GPU 节点上运行特权 Driver 容器，由它：</p>
+<ul>
+<li>检测宿主机内核版本</li>
+<li>准备或加载 NVIDIA 内核模块</li>
+<li>安装所需驱动组件</li>
+<li>暴露驱动库和设备节点</li>
+<li>检查驱动状态</li>
+</ul>
+</blockquote>
+<blockquote>
+<p>通常以 DaemonSet 形式运行：</p>
+</blockquote>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">每个 GPU 节点运行一个 Driver Pod</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>检查：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">kubectl get pods -n gpu-operator</span><br><span class="line"></span><br><span class="line"><span class="comment"># 具体命名可能因版本和配置而变化，通常能看到包含 driver 的 Pod。</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="4-3-已经安装驱动怎么办"><a href="#4-3-已经安装驱动怎么办" class="headerlink" title="4.3 已经安装驱动怎么办"></a>4.3 已经安装驱动怎么办</h3><blockquote>
+<p>如果 GPU 节点已经通过操作系统镜像、云厂商或其他方式安装了兼容驱动，可以禁用 Operator 的驱动安装：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">driver:</span><br><span class="line">  enabled: <span class="literal">false</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">方案一：节点镜像预装驱动</span><br><span class="line">方案二：GPU Operator 管理驱动</span><br><span class="line"></span><br><span class="line"># 选择一种统一方式，避免两个系统同时管理驱动。</span><br></pre></td></tr></table></figure>
+
+<h2 id="五，NVIDIA-Container-Toolkit"><a href="#五，NVIDIA-Container-Toolkit" class="headerlink" title="五，NVIDIA Container Toolkit"></a>五，NVIDIA Container Toolkit</h2><blockquote>
+<p>Container Toolkit 负责让容器访问宿主机 GPU：</p>
+</blockquote>
+<p><img src="/articles/2026/07/15/nvidia-gpu-operator/nvidia-gpu-operator-02.png"></p>
+<p>GPU Operator 可以自动：</p>
+<ul>
+<li>部署 NVIDIA Container Toolkit</li>
+<li>配置 containerd 或 CRI-O</li>
+<li>配置 NVIDIA 容器运行时</li>
+<li>让容器运行时支持 GPU 设备注入</li>
+</ul>
+<blockquote>
+<p><strong>注意：Driver 让宿主机识别 GPU；Container Toolkit 让容器能够使用 GPU。</strong></p>
+</blockquote>
+<h2 id="六，Device-Plugin"><a href="#六，Device-Plugin" class="headerlink" title="六，Device Plugin"></a>六，Device Plugin</h2><h3 id="6-1-Device-Plugin-是什么"><a href="#6-1-Device-Plugin-是什么" class="headerlink" title="6.1 Device Plugin 是什么"></a>6.1 Device Plugin 是什么</h3><blockquote>
+<p>NVIDIA Device Plugin 是 NVIDIA GPU 与 Kubernetes kubelet 之间的接口。</p>
+</blockquote>
+<p>主要负责：</p>
+<ol>
+<li>发现节点上的 GPU</li>
+<li>向 kubelet 注册 GPU 资源</li>
+<li>上报健康状态</li>
+<li>在 Pod 启动时分配 GPU</li>
+<li>向容器运行时提供设备分配信息</li>
+</ol>
+<blockquote>
+<p>成功运行后，Kubernetes 节点会出现扩展资源：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nvidia.com/gpu</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>查看：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl describe node &lt;GPU节点名&gt;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>输出包含：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Capacity:</span><br><span class="line">  nvidia.com/gpu: 8</span><br><span class="line"></span><br><span class="line">Allocatable:</span><br><span class="line">  nvidia.com/gpu: 8</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>表示该节点拥有 8 个可供 Kubernetes 分配的 GPU。</p>
+</blockquote>
+<h3 id="6-2-Pod-如何申请-GPU"><a href="#6-2-Pod-如何申请-GPU" class="headerlink" title="6.2 Pod 如何申请 GPU"></a>6.2 Pod 如何申请 GPU</h3><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Pod</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">gpu-test</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">restartPolicy:</span> <span class="string">Never</span></span><br><span class="line">  <span class="attr">containers:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">cuda</span></span><br><span class="line">      <span class="attr">image:</span> <span class="string">nvidia/cuda:&lt;具体版本&gt;</span></span><br><span class="line">      <span class="attr">command:</span> [<span class="string">&quot;nvidia-smi&quot;</span>]</span><br><span class="line">      <span class="attr">resources:</span></span><br><span class="line">        <span class="attr">limits:</span></span><br><span class="line">          <span class="attr">nvidia.com/gpu:</span> <span class="number">1</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>核心部分：</p>
+</blockquote>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">resources:</span></span><br><span class="line">  <span class="attr">limits:</span></span><br><span class="line">    <span class="attr">nvidia.com/gpu:</span> <span class="number">1</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>表示这个容器需要一张 GPU。</p>
+</blockquote>
+<h3 id="6-3-GPU-分配流程"><a href="#6-3-GPU-分配流程" class="headerlink" title="6.3 GPU 分配流程"></a>6.3 GPU 分配流程</h3><p><img src="/articles/2026/07/15/nvidia-gpu-operator/nvidia-gpu-operator-03.png"></p>
+<blockquote>
+<p><strong>注意：</strong></p>
+<ul>
+<li>Scheduler 通常只知道节点还有多少个 <code>nvidia.com/gpu</code></li>
+<li>具体分配哪张 GPU 主要由节点侧 Device Plugin 处理</li>
+<li>Container Toolkit 负责最终的容器设备注入</li>
+<li>Device Plugin 本身不安装驱动，也不执行 CUDA 计算</li>
+</ul>
+</blockquote>
+<h2 id="7-DCGM"><a href="#7-DCGM" class="headerlink" title="7. DCGM"></a>7. DCGM</h2><h3 id="7-1-DCGM-是什么"><a href="#7-1-DCGM-是什么" class="headerlink" title="7.1 DCGM 是什么"></a>7.1 DCGM 是什么</h3><blockquote>
+<p><strong>DCGM &#x3D; Data Center GPU Manager</strong><br>它是 NVIDIA 的数据中心 GPU 管理与诊断组件。</p>
+</blockquote>
+<p>DCGM 可以获取：</p>
+<ul>
+<li>GPU 利用率</li>
+<li>显存利用率</li>
+<li>温度</li>
+<li>功耗</li>
+<li>时钟频率</li>
+<li>PCIe 信息</li>
+<li>NVLink 状态</li>
+<li>ECC 错误</li>
+<li>Xid 错误</li>
+<li>GPU 健康状态</li>
+</ul>
+<blockquote>
+<p>DCGM 是数据中心 GPU 的监控、健康检查和诊断基础设施。</p>
+</blockquote>
+<h3 id="7-2-DCGM-与-DCGM-Exporter"><a href="#7-2-DCGM-与-DCGM-Exporter" class="headerlink" title="7.2 DCGM 与 DCGM Exporter"></a>7.2 DCGM 与 DCGM Exporter</h3><blockquote>
+<ul>
+<li>DCGM：从 GPU 驱动和硬件中获取指标、诊断信息。</li>
+<li>DCGM Exporter：将 DCGM 指标转换成 Prometheus 格式并暴露 HTTP 接口。</li>
+</ul>
+</blockquote>
+<blockquote>
+<p><strong>监控链路：</strong></p>
+</blockquote>
+<p><img src="/articles/2026/07/15/nvidia-gpu-operator/nvidia-gpu-operator-04.png"></p>
+<h3 id="7-3-常见指标"><a href="#7-3-常见指标" class="headerlink" title="7.3 常见指标"></a>7.3 常见指标</h3><blockquote>
+<p>DCGM Exporter 常见指标包括：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">DCGM_FI_DEV_GPU_UTIL：GPU 计算利用率，单位为百分比。</span><br><span class="line">DCGM_FI_DEV_MEM_COPY_UTIL：GPU 显存读写的忙碌程度，单位为百分比。</span><br><span class="line">DCGM_FI_DEV_FB_USED：GPU 已经使用的显存容量，通常单位为 MiB。</span><br><span class="line">DCGM_FI_DEV_FB_FREE：GPU 当前剩余的可用显存容量，通常单位为 MiB。</span><br><span class="line">DCGM_FI_DEV_GPU_TEMP：GPU 当前核心温度，单位为摄氏度。</span><br><span class="line">DCGM_FI_DEV_POWER_USAGE：GPU 当前消耗的功率，单位为瓦特。</span><br><span class="line">DCGM_FI_DEV_XID_ERRORS：GPU 最近出现的 NVIDIA Xid 错误代码，`0` 通常表示没有错误。</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p><strong>注意：</strong><br>GPU 利用率高不代表训练一定高效，还要结合显存、Tensor Core、功耗、网络和 NCCL 指标分析。</p>
+</blockquote>
+<h2 id="八，GPU-Feature-Discovery（GPU-功能发现）"><a href="#八，GPU-Feature-Discovery（GPU-功能发现）" class="headerlink" title="八，GPU Feature Discovery（GPU 功能发现）"></a>八，GPU Feature Discovery（GPU 功能发现）</h2><blockquote>
+<p>GPU Feature Discovery（GFD） 用于识别 GPU 特征，并给 Kubernetes Node 添加标签。</p>
+</blockquote>
+<blockquote>
+<p>可能包括：</p>
+</blockquote>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">GPU 型号</span><br><span class="line">GPU 数量</span><br><span class="line">显存大小</span><br><span class="line">驱动版本</span><br><span class="line">CUDA 能力</span><br><span class="line">是否支持 MIG</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>查看标签：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl get node &lt;节点名&gt; --show-labels</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>这些标签可以用于调度，例如让某个工作负载只运行在特定 GPU 节点：</p>
+</blockquote>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">nodeSelector:</span></span><br><span class="line">  <span class="attr">nvidia.com/gpu.product:</span> <span class="string">&lt;GPU产品名称&gt;</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>标签名称和值应以实际集群输出为准。</p>
+</blockquote>
+<h2 id="九，MIG-Manager"><a href="#九，MIG-Manager" class="headerlink" title="九，MIG Manager"></a>九，MIG Manager</h2><blockquote>
+<p>对于支持 MIG 的 GPU，GPU Operator 还可以部署 MIG Manager。<br>MIG 可以把一张物理 GPU 划分成多个相对隔离的实例：</p>
+</blockquote>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">一张物理 GPU</span><br><span class="line">├─ MIG 实例 1</span><br><span class="line">├─ MIG 实例 2</span><br><span class="line">└─ MIG 实例 3</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>用途：</p>
+</blockquote>
+<ul>
+<li>小模型推理</li>
+<li>多租户</li>
+<li>提高 GPU 利用率</li>
+<li>提供更细粒度的资源分配</li>
+</ul>
+<blockquote>
+<p>注意：</p>
+</blockquote>
+<ul>
+<li>只有部分数据中心 GPU 支持 MIG</li>
+<li>修改 MIG 配置可能影响节点上正在运行的工作负载</li>
+<li>MIG 配置应配合节点维护、驱逐和调度策略执行</li>
+</ul>
+<h3 id="十，Validator（验证器）"><a href="#十，Validator（验证器）" class="headerlink" title="十，Validator（验证器）"></a>十，Validator（验证器）</h3><blockquote>
+<p>GPU Operator 通常还会部署 Validator，用于验证各层是否正常：</p>
+</blockquote>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Driver 是否正常</span><br><span class="line">Container Toolkit 是否正常</span><br><span class="line">Device Plugin 是否正常</span><br><span class="line">CUDA 工作负载是否可以使用 GPU</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>如果 GPU Operator 安装后部分组件一直没有就绪，应查看 Validator 以及它依赖组件的日志。</p>
+</blockquote>
+<h2 id="十一，自动部署过程"><a href="#十一，自动部署过程" class="headerlink" title="十一，自动部署过程"></a>十一，自动部署过程</h2><h3 id="11-1-使用-Helm-安装"><a href="#11-1-使用-Helm-安装" class="headerlink" title="11.1 使用 Helm 安装"></a>11.1 使用 Helm 安装</h3><blockquote>
+<p>添加仓库：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">helm repo add nvidia https://helm.ngc.nvidia.com/nvidia</span><br><span class="line">helm repo update</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>查看：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">helm search repo gpu-operator --versions</span><br><span class="line"></span><br><span class="line"><span class="comment"># 输出：</span></span><br><span class="line">NAME                    CHART VERSION    APP VERSION</span><br><span class="line">nvidia/gpu-operator     25.3.0           v25.3.0</span><br><span class="line">nvidia/gpu-operator     25.2.2           v25.2.2</span><br><span class="line">nvidia/gpu-operator     25.2.1           v25.2.1</span><br><span class="line">nvidia/gpu-operator     24.9.2           v24.9.2</span><br><span class="line">nvidia/gpu-operator     24.9.1           v24.9.1</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>导出默认配置：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">helm show values nvidia/gpu-operator &gt; values.yaml</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>维护所需要的配置，例如：<br>这样做的好处：<strong>Chart 版本固定 + 配置固定</strong></p>
+</blockquote>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">driver:</span></span><br><span class="line">  <span class="attr">enabled:</span> <span class="literal">true</span></span><br><span class="line"></span><br><span class="line"><span class="attr">toolkit:</span></span><br><span class="line">  <span class="attr">enabled:</span> <span class="literal">true</span></span><br><span class="line"></span><br><span class="line"><span class="attr">devicePlugin:</span></span><br><span class="line">  <span class="attr">enabled:</span> <span class="literal">true</span></span><br><span class="line"></span><br><span class="line"><span class="attr">dcgmExporter:</span></span><br><span class="line">  <span class="attr">enabled:</span> <span class="literal">true</span></span><br><span class="line"></span><br><span class="line"><span class="attr">gfd:</span></span><br><span class="line">  <span class="attr">enabled:</span> <span class="literal">true</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>安装固定版本，例如24.9.2</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">helm install gpu-operator \</span><br><span class="line">nvidia/gpu-operator \</span><br><span class="line">--version 24.9.2 \</span><br><span class="line">-f values.yaml</span><br></pre></td></tr></table></figure>
+
+<h3 id="11-2-检查部署状态"><a href="#11-2-检查部署状态" class="headerlink" title="11.2 检查部署状态"></a>11.2 检查部署状态</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl get pods -n gpu-operator</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>重点确认相关组件是否为 <code>Running</code> 或 <code>Completed</code>：</p>
+</blockquote>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">GPU Operator</span><br><span class="line">Driver</span><br><span class="line">Container Toolkit</span><br><span class="line">Device Plugin</span><br><span class="line">DCGM Exporter</span><br><span class="line">GPU Feature Discovery</span><br><span class="line">Validator</span><br></pre></td></tr></table></figure>
+
+
+<h3 id="11-3-检查-GPU-资源"><a href="#11-3-检查-GPU-资源" class="headerlink" title="11.3 检查 GPU 资源"></a>11.3 检查 GPU 资源</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">kubectl get nodes</span><br><span class="line">kubectl describe node &lt;GPU节点名&gt;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>确认：</p>
+</blockquote>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">Capacity:</span></span><br><span class="line">  <span class="attr">nvidia.com/gpu:</span> <span class="string">...</span></span><br><span class="line"></span><br><span class="line"><span class="attr">Allocatable:</span></span><br><span class="line">  <span class="attr">nvidia.com/gpu:</span> <span class="string">...</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="11-4-创建测试-Pod"><a href="#11-4-创建测试-Pod" class="headerlink" title="11.4 创建测试 Pod"></a>11.4 创建测试 Pod</h3><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Pod</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">gpu-test</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">restartPolicy:</span> <span class="string">Never</span></span><br><span class="line">  <span class="attr">containers:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">gpu-test</span></span><br><span class="line">      <span class="attr">image:</span> <span class="string">nvidia/cuda:&lt;具体版本&gt;</span></span><br><span class="line">      <span class="attr">command:</span> [<span class="string">&quot;nvidia-smi&quot;</span>]</span><br><span class="line">      <span class="attr">resources:</span></span><br><span class="line">        <span class="attr">limits:</span></span><br><span class="line">          <span class="attr">nvidia.com/gpu:</span> <span class="number">1</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>查看结果：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl logs gpu-test</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>如果能够显示 GPU 信息，说明以下链路基本正常：</p>
+</blockquote>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Driver --&gt; Container Toolkit --&gt; Device Plugin --&gt; kubelet --&gt; GPU Pod</span><br></pre></td></tr></table></figure>
+
+</div><div class="post-tags post-tags-footer"><a class="tag-chip" href="/tags/Docker/">Docker</a><a class="tag-chip" href="/tags/Kubernetes/">Kubernetes</a><a class="tag-chip" href="/tags/GPU/">GPU</a></div><nav class="post-nav"><a class="post-nav-item post-nav-next" href="/articles/2026/07/14/nvidia-container-toolkit/"><span class="post-nav-label">下一篇</span><span class="post-nav-title">NVIDIA Container Toolkit 原理</span></a></nav><section class="post-comments" id="comments"><h2 class="post-comments-title">评论</h2><script src="https://giscus.app/client.js" data-repo="kkabuzs/blog-comments" data-repo-id="R_kgDOTZC8yg" data-category="General" data-category-id="DIC_kwDOTZC8ys4DBPFv" data-mapping="pathname" data-strict="0" data-reactions-enabled="1" data-emit-metadata="0" data-input-position="bottom" data-theme="preferred_color_scheme" data-lang="zh-CN" data-loading="lazy" crossorigin="anonymous" async></script></section></article><aside class="side-col"><div class="widget toc-widget"><h3 class="widget-title">目录</h3><div class="post-toc"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#NVIDIA-GPU-Operator%EF%BC%9AKubernetes-GPU-%E8%87%AA%E5%8A%A8%E5%8C%96%E7%AE%A1%E7%90%86"><span class="toc-text">NVIDIA GPU Operator：Kubernetes GPU 自动化管理</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%EF%BC%8C%E4%B8%BA%E4%BB%80%E4%B9%88%E9%9C%80%E8%A6%81-GPU-Operator"><span class="toc-text">一，为什么需要 GPU Operator</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%EF%BC%8C%E6%95%B4%E4%BD%93%E6%9E%B6%E6%9E%84"><span class="toc-text">二，整体架构</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%89%EF%BC%8COperator-%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86"><span class="toc-text">三，Operator 工作原理</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9B%9B%EF%BC%8CNVIDIA-Driver%EF%BC%88%E9%A9%B1%E5%8A%A8%EF%BC%89"><span class="toc-text">四，NVIDIA Driver（驱动）</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#4-1-Driver-%E7%9A%84%E4%BD%9C%E7%94%A8"><span class="toc-text">4.1 Driver 的作用</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-2-Operator-%E5%A6%82%E4%BD%95%E9%83%A8%E7%BD%B2-Driver"><span class="toc-text">4.2 Operator 如何部署 Driver</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-3-%E5%B7%B2%E7%BB%8F%E5%AE%89%E8%A3%85%E9%A9%B1%E5%8A%A8%E6%80%8E%E4%B9%88%E5%8A%9E"><span class="toc-text">4.3 已经安装驱动怎么办</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%94%EF%BC%8CNVIDIA-Container-Toolkit"><span class="toc-text">五，NVIDIA Container Toolkit</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%AD%EF%BC%8CDevice-Plugin"><span class="toc-text">六，Device Plugin</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#6-1-Device-Plugin-%E6%98%AF%E4%BB%80%E4%B9%88"><span class="toc-text">6.1 Device Plugin 是什么</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#6-2-Pod-%E5%A6%82%E4%BD%95%E7%94%B3%E8%AF%B7-GPU"><span class="toc-text">6.2 Pod 如何申请 GPU</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#6-3-GPU-%E5%88%86%E9%85%8D%E6%B5%81%E7%A8%8B"><span class="toc-text">6.3 GPU 分配流程</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#7-DCGM"><span class="toc-text">7. DCGM</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#7-1-DCGM-%E6%98%AF%E4%BB%80%E4%B9%88"><span class="toc-text">7.1 DCGM 是什么</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#7-2-DCGM-%E4%B8%8E-DCGM-Exporter"><span class="toc-text">7.2 DCGM 与 DCGM Exporter</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#7-3-%E5%B8%B8%E8%A7%81%E6%8C%87%E6%A0%87"><span class="toc-text">7.3 常见指标</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%AB%EF%BC%8CGPU-Feature-Discovery%EF%BC%88GPU-%E5%8A%9F%E8%83%BD%E5%8F%91%E7%8E%B0%EF%BC%89"><span class="toc-text">八，GPU Feature Discovery（GPU 功能发现）</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B9%9D%EF%BC%8CMIG-Manager"><span class="toc-text">九，MIG Manager</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8D%81%EF%BC%8CValidator%EF%BC%88%E9%AA%8C%E8%AF%81%E5%99%A8%EF%BC%89"><span class="toc-text">十，Validator（验证器）</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8D%81%E4%B8%80%EF%BC%8C%E8%87%AA%E5%8A%A8%E9%83%A8%E7%BD%B2%E8%BF%87%E7%A8%8B"><span class="toc-text">十一，自动部署过程</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#11-1-%E4%BD%BF%E7%94%A8-Helm-%E5%AE%89%E8%A3%85"><span class="toc-text">11.1 使用 Helm 安装</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#11-2-%E6%A3%80%E6%9F%A5%E9%83%A8%E7%BD%B2%E7%8A%B6%E6%80%81"><span class="toc-text">11.2 检查部署状态</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#11-3-%E6%A3%80%E6%9F%A5-GPU-%E8%B5%84%E6%BA%90"><span class="toc-text">11.3 检查 GPU 资源</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#11-4-%E5%88%9B%E5%BB%BA%E6%B5%8B%E8%AF%95-Pod"><span class="toc-text">11.4 创建测试 Pod</span></a></li></ol></li></ol></li></ol></div></div></aside></div><button class="mobile-toc-toggle" type="button" aria-label="打开目录" aria-expanded="false" aria-controls="mobile-toc-panel">目录</button><div class="mobile-toc-overlay" aria-hidden="true"><div class="mobile-toc-panel" id="mobile-toc-panel" role="dialog" aria-modal="true" aria-label="文章目录"><div class="mobile-toc-head"><h3 class="mobile-toc-title">目录</h3><button class="mobile-toc-close" type="button" aria-label="关闭目录">×</button></div><div class="post-toc mobile-post-toc"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#NVIDIA-GPU-Operator%EF%BC%9AKubernetes-GPU-%E8%87%AA%E5%8A%A8%E5%8C%96%E7%AE%A1%E7%90%86"><span class="toc-text">NVIDIA GPU Operator：Kubernetes GPU 自动化管理</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%EF%BC%8C%E4%B8%BA%E4%BB%80%E4%B9%88%E9%9C%80%E8%A6%81-GPU-Operator"><span class="toc-text">一，为什么需要 GPU Operator</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%EF%BC%8C%E6%95%B4%E4%BD%93%E6%9E%B6%E6%9E%84"><span class="toc-text">二，整体架构</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%89%EF%BC%8COperator-%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86"><span class="toc-text">三，Operator 工作原理</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9B%9B%EF%BC%8CNVIDIA-Driver%EF%BC%88%E9%A9%B1%E5%8A%A8%EF%BC%89"><span class="toc-text">四，NVIDIA Driver（驱动）</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#4-1-Driver-%E7%9A%84%E4%BD%9C%E7%94%A8"><span class="toc-text">4.1 Driver 的作用</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-2-Operator-%E5%A6%82%E4%BD%95%E9%83%A8%E7%BD%B2-Driver"><span class="toc-text">4.2 Operator 如何部署 Driver</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-3-%E5%B7%B2%E7%BB%8F%E5%AE%89%E8%A3%85%E9%A9%B1%E5%8A%A8%E6%80%8E%E4%B9%88%E5%8A%9E"><span class="toc-text">4.3 已经安装驱动怎么办</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%94%EF%BC%8CNVIDIA-Container-Toolkit"><span class="toc-text">五，NVIDIA Container Toolkit</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%AD%EF%BC%8CDevice-Plugin"><span class="toc-text">六，Device Plugin</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#6-1-Device-Plugin-%E6%98%AF%E4%BB%80%E4%B9%88"><span class="toc-text">6.1 Device Plugin 是什么</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#6-2-Pod-%E5%A6%82%E4%BD%95%E7%94%B3%E8%AF%B7-GPU"><span class="toc-text">6.2 Pod 如何申请 GPU</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#6-3-GPU-%E5%88%86%E9%85%8D%E6%B5%81%E7%A8%8B"><span class="toc-text">6.3 GPU 分配流程</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#7-DCGM"><span class="toc-text">7. DCGM</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#7-1-DCGM-%E6%98%AF%E4%BB%80%E4%B9%88"><span class="toc-text">7.1 DCGM 是什么</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#7-2-DCGM-%E4%B8%8E-DCGM-Exporter"><span class="toc-text">7.2 DCGM 与 DCGM Exporter</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#7-3-%E5%B8%B8%E8%A7%81%E6%8C%87%E6%A0%87"><span class="toc-text">7.3 常见指标</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%AB%EF%BC%8CGPU-Feature-Discovery%EF%BC%88GPU-%E5%8A%9F%E8%83%BD%E5%8F%91%E7%8E%B0%EF%BC%89"><span class="toc-text">八，GPU Feature Discovery（GPU 功能发现）</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B9%9D%EF%BC%8CMIG-Manager"><span class="toc-text">九，MIG Manager</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8D%81%EF%BC%8CValidator%EF%BC%88%E9%AA%8C%E8%AF%81%E5%99%A8%EF%BC%89"><span class="toc-text">十，Validator（验证器）</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8D%81%E4%B8%80%EF%BC%8C%E8%87%AA%E5%8A%A8%E9%83%A8%E7%BD%B2%E8%BF%87%E7%A8%8B"><span class="toc-text">十一，自动部署过程</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#11-1-%E4%BD%BF%E7%94%A8-Helm-%E5%AE%89%E8%A3%85"><span class="toc-text">11.1 使用 Helm 安装</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#11-2-%E6%A3%80%E6%9F%A5%E9%83%A8%E7%BD%B2%E7%8A%B6%E6%80%81"><span class="toc-text">11.2 检查部署状态</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#11-3-%E6%A3%80%E6%9F%A5-GPU-%E8%B5%84%E6%BA%90"><span class="toc-text">11.3 检查 GPU 资源</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#11-4-%E5%88%9B%E5%BB%BA%E6%B5%8B%E8%AF%95-Pod"><span class="toc-text">11.4 创建测试 Pod</span></a></li></ol></li></ol></li></ol></div></div></div></main><footer class="site-footer"><div class="container footer-inner"><p class="footer-copy">© 2018–2026 Kkabuzs</p><p class="footer-powered">Powered by
+ <a href="https://hexo.io" target="_blank" rel="noopener">Hexo</a> ·  Theme kk-tech</p></div></footer><script src="/js/main.js"></script></body></html>
