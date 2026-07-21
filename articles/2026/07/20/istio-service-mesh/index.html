@@ -1,0 +1,378 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#ffffff"><title>Istio：服务网格 | kkabuzs博客屋</title><meta name="description" content="学习记录和整理"><meta name="author" content="Kkabuzs"><link rel="icon" href="/images/touxiang.jpg"><link rel="stylesheet" href="/css/style.css"><script>(function () {
+  try {
+    var darkQuery = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)');
+    var override = localStorage.getItem('theme-override');
+    var theme = override === 'light' || override === 'dark' ? override : (darkQuery && darkQuery.matches ? 'dark' : 'light');
+    document.documentElement.setAttribute('data-theme', theme);
+    var meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.setAttribute('content', theme === 'dark' ? '#1c1c1e' : '#ffffff');
+  } catch (e) {}
+})();</script><meta name="generator" content="Hexo 8.1.2"></head><body><header class="site-header"><div class="container nav-inner"><a class="brand" href="/"><img class="brand-avatar" src="/images/touxiang.jpg" alt="Kkabuzs"><span class="brand-name">kkabuzs博客屋</span></a><button class="nav-toggle" type="button" aria-label="菜单" aria-expanded="false"><span class="nav-toggle-bar"></span><span class="nav-toggle-bar"></span><span class="nav-toggle-bar"></span></button><nav class="nav-menu"><a class="nav-link" href="/">首页</a><a class="nav-link" href="/categories/">分类</a><a class="nav-link" href="/tags/">标签</a><a class="nav-link" href="/archives/">时间轴</a></nav><div class="nav-actions"><button class="search-toggle" type="button" aria-label="打开搜索" title="搜索"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><path d="M21 21l-4.3-4.3"></path></svg></button><button class="theme-toggle" type="button" aria-label="切换深色模式" title="切换深色模式"><svg class="icon-sun" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path></svg><svg class="icon-moon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg></button></div></div></header><div class="search-overlay" aria-hidden="true"><div class="search-panel" role="dialog" aria-modal="true" aria-label="站内搜索"><div class="search-head"><div class="search-input-wrap"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><path d="M21 21l-4.3-4.3"></path></svg><input class="search-input" type="search" placeholder="搜索全部文章..." autocomplete="off"></div><button class="search-close" type="button" aria-label="关闭搜索">×</button></div><div class="search-scope">搜索全部文章</div><div class="search-results"><div class="search-empty">输入关键词开始搜索</div></div></div></div><main class="container site-main"><div class="layout-grid"><article class="main-col post"><header class="post-header"><h1 class="post-title">Istio：服务网格</h1><div class="post-meta"><time class="post-date">发布 2026-07-20</time><time class="post-date">更新 2026-07-21</time><a class="tag-pill" href="/categories/AI-Infra/">AI Infra</a><a class="tag-pill" href="/categories/AI-Infra/%E4%BA%91%E5%8E%9F%E7%94%9F/">云原生</a></div></header><div class="post-motto" data-motto-text="无论你跑多少距离，放弃很容易，停下来，肉体得到暂时的舒服，但你最终会一无所得。 坚持或许很难，但你最后一定会有所收获，跑过的路，永远不会欺骗自己。"><p>无论你跑多少距离，放弃很容易，停下来，肉体得到暂时的舒服，但你最终会一无所得。</p><p>坚持或许很难，但你最后一定会有所收获，跑过的路，永远不会欺骗自己。</p></div><div class="post-content markdown-preview"><h1 id="Istio：服务网格"><a href="#Istio：服务网格" class="headerlink" title="Istio：服务网格"></a>Istio：服务网格</h1><blockquote>
+<p>Istio 是运行在 Kubernetes 上的 Service Mesh（服务网格）。它把服务之间通信需要的安全、流量控制和可观测性从业务代码中抽离出来。</p>
+</blockquote>
+<h2 id="一、为什么需要-Istio"><a href="#一、为什么需要-Istio" class="headerlink" title="一、为什么需要 Istio"></a>一、为什么需要 Istio</h2><blockquote>
+<p>假设有如下调用链：</p>
+</blockquote>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">用户 --&gt; 网关 --&gt; order-service --&gt; payment-service --&gt; MySQL</span><br><span class="line">		                |</span><br><span class="line">		                |</span><br><span class="line">		                 --&gt; inventory-service</span><br></pre></td></tr></table></figure>
+
+<p>只依靠 Kubernetes Service，通常只能解决：</p>
+<ul>
+<li>服务发现</li>
+<li>基础四层负载均衡</li>
+<li>Pod 故障后重新选择实例</li>
+</ul>
+<p>而生产系统还经常需要：</p>
+<ul>
+<li>服务间自动 mTLS 加密与身份认证</li>
+<li>灰度发布：5% 流量进入新版本</li>
+<li>超时、重试、熔断</li>
+<li>按 HTTP 路径、Header、用户分流</li>
+<li>限制“哪个服务可以访问哪个服务”</li>
+<li>统一收集调用成功率、延迟、流量</li>
+<li>入口和出口流量治理</li>
+</ul>
+<blockquote>
+<p>没有 Istio，这些能力通常需要每种语言分别实现。Istio 将它们放到基础设施层，应用一般无须修改代码。但 Istio 不是所有系统都需要。服务数量很少、调用关系简单、没有零信任或灰度需求时，它带来的运维复杂度可能大于收益。</p>
+</blockquote>
+<h2 id="二、整体架构"><a href="#二、整体架构" class="headerlink" title="二、整体架构"></a>二、整体架构</h2><p><img src="/articles/2026/07/20/istio-service-mesh/istio-service-mesh-01.png"></p>
+<blockquote>
+<p><strong>Istio 分为：</strong></p>
+<ul>
+<li>控制面：生成、下发配置，不承载业务流量。</li>
+<li>数据面：真正拦截、加密、转发业务流量。</li>
+</ul>
+</blockquote>
+<h3 id="2-1-请求路径"><a href="#2-1-请求路径" class="headerlink" title="2.1 请求路径"></a>2.1 请求路径</h3><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">Sidecar：</span><br><span class="line">application -&gt; Envoy -&gt; Envoy -&gt; application</span><br><span class="line"></span><br><span class="line">Ambient L4：</span><br><span class="line">application -&gt; ztunnel -&gt; ztunnel -&gt; application</span><br><span class="line"></span><br><span class="line">Ambient L7：</span><br><span class="line">application -&gt; ztunnel -&gt; 目标服务的 Waypoint -&gt; ztunnel -&gt; application</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>Sidecar 在每个工作负载内处理 L4&#x2F;L7 流量。Ambient 由 ztunnel 处理 L4 流量，目标服务的 Waypoint 处理 L7 流量。</p>
+</blockquote>
+<h2 id="三、核心组件"><a href="#三、核心组件" class="headerlink" title="三、核心组件"></a>三、核心组件</h2><h3 id="3-1-Istiod"><a href="#3-1-Istiod" class="headerlink" title="3.1 Istiod"></a>3.1 Istiod</h3><blockquote>
+<p>Istio 的控制面核心组件，负责：</p>
+</blockquote>
+<ul>
+<li>监听 Kubernetes 中的 Service、Pod、Endpoint</li>
+<li>读取 VirtualService、DestinationRule、AuthorizationPolicy 等配置</li>
+<li>通过 xDS 把配置推送给代理</li>
+<li>为工作负载签发和轮换 mTLS 证书</li>
+<li>管理 Sidecar 自动注入 Webhook</li>
+</ul>
+<blockquote>
+<p>早期 Istio 的 Pilot、Citadel、Galley 等组件，现在已经合并进 Istiod。</p>
+</blockquote>
+<blockquote>
+<p>Istiod 不转发业务流量；它短暂故障时，现有代理通常仍能按已有配置继续工作，但新配置、证书和服务变化可能无法及时同步。</p>
+</blockquote>
+<h3 id="3-2-Envoy-Sidecar"><a href="#3-2-Envoy-Sidecar" class="headerlink" title="3.2 Envoy Sidecar"></a>3.2 Envoy Sidecar</h3><blockquote>
+<p>传统 Sidecar 模式下，每个业务 Pod 内都会附加一个 Envoy：</p>
+</blockquote>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Pod</span><br><span class="line">├── application</span><br><span class="line">└── istio-proxy（Envoy）</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>默认情况下，应用的 TCP 入站和出站流量会被透明地导向 Envoy。UDP、ICMP 和被显式排除的端口不会经过 Envoy。Sidecar 不提供绝对的网络隔离边界。</p>
+</blockquote>
+<blockquote>
+<p><strong>优点：</strong></p>
+<ul>
+<li>功能完整</li>
+<li>工作负载级隔离</li>
+<li>L4&#x2F;L7 治理能力成熟</li>
+</ul>
+</blockquote>
+<blockquote>
+<p><strong>缺点：</strong></p>
+<ul>
+<li>每个 Pod 都增加 CPU、内存</li>
+<li>注入后通常需要重建 Pod</li>
+<li>代理升级和应用生命周期耦合</li>
+</ul>
+</blockquote>
+<h3 id="3-3-Istio-CNI"><a href="#3-3-Istio-CNI" class="headerlink" title="3.3 Istio CNI"></a>3.3 Istio CNI</h3><blockquote>
+<p>运行在每个节点上，负责配置网络规则，将应用流量透明地导向代理。</p>
+</blockquote>
+<p>在 Sidecar 模式中，它是可选组件，用于替代每个 Pod 内的 <code>istio-init</code>。业务 Pod 无须配置 <code>NET_ADMIN</code>、<code>NET_RAW</code> 权限。</p>
+<p>在 Ambient 模式中，它负责：</p>
+<ul>
+<li>识别加入网格的 Pod</li>
+<li>把流量导向本节点的 ztunnel</li>
+<li>应用增删时更新流量拦截规则</li>
+</ul>
+<blockquote>
+<p>Istio CNI 在 Ambient 模式中是必需组件。</p>
+</blockquote>
+<h3 id="3-4-ztunnel"><a href="#3-4-ztunnel" class="headerlink" title="3.4 ztunnel"></a>3.4 ztunnel</h3><blockquote>
+<p>Ambient 模式下运行在每个节点上的 DaemonSet，一个节点通常一个。</p>
+</blockquote>
+<p>负责四层能力：</p>
+<ul>
+<li>服务身份</li>
+<li>mTLS 加密</li>
+<li>TCP 流量转发</li>
+<li>L4 AuthorizationPolicy</li>
+<li>TCP 指标</li>
+<li>使用 HBONE 隧道传输网格流量</li>
+</ul>
+<blockquote>
+<p>ztunnel 比 Envoy 更轻量，只处理 L4 流量，不解析 HTTP。按 URL、Header 分流等 L7 功能由 Waypoint 处理。</p>
+</blockquote>
+<h3 id="3-5-Waypoint-Proxy"><a href="#3-5-Waypoint-Proxy" class="headerlink" title="3.5 Waypoint Proxy"></a>3.5 Waypoint Proxy</h3><blockquote>
+<p>Ambient 模式中可选的 Envoy L7 代理，通常按命名空间或服务部署。</p>
+</blockquote>
+<p>负责：</p>
+<ul>
+<li>HTTP&#x2F;gRPC 路由</li>
+<li>按路径、Header 分流</li>
+<li>L7 授权</li>
+<li>重试、超时</li>
+<li>灰度发布</li>
+<li>HTTP 指标</li>
+</ul>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">加密和身份认证：ztunnel</span><br><span class="line">HTTP 灰度和 L7 策略：ztunnel + Waypoint</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-6-Egress-Gateway"><a href="#3-6-Egress-Gateway" class="headerlink" title="3.6 Egress Gateway"></a>3.6 Egress Gateway</h3><blockquote>
+<p>管理网格访问外部系统的流量，例如：</p>
+</blockquote>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Service --&gt; Egress Gateway --&gt; 第三方平台</span><br></pre></td></tr></table></figure>
+
+<p>适用于：</p>
+<ul>
+<li>统一出口 IP</li>
+<li>外部访问审计</li>
+<li>限制服务访问互联网</li>
+<li>对外部流量应用 TLS 和策略</li>
+</ul>
+<blockquote>
+<p>它是可选组件。</p>
+</blockquote>
+<blockquote>
+<p>Egress Gateway 不强制应用流量经过网关。强制出口和固定出口 IP 依赖 NetworkPolicy、防火墙、路由或云 NAT。</p>
+</blockquote>
+<h2 id="四、两种数据面模式如何选择"><a href="#四、两种数据面模式如何选择" class="headerlink" title="四、两种数据面模式如何选择"></a>四、两种数据面模式如何选择</h2><h3 id="4-1-Ambient-模式"><a href="#4-1-Ambient-模式" class="headerlink" title="4.1 Ambient 模式"></a>4.1 Ambient 模式</h3><blockquote>
+<p>新项目通常可以优先评估 Ambient：</p>
+</blockquote>
+<ul>
+<li>不向每个 Pod 注入 Sidecar</li>
+<li>已运行 Pod 加入网格时不需要重启</li>
+<li>ztunnel 提供基础零信任网络</li>
+<li>只给需要 L7 能力的服务部署 Waypoint</li>
+<li>数据面可以与应用独立升级</li>
+</ul>
+<h3 id="4-2-Sidecar-模式"><a href="#4-2-Sidecar-模式" class="headerlink" title="4.2 Sidecar 模式"></a>4.2 Sidecar 模式</h3><blockquote>
+<p>适合：</p>
+</blockquote>
+<ul>
+<li>已经稳定运行 Sidecar Istio</li>
+<li>需要成熟、完整的工作负载级代理能力</li>
+<li>某些功能或扩展尚未适配 Ambient</li>
+<li>需要通过 EnvoyFilter 深度定制代理</li>
+</ul>
+<blockquote>
+<p>Sidecar 和 Ambient 可以在同一个集群中共存并逐步迁移。同一个 Pod 不同时配置两种模式；同时匹配时，目前由 Sidecar 优先处理。</p>
+</blockquote>
+<blockquote>
+<p>普通 Pod 加入 Ambient 时不需要重启；从 Sidecar 迁移到 Ambient 时，需要重建 Pod，以移除已经注入的 Sidecar。</p>
+</blockquote>
+<h3 id="4-3-功能差异"><a href="#4-3-功能差异" class="headerlink" title="4.3 功能差异"></a>4.3 功能差异</h3><table>
+<thead>
+<tr>
+<th>对比项</th>
+<th>Sidecar</th>
+<th>Ambient</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>代理位置</td>
+<td>每个 Pod 一个 Envoy</td>
+<td>每个节点一个 ztunnel，按需部署 Waypoint</td>
+</tr>
+<tr>
+<td>L4 能力</td>
+<td>Envoy</td>
+<td>ztunnel</td>
+</tr>
+<tr>
+<td>L7 能力</td>
+<td>Envoy</td>
+<td>Waypoint</td>
+</tr>
+<tr>
+<td>应用资源占用</td>
+<td>每个 Pod 增加 CPU、内存</td>
+<td>ztunnel 由节点共享</td>
+</tr>
+<tr>
+<td>数据面升级</td>
+<td>通常需要重建业务 Pod</td>
+<td>ztunnel、Waypoint 独立升级</td>
+</tr>
+<tr>
+<td>EnvoyFilter</td>
+<td>支持</td>
+<td>Waypoint 不支持</td>
+</tr>
+<tr>
+<td>VM 工作负载</td>
+<td>支持</td>
+<td>不支持</td>
+</tr>
+<tr>
+<td>多集群</td>
+<td>支持多种部署模型</td>
+<td>仅支持多主、多网络模型</td>
+</tr>
+</tbody></table>
+<blockquote>
+<p>Ambient 多集群要求每个集群运行独立控制面，Waypoint 名称和服务作用域保持一致。Primary-Remote 和单网络模型不在当前支持范围内。</p>
+</blockquote>
+<h2 id="五、部署"><a href="#五、部署" class="headerlink" title="五、部署"></a>五、部署</h2><h3 id="5-1-固定版本并安装-istioctl"><a href="#5-1-固定版本并安装-istioctl" class="headerlink" title="5.1 固定版本并安装 istioctl"></a>5.1 固定版本并安装 istioctl</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">export</span> ISTIO_VERSION=1.30.3</span><br><span class="line"></span><br><span class="line">curl -L https://istio.io/downloadIstio |</span><br><span class="line">  ISTIO_VERSION=<span class="string">&quot;<span class="variable">$ISTIO_VERSION</span>&quot;</span> sh -</span><br><span class="line"></span><br><span class="line"><span class="built_in">export</span> PATH=<span class="string">&quot;<span class="variable">$PWD</span>/istio-<span class="variable">$ISTIO_VERSION</span>/bin:<span class="variable">$PATH</span>&quot;</span></span><br><span class="line"></span><br><span class="line">istioctl version</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p><code>ISTIO_VERSION</code> 固定下载版本。<code>istioctl</code>、控制面和数据面使用相同版本。</p>
+</blockquote>
+<h3 id="5-2-使用-istioctl-安装"><a href="#5-2-使用-istioctl-安装" class="headerlink" title="5.2 使用 istioctl 安装"></a>5.2 使用 istioctl 安装</h3><p>Sidecar 模式：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">istioctl install \</span><br><span class="line">  --<span class="built_in">set</span> profile=default \</span><br><span class="line">  -y</span><br></pre></td></tr></table></figure>
+
+<p>Ambient 模式：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">istioctl install \</span><br><span class="line">  --<span class="built_in">set</span> profile=ambient \</span><br><span class="line">  -y</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p><code>istioctl</code> 使用客户端内置的同版本 Chart 生成安装清单。</p>
+</blockquote>
+<h3 id="5-3-使用-Helm-安装"><a href="#5-3-使用-Helm-安装" class="headerlink" title="5.3 使用 Helm 安装"></a>5.3 使用 Helm 安装</h3><p>添加 Istio Chart 仓库：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">helm repo add istio https://istio-release.storage.googleapis.com/charts</span><br><span class="line">helm repo update</span><br><span class="line"></span><br><span class="line">helm search repo istio/base --versions</span><br></pre></td></tr></table></figure>
+
+<p>Sidecar 模式：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">helm install istio-base istio/base \</span><br><span class="line">  --version <span class="string">&quot;<span class="variable">$ISTIO_VERSION</span>&quot;</span> \</span><br><span class="line">  -n istio-system \</span><br><span class="line">  --create-namespace \</span><br><span class="line">  --<span class="built_in">set</span> defaultRevision=default</span><br><span class="line"></span><br><span class="line">helm install istiod istio/istiod \</span><br><span class="line">  --version <span class="string">&quot;<span class="variable">$ISTIO_VERSION</span>&quot;</span> \</span><br><span class="line">  -n istio-system \</span><br><span class="line">  --<span class="built_in">wait</span></span><br></pre></td></tr></table></figure>
+
+<p>Ambient 模式：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">helm install istio-base istio/base \</span><br><span class="line">  --version <span class="string">&quot;<span class="variable">$ISTIO_VERSION</span>&quot;</span> \</span><br><span class="line">  -n istio-system \</span><br><span class="line">  --create-namespace \</span><br><span class="line">  --<span class="built_in">set</span> defaultRevision=default</span><br><span class="line"></span><br><span class="line">helm install istio-cni istio/cni \</span><br><span class="line">  --version <span class="string">&quot;<span class="variable">$ISTIO_VERSION</span>&quot;</span> \</span><br><span class="line">  -n istio-system \</span><br><span class="line">  --<span class="built_in">set</span> profile=ambient \</span><br><span class="line">  --<span class="built_in">wait</span></span><br><span class="line"></span><br><span class="line">helm install istiod istio/istiod \</span><br><span class="line">  --version <span class="string">&quot;<span class="variable">$ISTIO_VERSION</span>&quot;</span> \</span><br><span class="line">  -n istio-system \</span><br><span class="line">  --<span class="built_in">set</span> profile=ambient \</span><br><span class="line">  --<span class="built_in">wait</span></span><br><span class="line"></span><br><span class="line">helm install ztunnel istio/ztunnel \</span><br><span class="line">  --version <span class="string">&quot;<span class="variable">$ISTIO_VERSION</span>&quot;</span> \</span><br><span class="line">  -n istio-system \</span><br><span class="line">  --<span class="built_in">wait</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>istioctl 和 Helm 是两种独立安装方式，同一个集群只选择一种。Helm 的每个 Chart 都指定相同的 <code>--version</code>。Ambient 的安装顺序为 base、CNI、Istiod、ztunnel。</p>
+</blockquote>
+<h3 id="5-4-工作负载加入网格"><a href="#5-4-工作负载加入网格" class="headerlink" title="5.4 工作负载加入网格"></a>5.4 工作负载加入网格</h3><p>创建命名空间：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl create namespace demo</span><br></pre></td></tr></table></figure>
+
+<p>Sidecar 模式：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl label namespace demo istio-injection=enabled</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>新建的 Pod 会自动注入 <code>istio-proxy</code>。已经运行的 Pod 需要重建。</p>
+</blockquote>
+<p>Ambient 模式：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl label namespace demo istio.io/dataplane-mode=ambient</span><br></pre></td></tr></table></figure>
+
+<p>需要 L7 功能时部署 Waypoint：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">istioctl waypoint apply -n demo --enroll-namespace --<span class="built_in">wait</span></span><br><span class="line">istioctl waypoint list -n demo</span><br></pre></td></tr></table></figure>
+
+<h3 id="5-5-验证安装"><a href="#5-5-验证安装" class="headerlink" title="5.5 验证安装"></a>5.5 验证安装</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看客户端、控制面和数据面版本</span></span><br><span class="line">istioctl version</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看 Istio 系统组件</span></span><br><span class="line">kubectl get pods -n istio-system</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看 Helm 安装的组件和版本</span></span><br><span class="line">helm list -n istio-system</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看 Sidecar 与 Istiod 的配置同步状态</span></span><br><span class="line">istioctl proxy-status</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看 Ambient 工作负载和 HBONE 状态</span></span><br><span class="line">istioctl ztunnel-config workloads</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p><code>PROTOCOL</code> 为 <code>HBONE</code> 的工作负载已经加入 Ambient 数据面。</p>
+</blockquote>
+<h3 id="5-6-生产部署"><a href="#5-6-生产部署" class="headerlink" title="5.6 生产部署"></a>5.6 生产部署</h3><ul>
+<li>Istiod 运行多个副本，Pod 分布在不同节点和可用区</li>
+<li>Ingress Gateway 与控制面独立部署、独立扩缩容</li>
+<li>升级前运行 <code>istioctl x precheck</code></li>
+<li>使用 revision 并行部署新旧控制面</li>
+<li>Helm 安装和升级时固定每个 Chart 的 <code>--version</code></li>
+<li>Helm 配置保存在独立的 values 文件中</li>
+<li>分批迁移命名空间和网关</li>
+<li>保留旧 revision，完成验证后再移除</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">istioctl x precheck</span><br><span class="line">istioctl install \</span><br><span class="line">  --<span class="built_in">set</span> profile=default \</span><br><span class="line">  --<span class="built_in">set</span> revision=canary \</span><br><span class="line">  -y</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>revision 升级允许新旧 Istiod 同时运行。命名空间通过 <code>istio.io/rev</code> 选择控制面版本，Sidecar 工作负载在重建后连接新版本。</p>
+</blockquote>
+<blockquote>
+<p>istioctl 安装参数：<a target="_blank" rel="noopener" href="https://istio.io/latest/docs/setup/install/istioctl/">https://istio.io/latest/docs/setup/install/istioctl/</a></p>
+</blockquote>
+<blockquote>
+<p>Helm 安装参数：<a target="_blank" rel="noopener" href="https://istio.io/latest/docs/setup/install/helm/">https://istio.io/latest/docs/setup/install/helm/</a></p>
+</blockquote>
+<h2 id="六、常见使用方式"><a href="#六、常见使用方式" class="headerlink" title="六、常见使用方式"></a>六、常见使用方式</h2><h3 id="6-1-灰度发布"><a href="#6-1-灰度发布" class="headerlink" title="6.1 灰度发布"></a>6.1 灰度发布</h3><blockquote>
+<p>部署 <code>v1</code>、<code>v2</code> 两个版本，通过 <code>DestinationRule</code> 定义版本，再使用 <code>VirtualService</code> 分流：</p>
+</blockquote>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">networking.istio.io/v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">DestinationRule</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">reviews</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">host:</span> <span class="string">reviews</span></span><br><span class="line">  <span class="attr">subsets:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">v1</span></span><br><span class="line">      <span class="attr">labels:</span></span><br><span class="line">        <span class="attr">version:</span> <span class="string">v1</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">v2</span></span><br><span class="line">      <span class="attr">labels:</span></span><br><span class="line">        <span class="attr">version:</span> <span class="string">v2</span></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">networking.istio.io/v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">VirtualService</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">reviews</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">hosts:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">reviews</span></span><br><span class="line">  <span class="attr">http:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">route:</span></span><br><span class="line">        <span class="bullet">-</span> <span class="attr">destination:</span></span><br><span class="line">            <span class="attr">host:</span> <span class="string">reviews</span></span><br><span class="line">            <span class="attr">subset:</span> <span class="string">v1</span></span><br><span class="line">          <span class="attr">weight:</span> <span class="number">90</span></span><br><span class="line">        <span class="bullet">-</span> <span class="attr">destination:</span></span><br><span class="line">            <span class="attr">host:</span> <span class="string">reviews</span></span><br><span class="line">            <span class="attr">subset:</span> <span class="string">v2</span></span><br><span class="line">          <span class="attr">weight:</span> <span class="number">10</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p><code>subset</code> 必须先在 <code>DestinationRule</code> 中定义，并与 Pod 上的 <code>version</code> 标签对应。</p>
+</blockquote>
+<blockquote>
+<p>Ambient 模式执行这种 HTTP L7 路由需要 Waypoint。Kubernetes Gateway API 的 <code>HTTPRoute</code> 是主要路由方式，<code>VirtualService</code> 在 Ambient 中仍为 Alpha。</p>
+</blockquote>
+<h3 id="6-2-超时和重试"><a href="#6-2-超时和重试" class="headerlink" title="6.2 超时和重试"></a>6.2 超时和重试</h3><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">http:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">retries:</span></span><br><span class="line">      <span class="attr">attempts:</span> <span class="number">3</span></span><br><span class="line">      <span class="attr">perTryTimeout:</span> <span class="string">1s</span></span><br><span class="line">    <span class="attr">timeout:</span> <span class="string">5s</span></span><br><span class="line">    <span class="attr">route:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">destination:</span></span><br><span class="line">          <span class="attr">host:</span> <span class="string">payment</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>重试会增加下游请求量，错误配置会放大故障。非幂等请求通常不配置自动重试。</p>
+</blockquote>
+<blockquote>
+<p><code>timeout</code> 是一次请求的总时间上限，<code>perTryTimeout</code> 是单次尝试的时间上限。实际重试次数同时受两者限制。</p>
+</blockquote>
+<h3 id="6-3-熔断和异常实例驱逐"><a href="#6-3-熔断和异常实例驱逐" class="headerlink" title="6.3 熔断和异常实例驱逐"></a>6.3 熔断和异常实例驱逐</h3><blockquote>
+<p>Istio 的熔断由连接池限制和异常实例驱逐组成。连接池限制并发连接和等待请求，<code>outlierDetection</code> 临时移除连续失败的实例。</p>
+</blockquote>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">networking.istio.io/v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">DestinationRule</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">payment</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">host:</span> <span class="string">payment</span></span><br><span class="line">  <span class="attr">trafficPolicy:</span></span><br><span class="line">    <span class="attr">connectionPool:</span></span><br><span class="line">      <span class="attr">tcp:</span></span><br><span class="line">        <span class="attr">maxConnections:</span> <span class="number">100</span></span><br><span class="line">      <span class="attr">http:</span></span><br><span class="line">        <span class="attr">http1MaxPendingRequests:</span> <span class="number">100</span></span><br><span class="line">    <span class="attr">outlierDetection:</span></span><br><span class="line">      <span class="attr">consecutive5xxErrors:</span> <span class="number">5</span></span><br><span class="line">      <span class="attr">interval:</span> <span class="string">10s</span></span><br><span class="line">      <span class="attr">baseEjectionTime:</span> <span class="string">30s</span></span><br><span class="line">      <span class="attr">maxEjectionPercent:</span> <span class="number">50</span></span><br><span class="line">    <span class="attr">retryBudget:</span></span><br><span class="line">      <span class="attr">percent:</span> <span class="number">20</span></span><br><span class="line">      <span class="attr">minRetryConcurrency:</span> <span class="number">3</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p><code>retryBudget</code> 按当前活动请求量限制并发重试，防止重试流量持续放大。</p>
+</blockquote>
+<h3 id="6-4-服务访问控制"><a href="#6-4-服务访问控制" class="headerlink" title="6.4 服务访问控制"></a>6.4 服务访问控制</h3><blockquote>
+<p>使用 <code>AuthorizationPolicy</code> 可以表达：</p>
+</blockquote>
+<ul>
+<li>只允许 <code>order</code> 服务访问 <code>payment</code></li>
+<li>只允许 GET 请求</li>
+<li>只允许访问 <code>/api/pay</code></li>
+<li>默认拒绝其他请求</li>
+</ul>
+<blockquote>
+<p>策略依据 Kubernetes ServiceAccount 对应的服务身份，而不是不稳定的 Pod IP。</p>
+</blockquote>
+<p>命名空间默认拒绝：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">security.istio.io/v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">AuthorizationPolicy</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">default-deny</span></span><br><span class="line">  <span class="attr">namespace:</span> <span class="string">demo</span></span><br><span class="line"><span class="attr">spec:</span> &#123;&#125;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>存在 ALLOW 策略后，目标工作负载只接受规则明确允许的流量。Ambient 的 L4 策略由 ztunnel 执行，L7 策略通过 <code>targetRefs</code> 绑定到 Service 或 Waypoint。</p>
+</blockquote>
+<p>JWT 认证由 <code>RequestAuthentication</code> 配置：</p>
+<ul>
+<li>无效 JWT 会被拒绝</li>
+<li>默认情况下，未携带 JWT 的请求仍可通过</li>
+<li>强制登录由 <code>AuthorizationPolicy</code> 校验 <code>requestPrincipal</code></li>
+<li>Ambient 模式需要 Waypoint 执行 JWT 和其他 L7 策略</li>
+</ul>
+<h3 id="6-5-强制-mTLS"><a href="#6-5-强制-mTLS" class="headerlink" title="6.5 强制 mTLS"></a>6.5 强制 mTLS</h3><blockquote>
+<p>加入 Ambient 后，网格内工作负载之间会通过 HBONE 自动使用 mTLS。但默认仍允许来自网格外或绕过代理的明文入站流量。</p>
+</blockquote>
+<blockquote>
+<p>可以通过 <code>PeerAuthentication</code> 使用 <code>STRICT</code> 模式拒绝明文流量。Ambient 不支持 <code>DISABLE</code> 模式，因为 ztunnel 之间的 HBONE 通信始终使用 mTLS。</p>
+</blockquote>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">security.istio.io/v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">PeerAuthentication</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">default</span></span><br><span class="line">  <span class="attr">namespace:</span> <span class="string">demo</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">mtls:</span></span><br><span class="line">    <span class="attr">mode:</span> <span class="string">STRICT</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="6-6-外部服务"><a href="#6-6-外部服务" class="headerlink" title="6.6 外部服务"></a>6.6 外部服务</h3><blockquote>
+<p><code>ServiceEntry</code> 将 Kubernetes 服务注册表之外的服务加入 Istio 服务注册表。注册后的外部服务可以使用路由、超时、TLS 和访问策略。</p>
+</blockquote>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">networking.istio.io/v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">ServiceEntry</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">third-party-api</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">hosts:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">api.example.com</span></span><br><span class="line">  <span class="attr">location:</span> <span class="string">MESH_EXTERNAL</span></span><br><span class="line">  <span class="attr">ports:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">number:</span> <span class="number">443</span></span><br><span class="line">      <span class="attr">name:</span> <span class="string">https</span></span><br><span class="line">      <span class="attr">protocol:</span> <span class="string">TLS</span></span><br><span class="line">  <span class="attr">resolution:</span> <span class="string">DNS</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p><code>ServiceEntry</code> 不会自动把流量导向 Egress Gateway。出口网关仍需要单独配置路由。</p>
+</blockquote>
+<h3 id="6-7-查看状态"><a href="#6-7-查看状态" class="headerlink" title="6.7 查看状态"></a>6.7 查看状态</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 检查 Istio 配置错误和冲突</span></span><br><span class="line">istioctl analyze</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看 Sidecar 与 Istiod 的 xDS 配置同步状态</span></span><br><span class="line">istioctl proxy-status</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看所有命名空间的授权策略</span></span><br><span class="line">kubectl get authorizationpolicy -A</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看所有命名空间的 Gateway</span></span><br><span class="line">kubectl get gateway -A</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>Sidecar 模式还可以查看某个 Pod 的代理配置：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看 Pod 中 Envoy 的路由配置</span></span><br><span class="line">istioctl proxy-config routes &lt;pod-name&gt; -n demo</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看 Pod 中 Envoy 的上游集群配置</span></span><br><span class="line">istioctl proxy-config clusters &lt;pod-name&gt; -n demo</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>Ambient 模式查看 ztunnel 和 Waypoint：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看 ztunnel 发现的工作负载、HBONE 状态和 Waypoint</span></span><br><span class="line">istioctl ztunnel-config workloads</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看 ztunnel 持有的 mTLS 证书</span></span><br><span class="line">istioctl ztunnel-config certificates</span><br><span class="line"></span><br><span class="line"><span class="comment"># 以 JSON 格式输出全部 ztunnel 配置</span></span><br><span class="line">istioctl ztunnel-config all -o json</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看集群中的 Waypoint</span></span><br><span class="line">istioctl waypoint list -A</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看 Waypoint Envoy 的全部配置</span></span><br><span class="line">istioctl proxy-config all deploy/waypoint -n demo</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>ztunnel 只提供 TCP 指标。HTTP 指标、访问日志和 Trace 由 Waypoint 提供。</p>
+</blockquote>
+</div><div class="post-tags post-tags-footer"><a class="tag-chip" href="/tags/Kubernetes/">Kubernetes</a></div><nav class="post-nav"><a class="post-nav-item post-nav-next" href="/articles/2026/07/15/nvidia-gpu-operator/"><span class="post-nav-label">下一篇</span><span class="post-nav-title">NVIDIA GPU Operator：Kubernetes GPU 自动化管理</span></a></nav><section class="post-comments" id="comments"><h2 class="post-comments-title">评论</h2><script src="https://giscus.app/client.js" data-repo="kkabuzs/blog-comments" data-repo-id="R_kgDOTZC8yg" data-category="General" data-category-id="DIC_kwDOTZC8ys4DBPFv" data-mapping="pathname" data-strict="0" data-reactions-enabled="1" data-emit-metadata="0" data-input-position="bottom" data-theme="preferred_color_scheme" data-lang="zh-CN" data-loading="lazy" crossorigin="anonymous" async></script></section></article><aside class="side-col"><div class="widget toc-widget"><h3 class="widget-title">目录</h3><div class="post-toc"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Istio%EF%BC%9A%E6%9C%8D%E5%8A%A1%E7%BD%91%E6%A0%BC"><span class="toc-text">Istio：服务网格</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E3%80%81%E4%B8%BA%E4%BB%80%E4%B9%88%E9%9C%80%E8%A6%81-Istio"><span class="toc-text">一、为什么需要 Istio</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%E3%80%81%E6%95%B4%E4%BD%93%E6%9E%B6%E6%9E%84"><span class="toc-text">二、整体架构</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-%E8%AF%B7%E6%B1%82%E8%B7%AF%E5%BE%84"><span class="toc-text">2.1 请求路径</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%89%E3%80%81%E6%A0%B8%E5%BF%83%E7%BB%84%E4%BB%B6"><span class="toc-text">三、核心组件</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#3-1-Istiod"><span class="toc-text">3.1 Istiod</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-2-Envoy-Sidecar"><span class="toc-text">3.2 Envoy Sidecar</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-3-Istio-CNI"><span class="toc-text">3.3 Istio CNI</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-4-ztunnel"><span class="toc-text">3.4 ztunnel</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-5-Waypoint-Proxy"><span class="toc-text">3.5 Waypoint Proxy</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-6-Egress-Gateway"><span class="toc-text">3.6 Egress Gateway</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9B%9B%E3%80%81%E4%B8%A4%E7%A7%8D%E6%95%B0%E6%8D%AE%E9%9D%A2%E6%A8%A1%E5%BC%8F%E5%A6%82%E4%BD%95%E9%80%89%E6%8B%A9"><span class="toc-text">四、两种数据面模式如何选择</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#4-1-Ambient-%E6%A8%A1%E5%BC%8F"><span class="toc-text">4.1 Ambient 模式</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-2-Sidecar-%E6%A8%A1%E5%BC%8F"><span class="toc-text">4.2 Sidecar 模式</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-3-%E5%8A%9F%E8%83%BD%E5%B7%AE%E5%BC%82"><span class="toc-text">4.3 功能差异</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%94%E3%80%81%E9%83%A8%E7%BD%B2"><span class="toc-text">五、部署</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#5-1-%E5%9B%BA%E5%AE%9A%E7%89%88%E6%9C%AC%E5%B9%B6%E5%AE%89%E8%A3%85-istioctl"><span class="toc-text">5.1 固定版本并安装 istioctl</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-2-%E4%BD%BF%E7%94%A8-istioctl-%E5%AE%89%E8%A3%85"><span class="toc-text">5.2 使用 istioctl 安装</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-3-%E4%BD%BF%E7%94%A8-Helm-%E5%AE%89%E8%A3%85"><span class="toc-text">5.3 使用 Helm 安装</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-4-%E5%B7%A5%E4%BD%9C%E8%B4%9F%E8%BD%BD%E5%8A%A0%E5%85%A5%E7%BD%91%E6%A0%BC"><span class="toc-text">5.4 工作负载加入网格</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-5-%E9%AA%8C%E8%AF%81%E5%AE%89%E8%A3%85"><span class="toc-text">5.5 验证安装</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-6-%E7%94%9F%E4%BA%A7%E9%83%A8%E7%BD%B2"><span class="toc-text">5.6 生产部署</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%AD%E3%80%81%E5%B8%B8%E8%A7%81%E4%BD%BF%E7%94%A8%E6%96%B9%E5%BC%8F"><span class="toc-text">六、常见使用方式</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#6-1-%E7%81%B0%E5%BA%A6%E5%8F%91%E5%B8%83"><span class="toc-text">6.1 灰度发布</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#6-2-%E8%B6%85%E6%97%B6%E5%92%8C%E9%87%8D%E8%AF%95"><span class="toc-text">6.2 超时和重试</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#6-3-%E7%86%94%E6%96%AD%E5%92%8C%E5%BC%82%E5%B8%B8%E5%AE%9E%E4%BE%8B%E9%A9%B1%E9%80%90"><span class="toc-text">6.3 熔断和异常实例驱逐</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#6-4-%E6%9C%8D%E5%8A%A1%E8%AE%BF%E9%97%AE%E6%8E%A7%E5%88%B6"><span class="toc-text">6.4 服务访问控制</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#6-5-%E5%BC%BA%E5%88%B6-mTLS"><span class="toc-text">6.5 强制 mTLS</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#6-6-%E5%A4%96%E9%83%A8%E6%9C%8D%E5%8A%A1"><span class="toc-text">6.6 外部服务</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#6-7-%E6%9F%A5%E7%9C%8B%E7%8A%B6%E6%80%81"><span class="toc-text">6.7 查看状态</span></a></li></ol></li></ol></li></ol></div></div></aside></div><button class="mobile-toc-toggle" type="button" aria-label="打开目录" aria-expanded="false" aria-controls="mobile-toc-panel">目录</button><div class="mobile-toc-overlay" aria-hidden="true"><div class="mobile-toc-panel" id="mobile-toc-panel" role="dialog" aria-modal="true" aria-label="文章目录"><div class="mobile-toc-head"><h3 class="mobile-toc-title">目录</h3><button class="mobile-toc-close" type="button" aria-label="关闭目录">×</button></div><div class="post-toc mobile-post-toc"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Istio%EF%BC%9A%E6%9C%8D%E5%8A%A1%E7%BD%91%E6%A0%BC"><span class="toc-text">Istio：服务网格</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E3%80%81%E4%B8%BA%E4%BB%80%E4%B9%88%E9%9C%80%E8%A6%81-Istio"><span class="toc-text">一、为什么需要 Istio</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%E3%80%81%E6%95%B4%E4%BD%93%E6%9E%B6%E6%9E%84"><span class="toc-text">二、整体架构</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-%E8%AF%B7%E6%B1%82%E8%B7%AF%E5%BE%84"><span class="toc-text">2.1 请求路径</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%89%E3%80%81%E6%A0%B8%E5%BF%83%E7%BB%84%E4%BB%B6"><span class="toc-text">三、核心组件</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#3-1-Istiod"><span class="toc-text">3.1 Istiod</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-2-Envoy-Sidecar"><span class="toc-text">3.2 Envoy Sidecar</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-3-Istio-CNI"><span class="toc-text">3.3 Istio CNI</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-4-ztunnel"><span class="toc-text">3.4 ztunnel</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-5-Waypoint-Proxy"><span class="toc-text">3.5 Waypoint Proxy</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-6-Egress-Gateway"><span class="toc-text">3.6 Egress Gateway</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9B%9B%E3%80%81%E4%B8%A4%E7%A7%8D%E6%95%B0%E6%8D%AE%E9%9D%A2%E6%A8%A1%E5%BC%8F%E5%A6%82%E4%BD%95%E9%80%89%E6%8B%A9"><span class="toc-text">四、两种数据面模式如何选择</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#4-1-Ambient-%E6%A8%A1%E5%BC%8F"><span class="toc-text">4.1 Ambient 模式</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-2-Sidecar-%E6%A8%A1%E5%BC%8F"><span class="toc-text">4.2 Sidecar 模式</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-3-%E5%8A%9F%E8%83%BD%E5%B7%AE%E5%BC%82"><span class="toc-text">4.3 功能差异</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%94%E3%80%81%E9%83%A8%E7%BD%B2"><span class="toc-text">五、部署</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#5-1-%E5%9B%BA%E5%AE%9A%E7%89%88%E6%9C%AC%E5%B9%B6%E5%AE%89%E8%A3%85-istioctl"><span class="toc-text">5.1 固定版本并安装 istioctl</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-2-%E4%BD%BF%E7%94%A8-istioctl-%E5%AE%89%E8%A3%85"><span class="toc-text">5.2 使用 istioctl 安装</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-3-%E4%BD%BF%E7%94%A8-Helm-%E5%AE%89%E8%A3%85"><span class="toc-text">5.3 使用 Helm 安装</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-4-%E5%B7%A5%E4%BD%9C%E8%B4%9F%E8%BD%BD%E5%8A%A0%E5%85%A5%E7%BD%91%E6%A0%BC"><span class="toc-text">5.4 工作负载加入网格</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-5-%E9%AA%8C%E8%AF%81%E5%AE%89%E8%A3%85"><span class="toc-text">5.5 验证安装</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-6-%E7%94%9F%E4%BA%A7%E9%83%A8%E7%BD%B2"><span class="toc-text">5.6 生产部署</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%AD%E3%80%81%E5%B8%B8%E8%A7%81%E4%BD%BF%E7%94%A8%E6%96%B9%E5%BC%8F"><span class="toc-text">六、常见使用方式</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#6-1-%E7%81%B0%E5%BA%A6%E5%8F%91%E5%B8%83"><span class="toc-text">6.1 灰度发布</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#6-2-%E8%B6%85%E6%97%B6%E5%92%8C%E9%87%8D%E8%AF%95"><span class="toc-text">6.2 超时和重试</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#6-3-%E7%86%94%E6%96%AD%E5%92%8C%E5%BC%82%E5%B8%B8%E5%AE%9E%E4%BE%8B%E9%A9%B1%E9%80%90"><span class="toc-text">6.3 熔断和异常实例驱逐</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#6-4-%E6%9C%8D%E5%8A%A1%E8%AE%BF%E9%97%AE%E6%8E%A7%E5%88%B6"><span class="toc-text">6.4 服务访问控制</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#6-5-%E5%BC%BA%E5%88%B6-mTLS"><span class="toc-text">6.5 强制 mTLS</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#6-6-%E5%A4%96%E9%83%A8%E6%9C%8D%E5%8A%A1"><span class="toc-text">6.6 外部服务</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#6-7-%E6%9F%A5%E7%9C%8B%E7%8A%B6%E6%80%81"><span class="toc-text">6.7 查看状态</span></a></li></ol></li></ol></li></ol></div></div></div></main><footer class="site-footer"><div class="container footer-inner"><p class="footer-copy">© 2018–2026 Kkabuzs</p><p class="footer-powered">Powered by
+ <a href="https://hexo.io" target="_blank" rel="noopener">Hexo</a> ·  Theme kk-tech</p></div></footer><script src="/js/main.js"></script></body></html>
