@@ -230,10 +230,10 @@
 <p><code>ISTIO_VERSION</code> 固定下载版本。<code>istioctl</code>、控制面和数据面使用相同版本。</p>
 </blockquote>
 <h3 id="5-2-使用-istioctl-安装"><a href="#5-2-使用-istioctl-安装" class="headerlink" title="5.2 使用 istioctl 安装"></a>5.2 使用 istioctl 安装</h3><p>Sidecar 模式：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">istioctl install \</span><br><span class="line">  --<span class="built_in">set</span> profile=default \</span><br><span class="line">  -y</span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">istioctl install --<span class="built_in">set</span> profile=default -y</span><br></pre></td></tr></table></figure>
 
 <p>Ambient 模式：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">istioctl install \</span><br><span class="line">  --<span class="built_in">set</span> profile=ambient \</span><br><span class="line">  -y</span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">istioctl install --<span class="built_in">set</span> profile=ambient -y</span><br></pre></td></tr></table></figure>
 
 <blockquote>
 <p><code>istioctl</code> 使用客户端内置的同版本 Chart 生成安装清单。</p>
@@ -280,7 +280,7 @@
 <li>分批迁移命名空间和网关</li>
 <li>保留旧 revision，完成验证后再移除</li>
 </ul>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">istioctl x precheck</span><br><span class="line">istioctl install \</span><br><span class="line">  --<span class="built_in">set</span> profile=default \</span><br><span class="line">  --<span class="built_in">set</span> revision=canary \</span><br><span class="line">  -y</span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">istioctl x precheck</span><br><span class="line">istioctl install --<span class="built_in">set</span> profile=default --<span class="built_in">set</span> revision=canary -y</span><br></pre></td></tr></table></figure>
 
 <blockquote>
 <p>revision 升级允许新旧 Istiod 同时运行。命名空间通过 <code>istio.io/rev</code> 选择控制面版本，Sidecar 工作负载在重建后连接新版本。</p>
