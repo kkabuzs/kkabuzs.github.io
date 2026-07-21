@@ -10,7 +10,10 @@
   --primary-hover: #1a5fe0;
   --primary-weak: rgba(47,111,235,0.1);
   --code-bg: #f7f7f8;
-  --code-border: #e7e8eb;
+  --code-toolbar-bg: #f3f3f4;
+  --code-gutter-bg: #f2f2f3;
+  --code-border: #e5e5e7;
+  --code-shadow: none;
   --header-bg: rgba(255,255,255,0.85);
   --shadow-sm: 0 1px 2px rgba(31,35,40,0.06);
   --shadow-md: 0 4px 16px rgba(31,35,40,0.08);
@@ -31,8 +34,11 @@ html[data-theme="dark"] {
   --primary: #0a84ff;
   --primary-hover: #409cff;
   --primary-weak: rgba(10,132,255,0.16);
-  --code-bg: #1c1c1e;
-  --code-border: #3a3a3c;
+  --code-bg: #161719;
+  --code-toolbar-bg: #202124;
+  --code-gutter-bg: #1b1c1f;
+  --code-border: #34363a;
+  --code-shadow: 0 12px 30px rgba(0,0,0,0.38);
   --header-bg: rgba(28,28,30,0.82);
   --shadow-sm: 0 1px 2px rgba(0,0,0,0.28);
   --shadow-md: 0 8px 24px rgba(0,0,0,0.36);
@@ -879,9 +885,10 @@ figure.highlight {
   position: relative;
   background: var(--code-bg);
   border: 1px solid var(--code-border);
-  border-radius: var(--radius-sm);
-  margin: 0.85em 0;
+  border-radius: 10px;
+  margin: 1em 0;
   overflow: hidden;
+  box-shadow: var(--code-shadow);
 }
 figure.highlight {
   padding: 0;
@@ -904,7 +911,7 @@ figure.highlight table {
   margin: 0;
   display: table;
   font-size: 13px;
-  line-height: 1.25;
+  line-height: 1.35;
 }
 figure.highlight td {
   border: none;
@@ -916,26 +923,30 @@ figure.highlight pre {
   border: none;
   border-radius: 0;
   background: transparent;
-  padding: 6px 0;
+  padding: 8px 0;
 }
 figure.highlight .gutter {
   width: 1%;
   white-space: nowrap;
   user-select: none;
 }
+figure.highlight .gutter {
+  background: var(--code-gutter-bg);
+  border-right: 1px solid var(--code-border);
+}
 figure.highlight .gutter pre {
-  padding-left: 10px;
-  padding-right: 8px;
+  padding-left: 12px;
+  padding-right: 10px;
   color: var(--muted);
   text-align: right;
-  opacity: 0.58;
+  opacity: 0.62;
 }
 figure.highlight .code {
   width: 100%;
 }
 figure.highlight .code pre {
-  padding-right: 12px;
-  padding-left: 2px;
+  padding-right: 14px;
+  padding-left: 12px;
   overflow: visible;
 }
 figure.highlight .line {
@@ -944,11 +955,11 @@ figure.highlight .line {
   white-space: pre;
 }
 pre {
-  padding: 7px 12px;
+  padding: 9px 14px;
   overflow: visible;
   font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
   font-size: 13px;
-  line-height: 1.25;
+  line-height: 1.35;
   color: var(--text);
   white-space: pre;
 }
@@ -1042,7 +1053,7 @@ figure.figcaption,
   gap: 6px;
   min-height: 32px;
   padding: 5px 8px;
-  background: var(--surface);
+  background: var(--code-toolbar-bg);
   border-bottom: 1px solid var(--code-border);
 }
 .code-copy {
@@ -1085,7 +1096,7 @@ figure.highlight .comment,
 figure.highlight .quote,
 pre .hljs-comment,
 pre .hljs-quote {
-  color: #8a9199;
+  color: #7a828c;
   font-style: italic;
 }
 figure.highlight .keyword,
@@ -1098,19 +1109,25 @@ pre .hljs-selector-tag,
 pre .hljs-built_in,
 pre .hljs-name,
 pre .hljs-tag {
-  color: #e45649;
+  color: #00875a;
+  font-weight: 600;
+}
+figure.highlight .attr,
+figure.highlight .attribute,
+pre .hljs-attr,
+pre .hljs-attribute {
+  color: #00875a;
+  font-weight: 600;
 }
 figure.highlight .string,
-figure.highlight .attr,
 figure.highlight .template-tag,
 figure.highlight .template-variable,
 figure.highlight .addition,
 pre .hljs-string,
-pre .hljs-attr,
 pre .hljs-template-tag,
 pre .hljs-template-variable,
 pre .hljs-addition {
-  color: #5b50d8;
+  color: #4f46e5;
 }
 figure.highlight .number,
 figure.highlight .literal,
@@ -1124,24 +1141,23 @@ pre .hljs-type,
 pre .hljs-params,
 pre .hljs-meta,
 pre .hljs-link {
-  color: #4078f2;
+  color: #0969da;
 }
 figure.highlight .title,
 figure.highlight .title.function_,
 figure.highlight .section,
 pre .hljs-title,
 pre .hljs-section {
-  color: #a071d9;
+  color: #7c3aed;
+  font-weight: 600;
 }
-figure.highlight .attribute,
 figure.highlight .variable,
 figure.highlight .symbol,
 figure.highlight .bullet,
-pre .hljs-attribute,
 pre .hljs-variable,
 pre .hljs-symbol,
 pre .hljs-bullet {
-  color: #986801;
+  color: #b45309;
 }
 figure.highlight .deletion,
 pre .hljs-deletion {
@@ -1171,15 +1187,21 @@ html[data-theme="dark"] pre .hljs-selector-tag,
 html[data-theme="dark"] pre .hljs-built_in,
 html[data-theme="dark"] pre .hljs-name,
 html[data-theme="dark"] pre .hljs-tag {
-  color: #ff7b72;
+  color: #7ee787;
+  font-weight: 600;
+}
+html[data-theme="dark"] figure.highlight .attr,
+html[data-theme="dark"] figure.highlight .attribute,
+html[data-theme="dark"] pre .hljs-attr,
+html[data-theme="dark"] pre .hljs-attribute {
+  color: #7ee787;
+  font-weight: 600;
 }
 html[data-theme="dark"] figure.highlight .string,
-html[data-theme="dark"] figure.highlight .attr,
 html[data-theme="dark"] figure.highlight .template-tag,
 html[data-theme="dark"] figure.highlight .template-variable,
 html[data-theme="dark"] figure.highlight .addition,
 html[data-theme="dark"] pre .hljs-string,
-html[data-theme="dark"] pre .hljs-attr,
 html[data-theme="dark"] pre .hljs-template-tag,
 html[data-theme="dark"] pre .hljs-template-variable,
 html[data-theme="dark"] pre .hljs-addition {
@@ -1205,12 +1227,11 @@ html[data-theme="dark"] figure.highlight .section,
 html[data-theme="dark"] pre .hljs-title,
 html[data-theme="dark"] pre .hljs-section {
   color: #d2a8ff;
+  font-weight: 600;
 }
-html[data-theme="dark"] figure.highlight .attribute,
 html[data-theme="dark"] figure.highlight .variable,
 html[data-theme="dark"] figure.highlight .symbol,
 html[data-theme="dark"] figure.highlight .bullet,
-html[data-theme="dark"] pre .hljs-attribute,
 html[data-theme="dark"] pre .hljs-variable,
 html[data-theme="dark"] pre .hljs-symbol,
 html[data-theme="dark"] pre .hljs-bullet {
