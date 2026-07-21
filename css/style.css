@@ -1096,7 +1096,7 @@ figure.highlight .comment,
 figure.highlight .quote,
 pre .hljs-comment,
 pre .hljs-quote {
-  color: #7a828c;
+  color: #8a9199;
   font-style: italic;
 }
 figure.highlight .keyword,
@@ -1109,25 +1109,19 @@ pre .hljs-selector-tag,
 pre .hljs-built_in,
 pre .hljs-name,
 pre .hljs-tag {
-  color: #00875a;
-  font-weight: 600;
-}
-figure.highlight .attr,
-figure.highlight .attribute,
-pre .hljs-attr,
-pre .hljs-attribute {
-  color: #00875a;
-  font-weight: 600;
+  color: #e45649;
 }
 figure.highlight .string,
+figure.highlight .attr,
 figure.highlight .template-tag,
 figure.highlight .template-variable,
 figure.highlight .addition,
 pre .hljs-string,
+pre .hljs-attr,
 pre .hljs-template-tag,
 pre .hljs-template-variable,
 pre .hljs-addition {
-  color: #4f46e5;
+  color: #5b50d8;
 }
 figure.highlight .number,
 figure.highlight .literal,
@@ -1141,23 +1135,24 @@ pre .hljs-type,
 pre .hljs-params,
 pre .hljs-meta,
 pre .hljs-link {
-  color: #0969da;
+  color: #4078f2;
 }
 figure.highlight .title,
 figure.highlight .title.function_,
 figure.highlight .section,
 pre .hljs-title,
 pre .hljs-section {
-  color: #7c3aed;
-  font-weight: 600;
+  color: #a071d9;
 }
+figure.highlight .attribute,
 figure.highlight .variable,
 figure.highlight .symbol,
 figure.highlight .bullet,
+pre .hljs-attribute,
 pre .hljs-variable,
 pre .hljs-symbol,
 pre .hljs-bullet {
-  color: #b45309;
+  color: #986801;
 }
 figure.highlight .deletion,
 pre .hljs-deletion {
@@ -1187,21 +1182,15 @@ html[data-theme="dark"] pre .hljs-selector-tag,
 html[data-theme="dark"] pre .hljs-built_in,
 html[data-theme="dark"] pre .hljs-name,
 html[data-theme="dark"] pre .hljs-tag {
-  color: #7ee787;
-  font-weight: 600;
-}
-html[data-theme="dark"] figure.highlight .attr,
-html[data-theme="dark"] figure.highlight .attribute,
-html[data-theme="dark"] pre .hljs-attr,
-html[data-theme="dark"] pre .hljs-attribute {
-  color: #7ee787;
-  font-weight: 600;
+  color: #ff7b72;
 }
 html[data-theme="dark"] figure.highlight .string,
+html[data-theme="dark"] figure.highlight .attr,
 html[data-theme="dark"] figure.highlight .template-tag,
 html[data-theme="dark"] figure.highlight .template-variable,
 html[data-theme="dark"] figure.highlight .addition,
 html[data-theme="dark"] pre .hljs-string,
+html[data-theme="dark"] pre .hljs-attr,
 html[data-theme="dark"] pre .hljs-template-tag,
 html[data-theme="dark"] pre .hljs-template-variable,
 html[data-theme="dark"] pre .hljs-addition {
@@ -1227,11 +1216,12 @@ html[data-theme="dark"] figure.highlight .section,
 html[data-theme="dark"] pre .hljs-title,
 html[data-theme="dark"] pre .hljs-section {
   color: #d2a8ff;
-  font-weight: 600;
 }
+html[data-theme="dark"] figure.highlight .attribute,
 html[data-theme="dark"] figure.highlight .variable,
 html[data-theme="dark"] figure.highlight .symbol,
 html[data-theme="dark"] figure.highlight .bullet,
+html[data-theme="dark"] pre .hljs-attribute,
 html[data-theme="dark"] pre .hljs-variable,
 html[data-theme="dark"] pre .hljs-symbol,
 html[data-theme="dark"] pre .hljs-bullet {
