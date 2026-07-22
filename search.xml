@@ -1776,31 +1776,6 @@
     
     
     <entry>
-      <title>git前端ci文件写法示例</title>
-      <link href="/articles/2019/06/11/gitlab-frontend-ci-example/"/>
-      <url>/articles/2019/06/11/gitlab-frontend-ci-example/</url>
-      
-        <content type="html"><![CDATA[<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#前端ci示例：</span></span><br><span class="line"></span><br><span class="line"><span class="attr">stages:</span> <span class="comment">#有哪些步骤</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">picc_ts_test</span></span><br><span class="line"><span class="attr">picc_ts_test:</span>  <span class="comment">#可以理解为项目名，只是定义一个名字</span></span><br><span class="line">  <span class="attr">stage:</span> <span class="string">picc_ts_test</span>  <span class="comment">#步骤1，跟上面的要对应</span></span><br><span class="line">  <span class="attr">tags:</span>  <span class="comment"># runner名字，决定用哪个runnre来执行</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">zhaoshuo_172.16.0.26</span></span><br><span class="line">  <span class="attr">only:</span>  <span class="comment"># 分支名，定义部署分支</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">develop</span></span><br><span class="line">  <span class="attr">script:</span> <span class="comment"># 动作</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">scp</span> <span class="string">-P</span> <span class="number">12224</span> <span class="string">-r</span> <span class="string">dist</span> <span class="string">gago_zhaoshuo@172.17.108.101:/data/home/gago_hetao/web_ci/picc_ts_test/</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">ssh</span> <span class="string">-p</span> <span class="number">12224</span> <span class="string">gago_zhaoshuo@172.17.108.101</span> <span class="string">&quot;sudo sh ~/picc_web_ts_ci.sh&quot;</span></span><br></pre></td></tr></table></figure>]]></content>
-      
-      
-      <categories>
-          
-          <category> DevOps 与持续集成 </category>
-          
-      </categories>
-      
-      
-        <tags>
-            
-            <tag> DevOps </tag>
-            
-        </tags>
-      
-    </entry>
-    
-    
-    
-    <entry>
       <title>容器占满了磁盘，但虚机和容器内都没有找到大文件</title>
       <link href="/articles/2019/04/23/docker-disk-full-no-large-files/"/>
       <url>/articles/2019/04/23/docker-disk-full-no-large-files/</url>
